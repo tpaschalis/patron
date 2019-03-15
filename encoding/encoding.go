@@ -11,6 +11,14 @@ const (
 	ContentTypeHeader string = "Content-Type"
 )
 
+// MediaTypes describe the accepted media type for requests.
+type MediaType struct {
+	EncodeKey  string
+	EncodeFunc EncodeFunc
+	DecodeKey  string
+	DecodeFunc DecodeFunc
+}
+
 // DecodeFunc function definition of a JSON decoding function.
 type DecodeFunc func(data io.Reader, v interface{}) error
 

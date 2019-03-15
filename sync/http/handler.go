@@ -14,7 +14,7 @@ import (
 	"github.com/thebeatapp/patron/sync"
 )
 
-func handler(hnd sync.ProcessorFunc) http.HandlerFunc {
+func handler(hnd sync.ProcessorFunc, mediaTypes encoding.MediaType) http.HandlerFunc {
 
 	return func(w http.ResponseWriter, r *http.Request) {
 

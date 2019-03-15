@@ -43,7 +43,7 @@ func main() {
 
 	// Set up routes
 	routes := []patronhttp.Route{
-		patronhttp.NewPostRoute("/", first, true),
+		patronhttp.NewPostRoute("/", first, true, nil),
 	}
 
 	sig := patron.SIGHUP(func() {
