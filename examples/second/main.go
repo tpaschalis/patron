@@ -67,14 +67,9 @@ func main() {
 		patronhttp.NewAuthGetRoute("/", httpCmp.second, true, auth),
 	}
 
-	srv, err := patron.New(name, version).WithRoutes(routes).Build()
+	err = patron.New(name, version).WithRoutes(routes).Run()
 	if err != nil {
 		log.Fatalf("failed to create service %v", err)
-	}
-
-	err = srv.Run()
-	if err != nil {
-		log.Fatalf("failed to run service %v", err)
 	}
 }
 

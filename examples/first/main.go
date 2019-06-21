@@ -61,12 +61,7 @@ func main() {
 		os.Exit(0)
 	}
 
-	srv, err := patron.New(name, version).WithRoutes(routes).WithMiddlewares(middlewareCors).WithSIGHUP(sig).Build()
-	if err != nil {
-		log.Fatalf("failed to create service %v", err)
-	}
-
-	err = srv.Run()
+	err = patron.New(name, version).WithRoutes(routes).WithMiddlewares(middlewareCors).WithSIGHUP(sig).Run()
 	if err != nil {
 		log.Fatalf("failed to run service %v", err)
 	}

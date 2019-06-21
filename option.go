@@ -7,10 +7,10 @@ import (
 	"github.com/beatlabs/patron/sync/http"
 )
 
-type optionFunc func(*Service) error
+type optionFunc func(*service) error
 
 func routes(rr []http.Route) optionFunc {
-	return func(s *Service) error {
+	return func(s *service) error {
 		if len(rr) == 0 {
 			return errors.New("routes are required")
 		}
@@ -21,7 +21,7 @@ func routes(rr []http.Route) optionFunc {
 }
 
 func middlewares(mm ...http.MiddlewareFunc) optionFunc {
-	return func(s *Service) error {
+	return func(s *service) error {
 		if len(mm) == 0 {
 			return errors.New("middlewares are required")
 		}
@@ -32,7 +32,7 @@ func middlewares(mm ...http.MiddlewareFunc) optionFunc {
 }
 
 func healthCheck(hcf http.HealthCheckFunc) optionFunc {
-	return func(s *Service) error {
+	return func(s *service) error {
 		if hcf == nil {
 			return errors.New("health check func is required")
 		}
@@ -43,7 +43,7 @@ func healthCheck(hcf http.HealthCheckFunc) optionFunc {
 }
 
 func components(cc ...Component) optionFunc {
-	return func(s *Service) error {
+	return func(s *service) error {
 		if len(cc) == 0 || cc[0] == nil {
 			return errors.New("components are required")
 		}
@@ -54,7 +54,7 @@ func components(cc ...Component) optionFunc {
 }
 
 func docs(file string) optionFunc {
-	return func(s *Service) error {
+	return func(s *service) error {
 		err := info.ImportDoc(file)
 		if err != nil {
 			return err
@@ -65,7 +65,7 @@ func docs(file string) optionFunc {
 }
 
 func sighub(handler func()) optionFunc {
-	return func(s *Service) error {
+	return func(s *service) error {
 		if handler == nil {
 			return errors.New("handler is nil")
 		}

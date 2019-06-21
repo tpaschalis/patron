@@ -55,8 +55,8 @@ func (b *Builder) WithSIGHUP(handler func()) *Builder {
 	return b
 }
 
-// Build the service.
-func (b *Builder) Build() (*Service, error) {
+// Run the service.
+func (b *Builder) Run() error {
 
 	var options []optionFunc
 
@@ -84,5 +84,10 @@ func (b *Builder) Build() (*Service, error) {
 		options = append(options, sighub(b.sighupHandler))
 	}
 
-	return new(b.name, b.version, options...)
+	s, err := new(b.name, b.version, options...)
+	if err != nil {
+		return err
+	}
+	return s.Run()
+	//TODO: fix cli to support the above
 }

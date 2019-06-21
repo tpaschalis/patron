@@ -27,7 +27,7 @@ type Component interface {
 
 // Service is responsible for managing and setting up everything.
 // The service will start by default a HTTP component in order to host management endpoint.
-type Service struct {
+type service struct {
 	cps           []Component
 	routes        []http.Route
 	middlewares   []http.MiddlewareFunc
@@ -36,7 +36,7 @@ type Service struct {
 	sighupHandler func()
 }
 
-func new(name, version string, oo ...optionFunc) (*Service, error) {
+func new(name, version string, oo ...optionFunc) (*service, error) {
 	if name == "" {
 		return nil, errors.New("name is required")
 	}
@@ -47,7 +47,7 @@ func new(name, version string, oo ...optionFunc) (*Service, error) {
 	info.UpdateName(name)
 	info.UpdateVersion(version)
 
-	s := Service{
+	s := service{
 		cps:           []Component{},
 		hcf:           http.DefaultHealthCheck,
 		termSig:       make(chan os.Signal, 1),
@@ -83,11 +83,11 @@ func new(name, version string, oo ...optionFunc) (*Service, error) {
 	return &s, nil
 }
 
-func (s *Service) setupOSSignal() {
+func (s *service) setupOSSignal() {
 	signal.Notify(s.termSig, os.Interrupt, syscall.SIGTERM, syscall.SIGHUP)
 }
 
-func (s *Service) setupInfo() {
+func (s *service) setupInfo() {
 	for _, c := range s.cps {
 		info.AppendComponent(c.Info())
 	}
@@ -96,7 +96,7 @@ func (s *Service) setupInfo() {
 // Run starts up all service components and monitors for errors.
 // If a component returns a error the service is responsible for shutting down
 // all components and terminate itself.
-func (s *Service) Run() error {
+func (s *service) Run() error {
 	defer func() {
 		err := trace.Close()
 		if err != nil {
@@ -154,7 +154,7 @@ func Setup(name, version string) error {
 	return err
 }
 
-func (s *Service) setupDefaultTracing(name, version string) error {
+func (s *service) setupDefaultTracing(name, version string) error {
 	var err error
 
 	host, ok := os.LookupEnv("PATRON_JAEGER_AGENT_HOST")
@@ -187,7 +187,7 @@ func (s *Service) setupDefaultTracing(name, version string) error {
 	return trace.Setup(name, version, agent, tp, prmVal)
 }
 
-func (s *Service) createHTTPComponent() (Component, error) {
+func (s *service) createHTTPComponent() (Component, error) {
 	var err error
 	var portVal = int64(50000)
 	port, ok := os.LookupEnv("PATRON_HTTP_DEFAULT_PORT")
@@ -224,7 +224,7 @@ func (s *Service) createHTTPComponent() (Component, error) {
 	return cp, nil
 }
 
-func (s *Service) waitTermination(chErr <-chan error) error {
+func (s *service) waitTermination(chErr <-chan error) error {
 	for {
 		select {
 		case sig := <-s.termSig:

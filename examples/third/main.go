@@ -56,14 +56,9 @@ func main() {
 		log.Fatalf("failed to create processor %v", err)
 	}
 
-	srv, err := patron.New(name, version).WithComponents(kafkaCmp.cmp).Build()
+	err = patron.New(name, version).WithComponents(kafkaCmp.cmp).Run()
 	if err != nil {
-		log.Fatalf("failed to create service %v", err)
-	}
-
-	err = srv.Run()
-	if err != nil {
-		log.Fatalf("failed to run service %v", err)
+		log.Fatalf("failed to create and run service %v", err)
 	}
 }
 
