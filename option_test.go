@@ -30,9 +30,9 @@ func TestRoutes(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			s, err := New("test", "1.0.0")
+			s, err := new("test", "1.0.0")
 			assert.NoError(t, err)
-			err = Routes(tt.args.rr)(s)
+			err = routes(tt.args.rr)(s)
 			if tt.wantErr {
 				assert.Error(t, err)
 			} else {
@@ -57,9 +57,9 @@ func TestMiddlewares(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			s, err := New("test", "1.0.0")
+			s, err := new("test", "1.0.0")
 			assert.NoError(t, err)
-			err = Middlewares(tt.args.mm...)(s)
+			err = middlewares(tt.args.mm...)(s)
 			if tt.wantErr {
 				assert.Error(t, err)
 			} else {
@@ -83,9 +83,9 @@ func TestHealthCheck(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			s, err := New("test", "1.0.0")
+			s, err := new("test", "1.0.0")
 			assert.NoError(t, err)
-			err = HealthCheck(tt.args.hcf)(s)
+			err = healthCheck(tt.args.hcf)(s)
 			if tt.wantErr {
 				assert.Error(t, err)
 			} else {
@@ -110,9 +110,9 @@ func TestComponents(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			s, err := New("test", "1.0.0")
+			s, err := new("test", "1.0.0")
 			assert.NoError(t, err)
-			err = Components(tt.args.c)(s)
+			err = components(tt.args.c)(s)
 			if tt.wantErr {
 				assert.Error(t, err)
 			} else {
@@ -136,9 +136,9 @@ func TestDocs(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			s, err := New("test", "1.0.0")
+			s, err := new("test", "1.0.0")
 			assert.NoError(t, err)
-			err = Docs(tt.args.file)(s)
+			err = docs(tt.args.file)(s)
 			if tt.wantErr {
 				assert.Error(t, err)
 			} else {
@@ -162,9 +162,9 @@ func TestSIGHUP(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			s, err := New("test", "1.0.0")
+			s, err := new("test", "1.0.0")
 			assert.NoError(t, err)
-			err = SIGHUP(tt.args.handler)(s)
+			err = sighub(tt.args.handler)(s)
 			if tt.wantErr {
 				assert.Error(t, err)
 			} else {

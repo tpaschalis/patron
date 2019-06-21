@@ -36,8 +36,7 @@ type Service struct {
 	sighupHandler func()
 }
 
-// New creates a new named service and allows for customization through functional options.
-func New(name, version string, oo ...OptionFunc) (*Service, error) {
+func new(name, version string, oo ...optionFunc) (*Service, error) {
 	if name == "" {
 		return nil, errors.New("name is required")
 	}

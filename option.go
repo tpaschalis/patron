@@ -7,11 +7,9 @@ import (
 	"github.com/beatlabs/patron/sync/http"
 )
 
-// OptionFunc definition for configuring the service in a functional way.
-type OptionFunc func(*Service) error
+type optionFunc func(*Service) error
 
-// Routes option for adding routes to the default HTTP component.
-func Routes(rr []http.Route) OptionFunc {
+func routes(rr []http.Route) optionFunc {
 	return func(s *Service) error {
 		if len(rr) == 0 {
 			return errors.New("routes are required")
@@ -22,8 +20,7 @@ func Routes(rr []http.Route) OptionFunc {
 	}
 }
 
-// Middlewares option for adding generic middlewares to the default HTTP component.
-func Middlewares(mm ...http.MiddlewareFunc) OptionFunc {
+func middlewares(mm ...http.MiddlewareFunc) optionFunc {
 	return func(s *Service) error {
 		if len(mm) == 0 {
 			return errors.New("middlewares are required")
@@ -34,8 +31,7 @@ func Middlewares(mm ...http.MiddlewareFunc) OptionFunc {
 	}
 }
 
-// HealthCheck option for overriding the default health check of the default HTTP component.
-func HealthCheck(hcf http.HealthCheckFunc) OptionFunc {
+func healthCheck(hcf http.HealthCheckFunc) optionFunc {
 	return func(s *Service) error {
 		if hcf == nil {
 			return errors.New("health check func is required")
@@ -46,8 +42,7 @@ func HealthCheck(hcf http.HealthCheckFunc) OptionFunc {
 	}
 }
 
-// Components option for adding additional components to the service.
-func Components(cc ...Component) OptionFunc {
+func components(cc ...Component) optionFunc {
 	return func(s *Service) error {
 		if len(cc) == 0 || cc[0] == nil {
 			return errors.New("components are required")
@@ -58,8 +53,7 @@ func Components(cc ...Component) OptionFunc {
 	}
 }
 
-// Docs option for adding additional documentation to the service info response.
-func Docs(file string) OptionFunc {
+func docs(file string) optionFunc {
 	return func(s *Service) error {
 		err := info.ImportDoc(file)
 		if err != nil {
@@ -70,8 +64,7 @@ func Docs(file string) OptionFunc {
 	}
 }
 
-// SIGHUP option for adding a handler when the service receives a SIGHUP.
-func SIGHUP(handler func()) OptionFunc {
+func sighub(handler func()) optionFunc {
 	return func(s *Service) error {
 		if handler == nil {
 			return errors.New("handler is nil")
