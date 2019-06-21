@@ -1,6 +1,41 @@
 package patron
 
-import "github.com/beatlabs/patron/sync/http"
+import (
+	"os"
+
+	"github.com/beatlabs/patron/errors"
+	"github.com/beatlabs/patron/info"
+	"github.com/beatlabs/patron/log"
+	"github.com/beatlabs/patron/log/zerolog"
+	"github.com/beatlabs/patron/sync/http"
+)
+
+// Setup set's up metrics and default logging.
+func Setup(name, version string) error {
+
+	lvl, ok := os.LookupEnv("PATRON_LOG_LEVEL")
+	if !ok {
+		lvl = string(log.InfoLevel)
+	}
+
+	info.UpsertConfig("log_level", lvl)
+	hostname, err := os.Hostname()
+	if err != nil {
+		return errors.Wrap(err, "failed to get hostname")
+	}
+	info.UpdateHost(hostname)
+
+	f := map[string]interface{}{
+		"srv":  name,
+		"ver":  version,
+		"host": hostname,
+	}
+	logSetupOnce.Do(func() {
+		err = log.Setup(zerolog.Create(log.Level(lvl)), f)
+	})
+
+	return err
+}
 
 // Builder definition.
 type Builder struct {
