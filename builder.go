@@ -56,7 +56,11 @@ type Builder struct {
 
 // New builder constructor.
 func New(name string, version string) *Builder {
-	return &Builder{name: name, version: version}
+	return &Builder{
+		name:        name,
+		version:     version,
+		healthCheck: http.DefaultHealthCheck,
+	}
 }
 
 // WithRoutes adds routes to the service.
@@ -98,6 +102,16 @@ func (b *Builder) WithSIGHUP(handler func()) *Builder {
 // Run the service.
 func (b *Builder) Run() error {
 
+	if b.name == "" {
+		return errors.New("name is required")
+	}
+
+	if b.version == "" {
+		b.version = "dev"
+	}
+	info.UpdateName(b.name)
+	info.UpdateVersion(b.version)
+
 	err := Setup(b.name, b.version)
 	if err != nil {
 		return err
@@ -114,33 +128,28 @@ func (b *Builder) Run() error {
 		}
 	}()
 
-	var options []optionFunc
-
-	if len(b.routes) > 0 {
-		options = append(options, routes(b.routes))
+	httpCmp, err := b.createHTTPComponent()
+	if err != nil {
+		return err
 	}
+	b.components = append(b.components, httpCmp)
 
-	if len(b.middlewares) > 0 {
-		options = append(options, middlewares(b.middlewares...))
-	}
-
-	if b.healthCheck != nil {
-		options = append(options, healthCheck(b.healthCheck))
-	}
-
-	if len(b.components) > 0 {
-		options = append(options, components(b.components...))
-	}
+	b.setupInfo()
 
 	if b.docFile != "" {
-		options = append(options, docs(b.docFile))
+		err := info.ImportDoc(b.docFile)
+		if err != nil {
+			return err
+		}
 	}
+
+	var options []optionFunc
 
 	if b.sighupHandler != nil {
 		options = append(options, sighub(b.sighupHandler))
 	}
 
-	s, err := new(b.name, b.version, options...)
+	s, err := new(b.components, options...)
 	if err != nil {
 		return err
 	}
@@ -179,4 +188,47 @@ func setupDefaultTracing(name, version string) error {
 	info.UpsertConfig("jaeger-agent-sampler-param", prm)
 	log.Infof("setting up default tracing %s, %s with param %s", agent, tp, prm)
 	return trace.Setup(name, version, agent, tp, prmVal)
+}
+
+func (b *Builder) createHTTPComponent() (Component, error) {
+	var err error
+	var portVal = int64(50000)
+	port, ok := os.LookupEnv("PATRON_HTTP_DEFAULT_PORT")
+	if ok {
+		portVal, err = strconv.ParseInt(port, 10, 64)
+		if err != nil {
+			return nil, errors.Wrap(err, "env var for HTTP default port is not valid")
+		}
+	}
+	port = strconv.FormatInt(portVal, 10)
+	log.Infof("creating default HTTP component at port %s", port)
+
+	options := []http.OptionFunc{
+		http.Port(int(portVal)),
+	}
+
+	if b.healthCheck != nil {
+		options = append(options, http.HealthCheck(b.healthCheck))
+	}
+
+	if b.routes != nil {
+		options = append(options, http.Routes(b.routes))
+	}
+
+	if b.middlewares != nil && len(b.middlewares) > 0 {
+		options = append(options, http.Middlewares(b.middlewares...))
+	}
+
+	cp, err := http.New(options...)
+	if err != nil {
+		return nil, errors.Wrap(err, "failed to create default HTTP component")
+	}
+
+	return cp, nil
+}
+
+func (b *Builder) setupInfo() {
+	for _, c := range b.components {
+		info.AppendComponent(c.Info())
+	}
 }

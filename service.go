@@ -4,14 +4,11 @@ import (
 	"context"
 	"os"
 	"os/signal"
-	"strconv"
 	"sync"
 	"syscall"
 
 	"github.com/beatlabs/patron/errors"
-	"github.com/beatlabs/patron/info"
 	"github.com/beatlabs/patron/log"
-	"github.com/beatlabs/patron/sync/http"
 )
 
 // Component interface for implementing service components.
@@ -24,30 +21,20 @@ type Component interface {
 // The service will start by default a HTTP component in order to host management endpoint.
 type service struct {
 	cps           []Component
-	routes        []http.Route
-	middlewares   []http.MiddlewareFunc
-	hcf           http.HealthCheckFunc
 	termSig       chan os.Signal
 	sighupHandler func()
 }
 
-func new(name, version string, oo ...optionFunc) (*service, error) {
-	if name == "" {
-		return nil, errors.New("name is required")
-	}
+func new(components []Component, oo ...optionFunc) (*service, error) {
 
-	if version == "" {
-		version = "dev"
+	if len(components) == 0 {
+		return nil, errors.New("no components provided")
 	}
-	info.UpdateName(name)
-	info.UpdateVersion(version)
 
 	s := service{
-		cps:           []Component{},
-		hcf:           http.DefaultHealthCheck,
+		cps:           components,
 		termSig:       make(chan os.Signal, 1),
 		sighupHandler: func() { log.Info("SIGHUP received: nothing setup") },
-		middlewares:   []http.MiddlewareFunc{},
 	}
 
 	var err error
@@ -59,25 +46,12 @@ func new(name, version string, oo ...optionFunc) (*service, error) {
 		}
 	}
 
-	httpCp, err := s.createHTTPComponent()
-	if err != nil {
-		return nil, err
-	}
-
-	s.cps = append(s.cps, httpCp)
-	s.setupInfo()
 	s.setupOSSignal()
 	return &s, nil
 }
 
 func (s *service) setupOSSignal() {
 	signal.Notify(s.termSig, os.Interrupt, syscall.SIGTERM, syscall.SIGHUP)
-}
-
-func (s *service) setupInfo() {
-	for _, c := range s.cps {
-		info.AppendComponent(c.Info())
-	}
 }
 
 // Run starts up all service components and monitors for errors.
@@ -106,43 +80,6 @@ func (s *service) Run() error {
 		ee = append(ee, err)
 	}
 	return errors.Aggregate(ee...)
-}
-
-func (s *service) createHTTPComponent() (Component, error) {
-	var err error
-	var portVal = int64(50000)
-	port, ok := os.LookupEnv("PATRON_HTTP_DEFAULT_PORT")
-	if ok {
-		portVal, err = strconv.ParseInt(port, 10, 64)
-		if err != nil {
-			return nil, errors.Wrap(err, "env var for HTTP default port is not valid")
-		}
-	}
-	port = strconv.FormatInt(portVal, 10)
-	log.Infof("creating default HTTP component at port %s", port)
-
-	options := []http.OptionFunc{
-		http.Port(int(portVal)),
-	}
-
-	if s.hcf != nil {
-		options = append(options, http.HealthCheck(s.hcf))
-	}
-
-	if s.routes != nil {
-		options = append(options, http.Routes(s.routes))
-	}
-
-	if s.middlewares != nil && len(s.middlewares) > 0 {
-		options = append(options, http.Middlewares(s.middlewares...))
-	}
-
-	cp, err := http.New(options...)
-	if err != nil {
-		return nil, errors.Wrap(err, "failed to create default HTTP component")
-	}
-
-	return cp, nil
 }
 
 func (s *service) waitTermination(chErr <-chan error) error {
