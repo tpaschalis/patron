@@ -69,7 +69,7 @@ func main() {
 
 	err = patron.New(name, version).WithRoutes(routes).Run()
 	if err != nil {
-		log.Fatalf("failed to create service %v", err)
+		log.Fatalf("failed to run service %v", err)
 	}
 }
 

@@ -12,8 +12,6 @@ import (
 	"github.com/beatlabs/patron/info"
 	"github.com/beatlabs/patron/log"
 	"github.com/beatlabs/patron/sync/http"
-	"github.com/beatlabs/patron/trace"
-	jaeger "github.com/uber/jaeger-client-go"
 )
 
 var logSetupOnce sync.Once
@@ -54,15 +52,7 @@ func new(name, version string, oo ...optionFunc) (*service, error) {
 		middlewares:   []http.MiddlewareFunc{},
 	}
 
-	err := Setup(name, version)
-	if err != nil {
-		return nil, err
-	}
-
-	err = s.setupDefaultTracing(name, version)
-	if err != nil {
-		return nil, err
-	}
+	var err error
 
 	for _, o := range oo {
 		err = o(&s)
@@ -96,12 +86,6 @@ func (s *service) setupInfo() {
 // If a component returns a error the service is responsible for shutting down
 // all components and terminate itself.
 func (s *service) Run() error {
-	defer func() {
-		err := trace.Close()
-		if err != nil {
-			log.Errorf("failed to close trace %v", err)
-		}
-	}()
 	ctx, cnl := context.WithCancel(context.Background())
 	chErr := make(chan error, len(s.cps))
 	wg := sync.WaitGroup{}
@@ -124,39 +108,6 @@ func (s *service) Run() error {
 		ee = append(ee, err)
 	}
 	return errors.Aggregate(ee...)
-}
-
-func (s *service) setupDefaultTracing(name, version string) error {
-	var err error
-
-	host, ok := os.LookupEnv("PATRON_JAEGER_AGENT_HOST")
-	if !ok {
-		host = "0.0.0.0"
-	}
-	port, ok := os.LookupEnv("PATRON_JAEGER_AGENT_PORT")
-	if !ok {
-		port = "6831"
-	}
-	agent := host + ":" + port
-	info.UpsertConfig("jaeger-agent", agent)
-	tp, ok := os.LookupEnv("PATRON_JAEGER_SAMPLER_TYPE")
-	if !ok {
-		tp = jaeger.SamplerTypeProbabilistic
-	}
-	info.UpsertConfig("jaeger-agent-sampler-type", tp)
-	var prmVal = 0.0
-	var prm = "0.0"
-
-	if prm, ok := os.LookupEnv("PATRON_JAEGER_SAMPLER_PARAM"); ok {
-		prmVal, err = strconv.ParseFloat(prm, 64)
-		if err != nil {
-			return errors.Wrap(err, "env var for jaeger sampler param is not valid")
-		}
-	}
-
-	info.UpsertConfig("jaeger-agent-sampler-param", prm)
-	log.Infof("setting up default tracing %s, %s with param %s", agent, tp, prm)
-	return trace.Setup(name, version, agent, tp, prmVal)
 }
 
 func (s *service) createHTTPComponent() (Component, error) {

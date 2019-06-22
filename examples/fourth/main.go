@@ -59,7 +59,7 @@ func main() {
 
 	err = patron.New(name, version).WithComponents(amqpCmp.cmp).Run()
 	if err != nil {
-		log.Fatalf("failed to create service %v", err)
+		log.Fatalf("failed to run service %v", err)
 	}
 }
 

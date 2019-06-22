@@ -2,17 +2,19 @@ package patron
 
 import (
 	"os"
+	"strconv"
 
 	"github.com/beatlabs/patron/errors"
 	"github.com/beatlabs/patron/info"
 	"github.com/beatlabs/patron/log"
 	"github.com/beatlabs/patron/log/zerolog"
 	"github.com/beatlabs/patron/sync/http"
+	"github.com/beatlabs/patron/trace"
+	jaeger "github.com/uber/jaeger-client-go"
 )
 
 // Setup set's up metrics and default logging.
 func Setup(name, version string) error {
-
 	lvl, ok := os.LookupEnv("PATRON_LOG_LEVEL")
 	if !ok {
 		lvl = string(log.InfoLevel)
@@ -93,6 +95,22 @@ func (b *Builder) WithSIGHUP(handler func()) *Builder {
 // Run the service.
 func (b *Builder) Run() error {
 
+	err := Setup(b.name, b.version)
+	if err != nil {
+		return err
+	}
+
+	err = setupDefaultTracing(b.name, b.version)
+	if err != nil {
+		return err
+	}
+	defer func() {
+		err := trace.Close()
+		if err != nil {
+			log.Errorf("failed to close trace %v", err)
+		}
+	}()
+
 	var options []optionFunc
 
 	if len(b.routes) > 0 {
@@ -125,4 +143,37 @@ func (b *Builder) Run() error {
 	}
 	return s.Run()
 	//TODO: fix cli to support the above
+}
+
+func setupDefaultTracing(name, version string) error {
+	var err error
+
+	host, ok := os.LookupEnv("PATRON_JAEGER_AGENT_HOST")
+	if !ok {
+		host = "0.0.0.0"
+	}
+	port, ok := os.LookupEnv("PATRON_JAEGER_AGENT_PORT")
+	if !ok {
+		port = "6831"
+	}
+	agent := host + ":" + port
+	info.UpsertConfig("jaeger-agent", agent)
+	tp, ok := os.LookupEnv("PATRON_JAEGER_SAMPLER_TYPE")
+	if !ok {
+		tp = jaeger.SamplerTypeProbabilistic
+	}
+	info.UpsertConfig("jaeger-agent-sampler-type", tp)
+	var prmVal = 0.0
+	var prm = "0.0"
+
+	if prm, ok := os.LookupEnv("PATRON_JAEGER_SAMPLER_PARAM"); ok {
+		prmVal, err = strconv.ParseFloat(prm, 64)
+		if err != nil {
+			return errors.Wrap(err, "env var for jaeger sampler param is not valid")
+		}
+	}
+
+	info.UpsertConfig("jaeger-agent-sampler-param", prm)
+	log.Infof("setting up default tracing %s, %s with param %s", agent, tp, prm)
+	return trace.Setup(name, version, agent, tp, prmVal)
 }

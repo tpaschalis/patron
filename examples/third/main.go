@@ -58,7 +58,7 @@ func main() {
 
 	err = patron.New(name, version).WithComponents(kafkaCmp.cmp).Run()
 	if err != nil {
-		log.Fatalf("failed to create and run service %v", err)
+		log.Fatalf("failed to run service %v", err)
 	}
 }
 
