@@ -143,13 +143,7 @@ func (b *Builder) Run() error {
 		}
 	}
 
-	var options []optionFunc
-
-	if b.sighupHandler != nil {
-		options = append(options, sighub(b.sighupHandler))
-	}
-
-	s, err := new(b.components, options...)
+	s, err := new(b.components, b.sighupHandler)
 	if err != nil {
 		return err
 	}

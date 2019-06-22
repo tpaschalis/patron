@@ -25,25 +25,20 @@ type service struct {
 	sighupHandler func()
 }
 
-func new(components []Component, oo ...optionFunc) (*service, error) {
+func new(components []Component, sighubHandler func()) (*service, error) {
 
 	if len(components) == 0 {
 		return nil, errors.New("no components provided")
 	}
 
+	if sighubHandler == nil {
+		sighubHandler = func() { log.Info("SIGHUP received: nothing setup") }
+	}
+
 	s := service{
 		cps:           components,
 		termSig:       make(chan os.Signal, 1),
-		sighupHandler: func() { log.Info("SIGHUP received: nothing setup") },
-	}
-
-	var err error
-
-	for _, o := range oo {
-		err = o(&s)
-		if err != nil {
-			return nil, err
-		}
+		sighupHandler: sighubHandler,
 	}
 
 	s.setupOSSignal()
