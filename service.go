@@ -14,8 +14,6 @@ import (
 	"github.com/beatlabs/patron/sync/http"
 )
 
-var logSetupOnce sync.Once
-
 // Component interface for implementing service components.
 type Component interface {
 	Run(ctx context.Context) error

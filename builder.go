@@ -3,6 +3,7 @@ package patron
 import (
 	"os"
 	"strconv"
+	"sync"
 
 	"github.com/beatlabs/patron/errors"
 	"github.com/beatlabs/patron/info"
@@ -12,6 +13,8 @@ import (
 	"github.com/beatlabs/patron/trace"
 	jaeger "github.com/uber/jaeger-client-go"
 )
+
+var logSetupOnce sync.Once
 
 // Setup set's up metrics and default logging.
 func Setup(name, version string) error {
