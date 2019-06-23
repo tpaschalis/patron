@@ -62,12 +62,9 @@ func main() {
 		log.Fatalf("failed to create authenticator %v", err)
 	}
 
-	// Set up routes
-	routes := []patronhttp.Route{
-		patronhttp.NewAuthGetRoute("/", httpCmp.second, true, auth),
-	}
-
-	err = patron.New(name, version).WithRoutes(routes).Run()
+	err = patron.New(name, version).
+		WithRoutes(patronhttp.NewAuthGetRoute("/", httpCmp.second, true, auth)).
+		Run()
 	if err != nil {
 		log.Fatalf("failed to run service %v", err)
 	}

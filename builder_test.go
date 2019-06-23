@@ -24,7 +24,7 @@ func TestNew_TraceError(t *testing.T) {
 }
 
 func TestNew_MissingRoutes(t *testing.T) {
-	err := New("name", "").WithRoutes(nil).Run()
+	err := New("name", "").WithRoutes().Run()
 	assert.EqualError(t, err, "routes are empty\n")
 }
 
@@ -61,15 +61,13 @@ func TestRun_HttpError(t *testing.T) {
 }
 
 func TestRun_Error(t *testing.T) {
-
 	h := func(_ http.ResponseWriter, _ *http.Request) {
 	}
 	m := func(_ http.Handler) http.Handler { return nil }
-
-	routes := []patronhttp.Route{patronhttp.NewRouteRaw("/", "GET", h, true)}
 	err := New("name", "").
-		WithRoutes(routes).
+		WithRoutes(patronhttp.NewRouteRaw("/", "GET", h, true)).
 		WithMiddlewares(m).
-		WithComponents(&testComponent{errorRunning: true}).Run()
+		WithComponents(&testComponent{errorRunning: true}).
+		Run()
 	assert.EqualError(t, err, "failed to run component\n")
 }

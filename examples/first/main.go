@@ -41,13 +41,8 @@ func main() {
 		os.Exit(1)
 	}
 
-	// Set up routes
-	routes := []patronhttp.Route{
-		patronhttp.NewPostRoute("/", first, true),
-	}
-
 	// Setup a simple CORS middleware
-	middlewareCors := func(h http.Handler) http.Handler {
+	middlewareCORS := func(h http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			w.Header().Add("Access-Control-Allow-Origin", "*")
 			w.Header().Add("Access-Control-Allow-Methods", "GET, POST")
@@ -61,7 +56,11 @@ func main() {
 		os.Exit(0)
 	}
 
-	err = patron.New(name, version).WithRoutes(routes).WithMiddlewares(middlewareCors).WithSIGHUP(sig).Run()
+	err = patron.New(name, version).
+		WithRoutes(patronhttp.NewPostRoute("/", first, true)).
+		WithMiddlewares(middlewareCORS).
+		WithSIGHUP(sig).
+		Run()
 	if err != nil {
 		log.Fatalf("failed to run service %v", err)
 	}

@@ -88,7 +88,7 @@ func New(name string, version string) *Builder {
 }
 
 // WithRoutes adds routes to the service.
-func (b *Builder) WithRoutes(rr []http.Route) *Builder {
+func (b *Builder) WithRoutes(rr ...http.Route) *Builder {
 	if len(rr) == 0 {
 		b.errors = append(b.errors, errors.New("routes are empty"))
 	}
