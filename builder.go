@@ -44,83 +44,108 @@ func Setup(name, version string) error {
 
 // Builder definition.
 type Builder struct {
+	errors        []error
 	name          string
 	version       string
 	routes        []http.Route
 	middlewares   []http.MiddlewareFunc
 	healthCheck   http.HealthCheckFunc
 	components    []Component
-	docFile       string
 	sighupHandler func()
 }
 
 // New builder constructor.
 func New(name string, version string) *Builder {
-	return &Builder{
-		name:        name,
-		version:     version,
-		healthCheck: http.DefaultHealthCheck,
+	b := &Builder{}
+	var ers []error
+	if name == "" {
+		b.errors = append(ers, errors.New("name is required"))
+		return b
 	}
+	if version == "" {
+		version = "dev"
+	}
+
+	b.name = name
+	b.version = version
+	b.healthCheck = http.DefaultHealthCheck
+
+	err := Setup(name, version)
+	if err != nil {
+		ers = append(ers, err)
+	}
+
+	info.UpdateName(name)
+	info.UpdateVersion(version)
+
+	err = setupDefaultTracing(name, version)
+	if err != nil {
+		ers = append(ers, err)
+	}
+
+	b.errors = ers
+	return b
 }
 
 // WithRoutes adds routes to the service.
 func (b *Builder) WithRoutes(rr []http.Route) *Builder {
+	if len(rr) == 0 {
+		b.errors = append(b.errors, errors.New("routes are empty"))
+	}
 	b.routes = rr
 	return b
 }
 
 // WithMiddlewares adds middlewares to the service.
 func (b *Builder) WithMiddlewares(mm ...http.MiddlewareFunc) *Builder {
+	if len(mm) == 0 {
+		b.errors = append(b.errors, errors.New("middlewares are empty"))
+	}
 	b.middlewares = mm
 	return b
 }
 
 // WithHealthCheck adds a custom health check to the service.
 func (b *Builder) WithHealthCheck(hcf http.HealthCheckFunc) *Builder {
+	if hcf == nil {
+		b.errors = append(b.errors, errors.New("health check function is nil"))
+	}
 	b.healthCheck = hcf
 	return b
 }
 
 // WithComponents adds custom components to the service.
 func (b *Builder) WithComponents(cc ...Component) *Builder {
+	if len(cc) == 0 {
+		b.errors = append(b.errors, errors.New("components are empty"))
+	}
 	b.components = cc
 	return b
 }
 
 // WithDocs adds docs support to the service.
 func (b *Builder) WithDocs(file string) *Builder {
-	b.docFile = file
+	if err := info.ImportDoc(file); err != nil {
+		b.errors = append(b.errors, errors.New("failed to import doc file"))
+	}
 	return b
 }
 
 // WithSIGHUP adds custom SIGHUP handling to the service.
 func (b *Builder) WithSIGHUP(handler func()) *Builder {
+	if handler == nil {
+		b.errors = append(b.errors, errors.New("sighub handler is nil"))
+	}
 	b.sighupHandler = handler
 	return b
 }
 
 // Run the service.
 func (b *Builder) Run() error {
-
-	if b.name == "" {
-		return errors.New("name is required")
+	if len(b.errors) > 0 {
+		return errors.Aggregate(b.errors...)
 	}
 
-	if b.version == "" {
-		b.version = "dev"
-	}
-	info.UpdateName(b.name)
-	info.UpdateVersion(b.version)
-
-	err := Setup(b.name, b.version)
-	if err != nil {
-		return err
-	}
-
-	err = setupDefaultTracing(b.name, b.version)
-	if err != nil {
-		return err
-	}
 	defer func() {
 		err := trace.Close()
 		if err != nil {
@@ -135,13 +160,6 @@ func (b *Builder) Run() error {
 	b.components = append(b.components, httpCmp)
 
 	b.setupInfo()
-
-	if b.docFile != "" {
-		err := info.ImportDoc(b.docFile)
-		if err != nil {
-			return err
-		}
-	}
 
 	s, err := new(b.components, b.sighupHandler)
 	if err != nil {
