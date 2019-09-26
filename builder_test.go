@@ -43,11 +43,6 @@ func TestNew_MissingComponents(t *testing.T) {
 	assert.EqualError(t, err, "components are empty\n")
 }
 
-func TestNew_MissingDocsFile(t *testing.T) {
-	err := New("name", "").WithDocs("").Run()
-	assert.EqualError(t, err, "failed to import doc file\n")
-}
-
 func TestNew_MissingSIGHUP(t *testing.T) {
 	err := New("name", "").WithSIGHUP(nil).Run()
 	assert.EqualError(t, err, "sighub handler is nil\n")

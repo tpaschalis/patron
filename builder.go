@@ -6,7 +6,6 @@ import (
 	"sync"
 
 	"github.com/beatlabs/patron/errors"
-	"github.com/beatlabs/patron/info"
 	"github.com/beatlabs/patron/log"
 	"github.com/beatlabs/patron/log/zerolog"
 	"github.com/beatlabs/patron/sync/http"
@@ -23,12 +22,10 @@ func Setup(name, version string) error {
 		lvl = string(log.InfoLevel)
 	}
 
-	info.UpsertConfig("log_level", lvl)
 	hostname, err := os.Hostname()
 	if err != nil {
 		return errors.Wrap(err, "failed to get hostname")
 	}
-	info.UpdateHost(hostname)
 
 	f := map[string]interface{}{
 		"srv":  name,
@@ -75,9 +72,6 @@ func New(name string, version string) *Builder {
 		ers = append(ers, err)
 	}
 
-	info.UpdateName(name)
-	info.UpdateVersion(version)
-
 	err = setupDefaultTracing(name, version)
 	if err != nil {
 		ers = append(ers, err)
@@ -123,14 +117,6 @@ func (b *Builder) WithComponents(cc ...Component) *Builder {
 	return b
 }
 
-// WithDocs adds docs support to the service.
-func (b *Builder) WithDocs(file string) *Builder {
-	if err := info.ImportDoc(file); err != nil {
-		b.errors = append(b.errors, errors.New("failed to import doc file"))
-	}
-	return b
-}
-
 // WithSIGHUP adds custom SIGHUP handling to the service.
 func (b *Builder) WithSIGHUP(handler func()) *Builder {
 	if handler == nil {
@@ -159,8 +145,6 @@ func (b *Builder) Run() error {
 	}
 	b.components = append(b.components, httpCmp)
 
-	b.setupInfo()
-
 	s, err := new(b.components, b.sighupHandler)
 	if err != nil {
 		return err
@@ -181,12 +165,10 @@ func setupDefaultTracing(name, version string) error {
 		port = "6831"
 	}
 	agent := host + ":" + port
-	info.UpsertConfig("jaeger-agent", agent)
 	tp, ok := os.LookupEnv("PATRON_JAEGER_SAMPLER_TYPE")
 	if !ok {
 		tp = jaeger.SamplerTypeProbabilistic
 	}
-	info.UpsertConfig("jaeger-agent-sampler-type", tp)
 	var prmVal = 0.0
 	var prm = "0.0"
 
@@ -197,7 +179,6 @@ func setupDefaultTracing(name, version string) error {
 		}
 	}
 
-	info.UpsertConfig("jaeger-agent-sampler-param", prm)
 	log.Infof("setting up default tracing %s, %s with param %s", agent, tp, prm)
 	return trace.Setup(name, version, agent, tp, prmVal)
 }
@@ -237,10 +218,4 @@ func (b *Builder) createHTTPComponent() (Component, error) {
 	}
 
 	return cp, nil
-}
-
-func (b *Builder) setupInfo() {
-	for _, c := range b.components {
-		info.AppendComponent(c.Info())
-	}
 }
