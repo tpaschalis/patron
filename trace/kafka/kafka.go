@@ -23,6 +23,7 @@ func NewMessage(t string, b []byte) *Message {
 	return &Message{topic: t, body: b}
 }
 
+// NewMessageWithKey create a message with a key.
 func NewMessageWithKey(t string, b []byte, k string) (*Message, error) {
 	if k == "" {
 		return nil, errors.New("key string can not be null")
