@@ -14,7 +14,6 @@ import (
 // Component interface for implementing service components.
 type Component interface {
 	Run(ctx context.Context) error
-	Info() map[string]interface{}
 }
 
 // Service is responsible for managing and setting up everything.

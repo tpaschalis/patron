@@ -2,9 +2,10 @@ package kafka
 
 import (
 	"context"
-	"github.com/beatlabs/patron/async"
 	"testing"
 	"time"
+
+	"github.com/beatlabs/patron/async"
 
 	"github.com/Shopify/sarama"
 	"github.com/beatlabs/patron/encoding"
@@ -44,9 +45,9 @@ func TestNew(t *testing.T) {
 			wantErr: true,
 		},
 		{
-			name:    "fails with missing group",
+			name:    "does not fail with missing group",
 			args:    args{name: "test", brokers: brokers, topic: "topic1", group: ""},
-			wantErr: true,
+			wantErr: false,
 		},
 		{
 			name:    "success",
@@ -132,21 +133,6 @@ func Test_determineContentType(t *testing.T) {
 			}
 		})
 	}
-}
-
-func TestConsumer_Info(t *testing.T) {
-	f, err := New("name", "application/json", "topic", "group", []string{"1", "2"})
-	assert.NoError(t, err)
-	c, err := f.Create()
-	assert.NoError(t, err)
-	expected := make(map[string]interface{})
-	expected["type"] = "kafka-consumer"
-	expected["brokers"] = "1,2"
-	expected["topic"] = "topic"
-	expected["group"] = "group"
-	expected["buffer"] = 0
-	expected["default-content-type"] = "application/json"
-	assert.Equal(t, expected, c.Info())
 }
 
 func Test_message(t *testing.T) {
@@ -267,7 +253,7 @@ func TestConsumer_ConsumeFailedBroker(t *testing.T) {
 	assert.Error(t, err)
 }
 
-func TestConsumer_Consume(t *testing.T) {
+func TestConsumer_ConsumeWithGroup(t *testing.T) {
 	broker := sarama.NewMockBroker(t, 0)
 	broker.SetHandlerByMap(map[string]sarama.MockResponse{
 		"MetadataRequest": sarama.NewMockMetadataResponse(t).
@@ -282,6 +268,38 @@ func TestConsumer_Consume(t *testing.T) {
 	})
 
 	f, err := New("name", "application/json", "TOPIC", "group", []string{broker.Addr()})
+	assert.NoError(t, err)
+	c, err := f.Create()
+	assert.NoError(t, err)
+	ctx := context.Background()
+	chMsg, chErr, err := c.Consume(ctx)
+	assert.NoError(t, err)
+	assert.NotNil(t, chMsg)
+	assert.NotNil(t, chErr)
+
+	err = c.Close()
+	assert.NoError(t, err)
+	broker.Close()
+
+	ctx.Done()
+}
+
+func TestConsumer_ConsumeWithoutGroup(t *testing.T) {
+	broker := sarama.NewMockBroker(t, 0)
+	topic := "foo_topic"
+	broker.SetHandlerByMap(map[string]sarama.MockResponse{
+		"MetadataRequest": sarama.NewMockMetadataResponse(t).
+			SetBroker(broker.Addr(), broker.BrokerID()).
+			SetLeader(topic, 0, broker.BrokerID()),
+		"OffsetRequest": sarama.NewMockOffsetResponse(t).
+			SetVersion(1).
+			SetOffset(topic, 0, sarama.OffsetNewest, 10).
+			SetOffset(topic, 0, sarama.OffsetOldest, 0),
+		"FetchRequest": sarama.NewMockFetchResponse(t, 1).
+			SetMessage(topic, 0, 9, sarama.StringEncoder("Foo")),
+	})
+
+	f, err := New("name", "application/json", topic, "", []string{broker.Addr()})
 	assert.NoError(t, err)
 	c, err := f.Create()
 	assert.NoError(t, err)

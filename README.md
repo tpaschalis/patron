@@ -10,7 +10,7 @@ The entry point of the framework is the `Service`. The `Service` uses `Component
 
 - service, which orchestrates everything
 - components and processors, which provide a abstraction of adding processing functionality to the service
-  - asynchronous message processing (RabbitMQ, Kafka)
+  - asynchronous message processing (RabbitMQ, Kafka, AWS SQS)
   - synchronous processing (HTTP)
 - metrics and tracing
 - logging
@@ -76,7 +76,6 @@ The `Service` has the role of glueing all of the above together, which are:
 - setting up default HTTP component with the following endpoints configured:
   - profiling via pprof
   - health check
-  - info endpoint for returning information about the service
 - setting up termination by os signal
 - setting up SIGHUP custom hook if provided by a option
 - starting and stopping components
@@ -100,7 +99,6 @@ A `Component` is a interface that exposes the following API:
 ```go
 type Component interface {
   Run(ctx context.Context) error  
-  Info() map[string]interface{}
 }
 ```
 
@@ -142,7 +140,8 @@ Detailed examples can be found in the [examples](/examples) folder with the foll
 - [HTTP Component, HTTP Tracing, HTTP middleware](/examples/first/main.go)
 - [Kafka Component, HTTP Component, HTTP Authentication, Kafka Tracing](/examples/second/main.go)
 - [Kafka Component, AMQP Tracing](/examples/third/main.go)
-- [AMQP Component](/examples/fourth/main.go)
+- [AMQP Component, AWS SNS](/examples/fourth/main.go)
+- [AWS SQS](/examples/fifth/main.go)
 
 ## Processors
 

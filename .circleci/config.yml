@@ -1,16 +1,16 @@
-version: 2
+version: 2.1
+
 jobs:
   build:
     docker:
-      - image: circleci/golang:1.11
+      - image: circleci/golang:1.12
 
     environment:
       TEST_RESULTS: /tmp/test-results/go
 
     steps:
-      
       - checkout
-      
+
       - run:
           name: Running with test coverage and send to codecov
           command: |

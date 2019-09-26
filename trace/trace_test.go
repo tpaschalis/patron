@@ -94,6 +94,7 @@ func TestHTTPStartFinishSpan(t *testing.T) {
 	assert.Equal(t, map[string]interface{}{
 		"span.kind":        ext.SpanKindRPCServerEnum,
 		"component":        "http",
+		"error":            false,
 		"http.method":      "GET",
 		"http.status_code": uint16(200),
 		"http.url":         "/",
@@ -123,6 +124,30 @@ func TestSQLStartFinishSpan(t *testing.T) {
 		"error":        false,
 		"key":          "value",
 	}, rawSpan.Tags())
+}
+
+func TestEsSpan(t *testing.T) {
+	mtr := mocktracer.New()
+	opentracing.SetGlobalTracer(mtr)
+	hostPool := []string{"http://localhost:9200", "http:10.1.1.1:9201", "https://www.domain.com:9203"}
+	sp := EsSpan(context.Background(), "opName", "es-component", "es-user", "es-uri", "query-method", "query-body", hostPool)
+	assert.NotNil(t, sp)
+	assert.IsType(t, &mocktracer.MockSpan{}, sp)
+	jsp := sp.(*mocktracer.MockSpan)
+	assert.NotNil(t, jsp)
+	SpanSuccess(sp)
+	rawspan := mtr.FinishedSpans()[0]
+	assert.Equal(t, map[string]interface{}{
+		"component":    "es-component",
+		"version":      "dev",
+		"db.statement": "query-body",
+		"db.type":      "elasticsearch",
+		"db.user":      "es-user",
+		"http.url":     "es-uri",
+		"http.method":  "query-method",
+		hostsTag:       "[http://localhost:9200, http:10.1.1.1:9201, https://www.domain.com:9203]",
+		"error":        false,
+	}, rawspan.Tags())
 }
 
 func TestComponentOpName(t *testing.T) {
