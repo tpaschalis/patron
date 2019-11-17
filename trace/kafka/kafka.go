@@ -93,14 +93,9 @@ func NewAsyncProducer(brokers []string, oo ...OptionFunc) (*AsyncProducer, error
 
 // Send a message to a topic.
 func (ap *AsyncProducer) Send(ctx context.Context, msg *Message) error {
-	sp, _ := trace.ChildSpan(
-		ctx,
-		trace.ComponentOpName(trace.KafkaAsyncProducerComponent, msg.topic),
-		trace.KafkaAsyncProducerComponent,
-		ext.SpanKindProducer,
-		ap.tag,
-		opentracing.Tag{Key: "topic", Value: msg.topic},
-	)
+	sp, _ := trace.ChildSpan(ctx, trace.ComponentOpName(trace.KafkaAsyncProducerComponent, msg.topic),
+		trace.KafkaAsyncProducerComponent, ext.SpanKindProducer, ap.tag,
+		opentracing.Tag{Key: "topic", Value: msg.topic})
 	pm, err := createProducerMessage(ctx, msg, sp)
 	if err != nil {
 		trace.SpanError(sp)
