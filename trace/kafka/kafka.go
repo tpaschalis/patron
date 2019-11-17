@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/Shopify/sarama"
+	"github.com/beatlabs/patron/correlation"
 	"github.com/beatlabs/patron/encoding/json"
 	"github.com/beatlabs/patron/errors"
 	"github.com/beatlabs/patron/trace"
@@ -100,7 +101,7 @@ func (ap *AsyncProducer) Send(ctx context.Context, msg *Message) error {
 		ap.tag,
 		opentracing.Tag{Key: "topic", Value: msg.topic},
 	)
-	pm, err := createProducerMessage(msg, sp)
+	pm, err := createProducerMessage(ctx, msg, sp)
 	if err != nil {
 		trace.SpanError(sp)
 		return err
@@ -126,7 +127,7 @@ func (ap *AsyncProducer) propagateError() {
 	}
 }
 
-func createProducerMessage(msg *Message, sp opentracing.Span) (*sarama.ProducerMessage, error) {
+func createProducerMessage(ctx context.Context, msg *Message, sp opentracing.Span) (*sarama.ProducerMessage, error) {
 	c := kafkaHeadersCarrier{}
 	err := sp.Tracer().Inject(sp.Context(), opentracing.TextMap, &c)
 	if err != nil {
@@ -136,6 +137,7 @@ func createProducerMessage(msg *Message, sp opentracing.Span) (*sarama.ProducerM
 	if msg.key != nil {
 		saramaKey = sarama.ByteEncoder(*msg.key)
 	}
+	c.Set(correlation.HeaderID, correlation.IDFromContext(ctx))
 	return &sarama.ProducerMessage{
 		Topic:   msg.topic,
 		Key:     saramaKey,
