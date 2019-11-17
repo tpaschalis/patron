@@ -7,7 +7,7 @@ import (
 )
 
 // HeaderID constant.
-const HeaderID = "X-CORRELATION-ID"
+const HeaderID string = "X-CORRELATION-ID"
 
 type idContextKey struct{}
 
