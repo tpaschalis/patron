@@ -146,48 +146,97 @@ func (cb *Builder) New2() *Builder {
 
 // WithSSL ...
 func (cb *Builder) WithSSL(c, k string) *Builder {
+	if c == "" || k == "" {
+		cb.errors = append(cb.errors, errors.New("Invalid cert or key provided"))
+	} else {
+		log.Info(propSetMsg, "Cert, Key", c+","+k)
+		cb.certFile = c
+		cb.keyFile = k
+	}
 
 	return cb
 }
 
 // WithRoutes ...
 func (cb *Builder) WithRoutes(rr []Route) *Builder {
+	if len(rr) == 0 {
+		cb.errors = append(cb.errors, errors.New("Empty Routes Slice provided"))
+	} else {
+		log.Info(propSetMsg, "Routes", rr)
+		cb.routes = append(cb.routes, rr...)
+	}
 
 	return cb
 }
 
 // WithMiddlewares ...
 func (cb *Builder) WithMiddlewares(mm ...MiddlewareFunc) *Builder {
+	if len(mm) == 0 {
+		cb.errors = append(cb.errors, errors.New("Empty list of middlewares provided"))
+	} else {
+		log.Info(propSetMsg, "Middlewares", mm)
+		cb.middlewares = append(cb.middlewares, mm...)
+	}
 
 	return cb
 }
 
 // WithReadTimeout ...
 func (cb *Builder) WithReadTimeout(rt time.Duration) *Builder {
+	if rt <= 0*time.Second {
+		cb.errors = append(cb.errors, errors.New("Negative or zero read timeout provided"))
+	} else {
+		log.Infof(propSetMsg, "Read Timeout", rt)
+		cb.httpReadTimeout = rt
+	}
 
 	return cb
 }
 
 // WithWriteTimeout ...
 func (cb *Builder) WithWriteTimeout(wt time.Duration) *Builder {
+	if wt <= 0*time.Second {
+		cb.errors = append(cb.errors, errors.New("Negative or zero write timeout provided"))
+	} else {
+		log.Infof(propSetMsg, "Write Timeout", wt)
+		cb.httpWriteTimeout = wt
+	}
 
 	return cb
 }
 
 // WithPort ...
 func (cb *Builder) WithPort(p int) *Builder {
+	if p <= 0 || p > 65535 {
+		cb.errors = append(cb.errors, errors.New("Invalid HTTP Port provided"))
+	} else {
+		log.Infof(propSetMsg, "Port", p)
+		cb.httpPort = p
+	}
 
 	return cb
 }
 
 // WithAliveCheckFunc ...
 func (cb *Builder) WithAliveCheckFunc(acf AliveCheckFunc) *Builder {
+	if acf == nil {
+		cb.errors = append(cb.errors, errors.New("Nil AliveCheckFunc was provided"))
+	} else {
+		log.Infof(propSetMsg, "AliveCheckFunc", acf)
+		cb.ac = acf
+	}
 
 	return cb
 }
 
 // WithReadyCheckFunc ...
 func (cb *Builder) WithReadyCheckFunc(rcf ReadyCheckFunc) *Builder {
+	if rcf == nil {
+		cb.errors = append(cb.errors, errors.New("Nil ReadyCheckFunc provided"))
+	} else {
+		log.Infof(propSetMsg, "ReadyCheckFunc", rcf)
+		cb.rc = rcf
+	}
 
 	return cb
 }
