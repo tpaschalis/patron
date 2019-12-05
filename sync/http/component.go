@@ -7,6 +7,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/beatlabs/patron/errors"
 	"github.com/beatlabs/patron/log"
 	"github.com/julienschmidt/httprouter"
 )
@@ -120,4 +121,94 @@ func (c *Component) createHTTPServer() *http.Server {
 		IdleTimeout:  httpIdleTimeout,
 		Handler:      routerAfterMiddleware,
 	}
+}
+
+// 2019-12-05 start working on issue #54
+// https://github.com/beatlabs/patron/issues/53
+// HTTP Component Builder Pattern
+
+const propSetMsg = "Setting property '%v' for '%v'"
+
+// Builder gathers all required and optional properties, in order
+// to construct an HTTP component
+type Builder struct {
+	Component
+	errors []error
+}
+
+// New2 is a bad name, we'll find a better one
+func (cb *Builder) New2() *Builder {
+	var errs []error
+	return &Builder{
+		errors: errs,
+	}
+}
+
+// WithSSL ...
+func (cb *Builder) WithSSL(c, k string) *Builder {
+
+	return cb
+}
+
+// WithRoutes ...
+func (cb *Builder) WithRoutes(rr []Route) *Builder {
+
+	return cb
+}
+
+// WithMiddlewares ...
+func (cb *Builder) WithMiddlewares(mm ...MiddlewareFunc) *Builder {
+
+	return cb
+}
+
+// WithReadTimeout ...
+func (cb *Builder) WithReadTimeout(rt time.Duration) *Builder {
+
+	return cb
+}
+
+// WithWriteTimeout ...
+func (cb *Builder) WithWriteTimeout(wt time.Duration) *Builder {
+
+	return cb
+}
+
+// WithPort ...
+func (cb *Builder) WithPort(p int) *Builder {
+
+	return cb
+}
+
+// WithAliveCheckFunc ...
+func (cb *Builder) WithAliveCheckFunc(acf AliveCheckFunc) *Builder {
+
+	return cb
+}
+
+// WithReadyCheckFunc ...
+func (cb *Builder) WithReadyCheckFunc(rcf ReadyCheckFunc) *Builder {
+
+	return cb
+}
+
+// Create constructs the HTTP component by applying the gathered properties
+func (cb *Builder) Create() (*Component, error) {
+	if len(cb.errors) > 0 {
+		return nil, errors.Aggregate(cb.errors...)
+	}
+
+	c := &Component{
+		ac:               cb.ac,
+		rc:               cb.rc,
+		httpPort:         cb.httpPort,
+		httpReadTimeout:  cb.httpReadTimeout,
+		httpWriteTimeout: cb.httpWriteTimeout,
+		routes:           cb.routes,
+		middlewares:      cb.middlewares,
+		certFile:         cb.certFile,
+		keyFile:          cb.keyFile,
+	}
+
+	return c, nil
 }
