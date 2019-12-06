@@ -90,3 +90,31 @@ func Test_createHTTPServer(t *testing.T) {
 	assert.Equal(t, 5*time.Second, s.ReadTimeout)
 	assert.Equal(t, 10*time.Second, s.WriteTimeout)
 }
+
+func Test_createHTTPServerUsingBuilder(t *testing.T) {
+
+	type testcase struct{
+		acf AliveCheckFunc
+		rcf ReadyCheckFunc
+		p int
+		rt time.Duration
+		wt time.Duration
+		rr []route
+		mm []MiddlewareFunc
+		k string
+		c string
+	}
+
+	testcases := []testcase {}
+
+
+	cmp := NewBuilder().
+		WithAliveCheckFunc(acf).
+		WithReadyCheckFunc(rcf).
+		WithPort(p).
+		WithReadTimeout(rt).
+		WithWriteTimeout(wt).
+		WithRoutes(rr).
+		WithMiddlewares(mm).
+		WithSSL(k, c).
+}
