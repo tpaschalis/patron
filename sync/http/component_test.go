@@ -103,7 +103,6 @@ func Test_createHTTPServerUsingBuilder(t *testing.T) {
 		mm       []MiddlewareFunc
 		c        string
 		k        string
-		wantComp Component
 		wantErrs []error
 	}
 
@@ -123,10 +122,22 @@ func Test_createHTTPServerUsingBuilder(t *testing.T) {
 				NewRecoveryMiddleware(),
 				panicMiddleware("error"),
 			},
-			c: "cert.file",
-			k: "key.file",
+			c:        "cert.file",
+			k:        "key.file",
+			wantErrs: httpBuilderNoErrors,
 		},
-		{},
+		{
+			acf:      nil,
+			rcf:      nil,
+			p:        -1,
+			rt:       -10 * time.Second,
+			wt:       -20 * time.Second,
+			rr:       []Route{},
+			mm:       []MiddlewareFunc{},
+			c:        "",
+			k:        "",
+			wantErrs: httpBuilderAllErrors,
+		},
 	}
 
 	for _, tc := range testcases {
@@ -139,8 +150,10 @@ func Test_createHTTPServerUsingBuilder(t *testing.T) {
 			WithRoutes(tc.rr).
 			WithMiddlewares(tc.mm...).
 			WithSSL(tc.c, tc.k)
-		assert.Equal(t, cmp.errors, nil)
 
+		gotErrs := cmp.errors
+
+		assert.ObjectsAreEqual(tc.wantErrs, gotErrs)
 	}
 
 }

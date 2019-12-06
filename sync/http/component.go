@@ -164,7 +164,7 @@ func (cb *Builder) WithSSL(c, k string) *Builder {
 // WithRoutes ...
 func (cb *Builder) WithRoutes(rr []Route) *Builder {
 	if len(rr) == 0 {
-		cb.errors = append(cb.errors, errors.New("Empty Routes Slice provided"))
+		cb.errors = append(cb.errors, errors.New("Empty Routes slice provided"))
 	} else {
 		log.Info(propSetMsg, "Routes", rr)
 		cb.routes = append(cb.routes, rr...)
