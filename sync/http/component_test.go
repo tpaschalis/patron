@@ -93,28 +93,39 @@ func Test_createHTTPServer(t *testing.T) {
 
 func Test_createHTTPServerUsingBuilder(t *testing.T) {
 
-	type testcase struct{
-		acf AliveCheckFunc
-		rcf ReadyCheckFunc
-		p int
-		rt time.Duration
-		wt time.Duration
-		rr []route
-		mm []MiddlewareFunc
-		k string
-		c string
+	type testcase struct {
+		acf      AliveCheckFunc
+		rcf      ReadyCheckFunc
+		p        int
+		rt       time.Duration
+		wt       time.Duration
+		rr       []Route
+		mm       []MiddlewareFunc
+		k        string
+		c        string
+		wantComp Component
+		wantErrs []error
 	}
 
-	testcases := []testcase {}
+	acf := DefaultAliveCheck()
+	rcf := DefaultReadyCheck()
 
+	testcases := []testcase{
+		{
 
-	cmp := NewBuilder().
-		WithAliveCheckFunc(acf).
-		WithReadyCheckFunc(rcf).
-		WithPort(p).
-		WithReadTimeout(rt).
-		WithWriteTimeout(wt).
-		WithRoutes(rr).
-		WithMiddlewares(mm).
-		WithSSL(k, c).
+		}
+	}
+
+	for _, tc := range testcases {
+		cmp := NewBuilder().
+			WithAliveCheckFunc(tc.acf).
+			WithReadyCheckFunc(tc.rcf).
+			WithPort(tc.p).
+			WithReadTimeout(tc.rt).
+			WithWriteTimeout(tc.wt).
+			WithRoutes(tc.rr).
+			WithMiddlewares(tc.mm...).
+			WithSSL(tc.k, tc.c)
+	}
+
 }
