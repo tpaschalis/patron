@@ -140,7 +140,7 @@ type Builder struct {
 	errors []error
 }
 
-// New is a bad name, we'll find a better one
+// NewBuilder is a bad name, we'll find a better one
 func NewBuilder() *Builder {
 	var errs []error
 	return &Builder{

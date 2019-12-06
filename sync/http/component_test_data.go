@@ -13,17 +13,3 @@ var httpBuilderAllErrors = []error{
 	errors.New("Empty list of middlewares provided"),
 	errors.New("Invalid cert or key provided"),
 }
-
-// +++ Actual
-// @@ -1,2 +1,11 @@
-// -([]error) <nil>
-// +([]error) (len=8) {
-// + (*errors.fundamental)(Nil AliveCheckFunc was provided),
-// + (*errors.fundamental)(Nil ReadyCheckFunc provided),
-// + (*errors.fundamental)(Invalid HTTP Port provided),
-// + (*errors.fundamental)(Negative or zero read timeout provided),
-// + (*errors.fundamental)(Negative or zero write timeout provided),
-// + (*errors.fundamental)(Empty Routes slice provided),
-// + (*errors.fundamental)(Empty list of middlewares provided),
-// + (*errors.fundamental)(Invalid cert or key provided)
-// +}
