@@ -101,19 +101,32 @@ func Test_createHTTPServerUsingBuilder(t *testing.T) {
 		wt       time.Duration
 		rr       []Route
 		mm       []MiddlewareFunc
-		k        string
 		c        string
+		k        string
 		wantComp Component
 		wantErrs []error
 	}
 
-	acf := DefaultAliveCheck()
-	rcf := DefaultReadyCheck()
-
 	testcases := []testcase{
 		{
-
-		}
+			acf: DefaultAliveCheck,
+			rcf: DefaultReadyCheck,
+			p:   httpPort,
+			rt:  httpReadTimeout,
+			wt:  httpIdleTimeout,
+			rr: []Route{
+				aliveCheckRoute(DefaultAliveCheck),
+				readyCheckRoute(DefaultReadyCheck),
+				metricRoute(),
+			},
+			mm: []MiddlewareFunc{
+				NewRecoveryMiddleware(),
+				panicMiddleware("error"),
+			},
+			c: "cert.file",
+			k: "key.file",
+		},
+		{},
 	}
 
 	for _, tc := range testcases {
@@ -125,7 +138,9 @@ func Test_createHTTPServerUsingBuilder(t *testing.T) {
 			WithWriteTimeout(tc.wt).
 			WithRoutes(tc.rr).
 			WithMiddlewares(tc.mm...).
-			WithSSL(tc.k, tc.c)
+			WithSSL(tc.c, tc.k)
+		assert.Equal(t, cmp.errors, nil)
+
 	}
 
 }
