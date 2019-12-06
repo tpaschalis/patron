@@ -123,9 +123,13 @@ func (c *Component) createHTTPServer() *http.Server {
 	}
 }
 
-// 2019-12-05 start working on issue #54
+// 2019-12-05 start working on issue #53
 // https://github.com/beatlabs/patron/issues/53
 // HTTP Component Builder Pattern
+//
+// Similar
+// https://github.com/beatlabs/patron/pull/110/files https://github.com/beatlabs/patron/issues/54
+// https://github.com/beatlabs/patron/pull/63/files https://github.com/beatlabs/patron/issues/48
 
 const propSetMsg = "Setting property '%v' for '%v'"
 
@@ -136,8 +140,8 @@ type Builder struct {
 	errors []error
 }
 
-// New2 is a bad name, we'll find a better one
-func (cb *Builder) New2() *Builder {
+// New is a bad name, we'll find a better one
+func NewBuilder() *Builder {
 	var errs []error
 	return &Builder{
 		errors: errs,
