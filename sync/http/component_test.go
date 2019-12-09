@@ -93,55 +93,8 @@ func Test_createHTTPServer(t *testing.T) {
 
 func Test_createHTTPServerUsingBuilder(t *testing.T) {
 
-	type testcase struct {
-		acf      AliveCheckFunc
-		rcf      ReadyCheckFunc
-		p        int
-		rt       time.Duration
-		wt       time.Duration
-		rr       []Route
-		mm       []MiddlewareFunc
-		c        string
-		k        string
-		wantErrs []error
-	}
-
-	testcases := []testcase{
-		{
-			acf: DefaultAliveCheck,
-			rcf: DefaultReadyCheck,
-			p:   httpPort,
-			rt:  httpReadTimeout,
-			wt:  httpIdleTimeout,
-			rr: []Route{
-				aliveCheckRoute(DefaultAliveCheck),
-				readyCheckRoute(DefaultReadyCheck),
-				metricRoute(),
-			},
-			mm: []MiddlewareFunc{
-				NewRecoveryMiddleware(),
-				panicMiddleware("error"),
-			},
-			c:        "cert.file",
-			k:        "key.file",
-			wantErrs: httpBuilderNoErrors,
-		},
-		{
-			acf:      nil,
-			rcf:      nil,
-			p:        -1,
-			rt:       -10 * time.Second,
-			wt:       -20 * time.Second,
-			rr:       []Route{},
-			mm:       []MiddlewareFunc{},
-			c:        "",
-			k:        "",
-			wantErrs: httpBuilderAllErrors,
-		},
-	}
-
-	for _, tc := range testcases {
-		cmp := NewBuilder().
+	for _, tc := range builderTestcases {
+		gotHTTPComponent, gotErrs := NewBuilder().
 			WithAliveCheckFunc(tc.acf).
 			WithReadyCheckFunc(tc.rcf).
 			WithPort(tc.p).
@@ -149,11 +102,15 @@ func Test_createHTTPServerUsingBuilder(t *testing.T) {
 			WithWriteTimeout(tc.wt).
 			WithRoutes(tc.rr).
 			WithMiddlewares(tc.mm...).
-			WithSSL(tc.c, tc.k)
+			WithSSL(tc.c, tc.k).
+			Create()
 
-		gotErrs := cmp.errors
-
-		assert.ObjectsAreEqual(tc.wantErrs, gotErrs)
+		if len(tc.wantErrs) > 0 {
+			assert.ObjectsAreEqual(tc.wantErrs, gotErrs)
+			assert.Nil(t, gotHTTPComponent)
+		} else {
+			assert.NotNil(t, gotHTTPComponent)
+		}
 	}
 
 }
