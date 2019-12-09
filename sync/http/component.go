@@ -140,7 +140,7 @@ type Builder struct {
 	errors []error
 }
 
-// NewBuilder is a bad name, we'll find a better one
+// NewBuilder initiates the HTTP component builder chain
 func NewBuilder() *Builder {
 	var errs []error
 	return &Builder{
@@ -148,7 +148,7 @@ func NewBuilder() *Builder {
 	}
 }
 
-// WithSSL ...
+// WithSSL sets the filenames for the Certificate and Keyfile, in order to enable SSL
 func (cb *Builder) WithSSL(c, k string) *Builder {
 	if c == "" || k == "" {
 		cb.errors = append(cb.errors, errors.New("Invalid cert or key provided"))
@@ -161,7 +161,7 @@ func (cb *Builder) WithSSL(c, k string) *Builder {
 	return cb
 }
 
-// WithRoutes ...
+// WithRoutes adds routes to the HTTP component
 func (cb *Builder) WithRoutes(rr []Route) *Builder {
 	if len(rr) == 0 {
 		cb.errors = append(cb.errors, errors.New("Empty Routes slice provided"))
@@ -173,7 +173,7 @@ func (cb *Builder) WithRoutes(rr []Route) *Builder {
 	return cb
 }
 
-// WithMiddlewares ...
+// WithMiddlewares adds middlewares to the HTTP component
 func (cb *Builder) WithMiddlewares(mm ...MiddlewareFunc) *Builder {
 	if len(mm) == 0 {
 		cb.errors = append(cb.errors, errors.New("Empty list of middlewares provided"))
@@ -185,7 +185,7 @@ func (cb *Builder) WithMiddlewares(mm ...MiddlewareFunc) *Builder {
 	return cb
 }
 
-// WithReadTimeout ...
+// WithReadTimeout sets the Read Timeout for the HTTP component
 func (cb *Builder) WithReadTimeout(rt time.Duration) *Builder {
 	if rt <= 0*time.Second {
 		cb.errors = append(cb.errors, errors.New("Negative or zero read timeout provided"))
@@ -197,7 +197,7 @@ func (cb *Builder) WithReadTimeout(rt time.Duration) *Builder {
 	return cb
 }
 
-// WithWriteTimeout ...
+// WithWriteTimeout sets the Write Timeout for the HTTP component
 func (cb *Builder) WithWriteTimeout(wt time.Duration) *Builder {
 	if wt <= 0*time.Second {
 		cb.errors = append(cb.errors, errors.New("Negative or zero write timeout provided"))
@@ -209,7 +209,7 @@ func (cb *Builder) WithWriteTimeout(wt time.Duration) *Builder {
 	return cb
 }
 
-// WithPort ...
+// WithPort sets the port used by the HTTP component
 func (cb *Builder) WithPort(p int) *Builder {
 	if p <= 0 || p > 65535 {
 		cb.errors = append(cb.errors, errors.New("Invalid HTTP Port provided"))
@@ -221,7 +221,7 @@ func (cb *Builder) WithPort(p int) *Builder {
 	return cb
 }
 
-// WithAliveCheckFunc ...
+// WithAliveCheckFunc sets the AliveCheckFunc used by the HTTP component
 func (cb *Builder) WithAliveCheckFunc(acf AliveCheckFunc) *Builder {
 	if acf == nil {
 		cb.errors = append(cb.errors, errors.New("Nil AliveCheckFunc was provided"))
@@ -233,7 +233,7 @@ func (cb *Builder) WithAliveCheckFunc(acf AliveCheckFunc) *Builder {
 	return cb
 }
 
-// WithReadyCheckFunc ...
+// WithReadyCheckFunc sets the ReadyCheckFunc used by the HTTP component
 func (cb *Builder) WithReadyCheckFunc(rcf ReadyCheckFunc) *Builder {
 	if rcf == nil {
 		cb.errors = append(cb.errors, errors.New("Nil ReadyCheckFunc provided"))
