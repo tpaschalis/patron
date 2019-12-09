@@ -135,9 +135,18 @@ type Builder struct {
 }
 
 // NewBuilder initiates the HTTP component builder chain
+// The builder instantiates the component using default values for
+// HTTP Port, Alive/Ready check functions and Read/Write timeouts
 func NewBuilder() *Builder {
 	var errs []error
 	return &Builder{
+		Component: Component{
+			ac:               DefaultAliveCheck,
+			rc:               DefaultReadyCheck,
+			httpPort:         httpPort,
+			httpReadTimeout:  httpReadTimeout,
+			httpWriteTimeout: httpWriteTimeout,
+		},
 		errors: errs,
 	}
 }
