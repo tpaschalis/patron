@@ -123,14 +123,8 @@ func (c *Component) createHTTPServer() *http.Server {
 	}
 }
 
-// 2019-12-05 start working on issue #53
-// https://github.com/beatlabs/patron/issues/53
-// HTTP Component Builder Pattern
-//
-// Similar
-// https://github.com/beatlabs/patron/pull/110/files https://github.com/beatlabs/patron/issues/54
-// https://github.com/beatlabs/patron/pull/63/files https://github.com/beatlabs/patron/issues/48
-
+// propSetMsg is used to log successes when using
+// the HTTP Builder setters, in a uniform way
 const propSetMsg = "Setting property '%v' for '%v'"
 
 // Builder gathers all required and optional properties, in order

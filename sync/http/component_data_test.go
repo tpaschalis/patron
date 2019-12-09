@@ -6,7 +6,7 @@ import (
 	"github.com/beatlabs/patron/errors"
 )
 
-// Variables used for testing the HTTP Component builder
+// Data used for testing the HTTP Component builder
 
 var httpBuilderNoErrors = []error{}
 var httpBuilderAllErrors = []error{
