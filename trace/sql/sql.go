@@ -24,6 +24,16 @@ type Conn struct {
 	conn *sql.Conn
 }
 
+// DSNData contains information extracted from a valid
+// connection string. Additional parameters provided are discarded
+type DSNData struct {
+	DBName   string
+	Address  string
+	User     string
+	Protocol string
+	Passwd   string
+}
+
 // BeginTx starts a transaction.
 func (c *Conn) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) {
 	sp, _ := c.startSpan(ctx, "conn.BeginTx", "")
@@ -372,4 +382,11 @@ func (tx *Tx) Stmt(ctx context.Context, stmt *Stmt) *Stmt {
 	sp, _ := tx.startSpan(ctx, "tx.Stmt", "")
 	defer trace.SpanSuccess(sp)
 	return &Stmt{stmt: tx.tx.StmtContext(ctx, stmt.stmt)}
+}
+
+// ParseDSN unpacks the connections string to the relevant struct
+func ParseDSN(dsn string) (DSNData, error) {
+	res := DSNData{}
+
+	return res, nil
 }
