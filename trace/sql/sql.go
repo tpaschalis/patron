@@ -127,7 +127,12 @@ func Open(driverName, dataSourceName string) (*DB, error) {
 	if err != nil {
 		return nil, err
 	}
-	return &DB{db: db}, nil
+	info, err := ParseDSN(dataSourceName)
+	if err != nil {
+		return nil, err
+	}
+
+	return &DB{connInfo: connInfo{info.DBName, info.User}, db: db}, nil
 }
 
 // OpenDB opens a database.
