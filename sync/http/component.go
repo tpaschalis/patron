@@ -123,20 +123,18 @@ func (c *Component) createHTTPServer() *http.Server {
 	}
 }
 
-// propSetMsg is used to log successes when using
-// the HTTP Builder setters, in a uniform way
-const propSetMsg = "Setting property '%v' for '%v'"
+const fieldSetMsg = "Setting property '%v' for '%v'"
 
 // Builder gathers all required and optional properties, in order
-// to construct an HTTP component
+// to construct an HTTP component.
 type Builder struct {
 	Component
 	errors []error
 }
 
-// NewBuilder initiates the HTTP component builder chain
+// NewBuilder initiates the HTTP component builder chain.
 // The builder instantiates the component using default values for
-// HTTP Port, Alive/Ready check functions and Read/Write timeouts
+// HTTP Port, Alive/Ready check functions and Read/Write timeouts.
 func NewBuilder() *Builder {
 	var errs []error
 	return &Builder{
@@ -151,12 +149,12 @@ func NewBuilder() *Builder {
 	}
 }
 
-// WithSSL sets the filenames for the Certificate and Keyfile, in order to enable SSL
+// WithSSL sets the filenames for the Certificate and Keyfile, in order to enable SSL.
 func (cb *Builder) WithSSL(c, k string) *Builder {
 	if c == "" || k == "" {
 		cb.errors = append(cb.errors, errors.New("Invalid cert or key provided"))
 	} else {
-		log.Info(propSetMsg, "Cert, Key", c+","+k)
+		log.Info(fieldSetMsg, "Cert, Key", c+","+k)
 		cb.certFile = c
 		cb.keyFile = k
 	}
@@ -164,91 +162,91 @@ func (cb *Builder) WithSSL(c, k string) *Builder {
 	return cb
 }
 
-// WithRoutes adds routes to the HTTP component
+// WithRoutes adds routes to the HTTP component.
 func (cb *Builder) WithRoutes(rr []Route) *Builder {
 	if len(rr) == 0 {
 		cb.errors = append(cb.errors, errors.New("Empty Routes slice provided"))
 	} else {
-		log.Info(propSetMsg, "Routes", rr)
+		log.Info(fieldSetMsg, "Routes", rr)
 		cb.routes = append(cb.routes, rr...)
 	}
 
 	return cb
 }
 
-// WithMiddlewares adds middlewares to the HTTP component
+// WithMiddlewares adds middlewares to the HTTP component.
 func (cb *Builder) WithMiddlewares(mm ...MiddlewareFunc) *Builder {
 	if len(mm) == 0 {
 		cb.errors = append(cb.errors, errors.New("Empty list of middlewares provided"))
 	} else {
-		log.Info(propSetMsg, "Middlewares", mm)
+		log.Info(fieldSetMsg, "Middlewares", mm)
 		cb.middlewares = append(cb.middlewares, mm...)
 	}
 
 	return cb
 }
 
-// WithReadTimeout sets the Read Timeout for the HTTP component
+// WithReadTimeout sets the Read Timeout for the HTTP component.
 func (cb *Builder) WithReadTimeout(rt time.Duration) *Builder {
 	if rt <= 0*time.Second {
 		cb.errors = append(cb.errors, errors.New("Negative or zero read timeout provided"))
 	} else {
-		log.Infof(propSetMsg, "Read Timeout", rt)
+		log.Infof(fieldSetMsg, "Read Timeout", rt)
 		cb.httpReadTimeout = rt
 	}
 
 	return cb
 }
 
-// WithWriteTimeout sets the Write Timeout for the HTTP component
+// WithWriteTimeout sets the Write Timeout for the HTTP component.
 func (cb *Builder) WithWriteTimeout(wt time.Duration) *Builder {
 	if wt <= 0*time.Second {
 		cb.errors = append(cb.errors, errors.New("Negative or zero write timeout provided"))
 	} else {
-		log.Infof(propSetMsg, "Write Timeout", wt)
+		log.Infof(fieldSetMsg, "Write Timeout", wt)
 		cb.httpWriteTimeout = wt
 	}
 
 	return cb
 }
 
-// WithPort sets the port used by the HTTP component
+// WithPort sets the port used by the HTTP component.
 func (cb *Builder) WithPort(p int) *Builder {
 	if p <= 0 || p > 65535 {
 		cb.errors = append(cb.errors, errors.New("Invalid HTTP Port provided"))
 	} else {
-		log.Infof(propSetMsg, "Port", p)
+		log.Infof(fieldSetMsg, "Port", p)
 		cb.httpPort = p
 	}
 
 	return cb
 }
 
-// WithAliveCheckFunc sets the AliveCheckFunc used by the HTTP component
+// WithAliveCheckFunc sets the AliveCheckFunc used by the HTTP component.
 func (cb *Builder) WithAliveCheckFunc(acf AliveCheckFunc) *Builder {
 	if acf == nil {
 		cb.errors = append(cb.errors, errors.New("Nil AliveCheckFunc was provided"))
 	} else {
-		log.Infof(propSetMsg, "AliveCheckFunc", acf)
+		log.Infof(fieldSetMsg, "AliveCheckFunc", acf)
 		cb.ac = acf
 	}
 
 	return cb
 }
 
-// WithReadyCheckFunc sets the ReadyCheckFunc used by the HTTP component
+// WithReadyCheckFunc sets the ReadyCheckFunc used by the HTTP component.
 func (cb *Builder) WithReadyCheckFunc(rcf ReadyCheckFunc) *Builder {
 	if rcf == nil {
 		cb.errors = append(cb.errors, errors.New("Nil ReadyCheckFunc provided"))
 	} else {
-		log.Infof(propSetMsg, "ReadyCheckFunc", rcf)
+		log.Infof(fieldSetMsg, "ReadyCheckFunc", rcf)
 		cb.rc = rcf
 	}
 
 	return cb
 }
 
-// Create constructs the HTTP component by applying the gathered properties
+// Create constructs the HTTP component by applying the gathered properties.
 func (cb *Builder) Create() (*Component, error) {
 	if len(cb.errors) > 0 {
 		return nil, errors.Aggregate(cb.errors...)
