@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"database/sql/driver"
+	"regexp"
 	"time"
 
 	"github.com/beatlabs/patron/trace"
@@ -387,6 +388,30 @@ func (tx *Tx) Stmt(ctx context.Context, stmt *Stmt) *Stmt {
 // ParseDSN unpacks the connections string to the relevant struct
 func ParseDSN(dsn string) (DSNData, error) {
 	res := DSNData{}
+
+	dsnPattern := regexp.MustCompile(
+		`^(?:(?P<username>.*?)(?::(?P<passwd>.*))?@)?` + // [user[:password]@]
+			`(?:(?P<protocol>[^\(]*)(?:\((?P<address>[^\)]*)\))?)?` + // [net[(addr)]]
+			`\/(?P<dbname>.*?)` + // /dbname
+			`(?:\?(?P<params>[^\?]*))?$`) // [?param1=value1&paramN=valueN]
+
+	matches := dsnPattern.FindStringSubmatch(dsn)
+	fields := dsnPattern.SubexpNames()
+
+	for i, match := range matches {
+		switch fields[i] {
+		case "username":
+			res.User = match
+		case "passwd":
+			res.Passwd = match
+		case "protocol":
+			res.Protocol = match
+		case "address":
+			res.Address = match
+		case "dbname":
+			res.DBName = match
+		}
+	}
 
 	return res, nil
 }
