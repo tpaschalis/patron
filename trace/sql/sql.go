@@ -25,9 +25,9 @@ type Conn struct {
 	conn *sql.Conn
 }
 
-// DSNData contains information extracted from a valid
+// DSNInfo contains information extracted from a valid
 // connection string. Additional parameters provided are discarded
-type DSNData struct {
+type DSNInfo struct {
 	DBName   string
 	Address  string
 	User     string
@@ -391,8 +391,8 @@ func (tx *Tx) Stmt(ctx context.Context, stmt *Stmt) *Stmt {
 }
 
 // ParseDSN unpacks the connections string to the relevant struct
-func ParseDSN(dsn string) (DSNData, error) {
-	res := DSNData{}
+func ParseDSN(dsn string) DSNInfo {
+	res := DSNInfo{}
 
 	dsnPattern := regexp.MustCompile(
 		`^(?:(?P<username>.*?)(?::(?P<passwd>.*))?@)?` + // [user[:password]@]
@@ -418,5 +418,5 @@ func ParseDSN(dsn string) (DSNData, error) {
 		}
 	}
 
-	return res, nil
+	return res
 }
