@@ -127,10 +127,7 @@ func Open(driverName, dataSourceName string) (*DB, error) {
 	if err != nil {
 		return nil, err
 	}
-	info, err := ParseDSN(dataSourceName)
-	if err != nil {
-		return nil, err
-	}
+	info := ParseDSN(dataSourceName)
 
 	return &DB{connInfo: connInfo{info.DBName, info.User}, db: db}, nil
 }
