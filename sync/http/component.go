@@ -128,8 +128,16 @@ const fieldSetMsg = "Setting property '%v' for '%v'"
 // Builder gathers all required and optional properties, in order
 // to construct an HTTP component.
 type Builder struct {
-	Component
-	errors []error
+	ac               AliveCheckFunc
+	rc               ReadyCheckFunc
+	httpPort         int
+	httpReadTimeout  time.Duration
+	httpWriteTimeout time.Duration
+	routes           []Route
+	middlewares      []MiddlewareFunc
+	certFile         string
+	keyFile          string
+	errors           []error
 }
 
 // NewBuilder initiates the HTTP component builder chain.
@@ -138,14 +146,12 @@ type Builder struct {
 func NewBuilder() *Builder {
 	var errs []error
 	return &Builder{
-		Component: Component{
-			ac:               DefaultAliveCheck,
-			rc:               DefaultReadyCheck,
-			httpPort:         httpPort,
-			httpReadTimeout:  httpReadTimeout,
-			httpWriteTimeout: httpWriteTimeout,
-		},
-		errors: errs,
+		ac:               DefaultAliveCheck,
+		rc:               DefaultReadyCheck,
+		httpPort:         httpPort,
+		httpReadTimeout:  httpReadTimeout,
+		httpWriteTimeout: httpWriteTimeout,
+		errors:           errs,
 	}
 }
 
