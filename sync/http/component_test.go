@@ -93,24 +93,84 @@ func Test_createHTTPServer(t *testing.T) {
 
 func Test_createHTTPServerUsingBuilder(t *testing.T) {
 
-	for _, tc := range builderTestcases {
-		gotHTTPComponent, gotErrs := NewBuilder().
-			WithAliveCheckFunc(tc.acf).
-			WithReadyCheckFunc(tc.rcf).
-			WithPort(tc.p).
-			WithReadTimeout(tc.rt).
-			WithWriteTimeout(tc.wt).
-			WithRoutes(tc.rr).
-			WithMiddlewares(tc.mm...).
-			WithSSL(tc.c, tc.k).
-			Create()
+	var httpBuilderNoErrors = []error{}
+	var httpBuilderAllErrors = []error{
+		errors.New("Nil AliveCheckFunc was provided"),
+		errors.New("Nil ReadyCheckFunc provided"),
+		errors.New("Invalid HTTP Port provided"),
+		errors.New("Negative or zero read timeout provided"),
+		errors.New("Negative or zero write timeout provided"),
+		errors.New("Empty Routes slice provided"),
+		errors.New("Empty list of middlewares provided"),
+		errors.New("Invalid cert or key provided"),
+	}
 
-		if len(tc.wantErrs) > 0 {
-			assert.ObjectsAreEqual(tc.wantErrs, gotErrs)
-			assert.Nil(t, gotHTTPComponent)
-		} else {
-			assert.NotNil(t, gotHTTPComponent)
-		}
+	tests := map[string]struct {
+		acf      AliveCheckFunc
+		rcf      ReadyCheckFunc
+		p        int
+		rt       time.Duration
+		wt       time.Duration
+		rr       []Route
+		mm       []MiddlewareFunc
+		c        string
+		k        string
+		wantErrs []error
+	}{
+		"success": {
+			acf: DefaultAliveCheck,
+			rcf: DefaultReadyCheck,
+			p:   httpPort,
+			rt:  httpReadTimeout,
+			wt:  httpIdleTimeout,
+			rr: []Route{
+				aliveCheckRoute(DefaultAliveCheck),
+				readyCheckRoute(DefaultReadyCheck),
+				metricRoute(),
+			},
+			mm: []MiddlewareFunc{
+				NewRecoveryMiddleware(),
+				panicMiddleware("error"),
+			},
+			c:        "cert.file",
+			k:        "key.file",
+			wantErrs: httpBuilderNoErrors,
+		},
+		"error in all builder steps": {
+			acf:      nil,
+			rcf:      nil,
+			p:        -1,
+			rt:       -10 * time.Second,
+			wt:       -20 * time.Second,
+			rr:       []Route{},
+			mm:       []MiddlewareFunc{},
+			c:        "",
+			k:        "",
+			wantErrs: httpBuilderAllErrors,
+		},
+	}
+
+	for name, tc := range tests {
+		t.Run(name, func(t *testing.T) {
+			gotHTTPComponent, gotErrs := NewBuilder().
+				WithAliveCheckFunc(tc.acf).
+				WithReadyCheckFunc(tc.rcf).
+				WithPort(tc.p).
+				WithReadTimeout(tc.rt).
+				WithWriteTimeout(tc.wt).
+				WithRoutes(tc.rr).
+				WithMiddlewares(tc.mm...).
+				WithSSL(tc.c, tc.k).
+				Create()
+
+			if len(tc.wantErrs) > 0 {
+				assert.ObjectsAreEqual(tc.wantErrs, gotErrs)
+				assert.Nil(t, gotHTTPComponent)
+			} else {
+				assert.NotNil(t, gotHTTPComponent)
+				assert.IsType(t, &Component{}, gotHTTPComponent)
+			}
+		})
 	}
 
 }
