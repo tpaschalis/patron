@@ -33,7 +33,6 @@ type DSNInfo struct {
 	Address  string
 	User     string
 	Protocol string
-	Passwd   string
 }
 
 // BeginTx starts a transaction.
@@ -393,7 +392,7 @@ func ParseDSN(dsn string) DSNInfo {
 	res := DSNInfo{}
 
 	dsnPattern := regexp.MustCompile(
-		`^(?P<driver>.*:\/\/)?(?:(?P<username>.*?)(?::(?P<passwd>.*))?@)?` + // [driver://][user[:password]@]
+		`^(?P<driver>.*:\/\/)?(?:(?P<username>.*?)(?::(.*))?@)?` + // [driver://][user[:password]@]
 			`(?:(?P<protocol>[^\(]*)(?:\((?P<address>[^\)]*)\))?)?` + // [net[(addr)]]
 			`\/(?P<dbname>.*?)` + // /dbname
 			`(?:\?(?P<params>[^\?]*))?$`) // [?param1=value1&paramN=valueN]
@@ -407,8 +406,6 @@ func ParseDSN(dsn string) DSNInfo {
 			res.Driver = match
 		case "username":
 			res.User = match
-		case "passwd":
-			res.Passwd = match
 		case "protocol":
 			res.Protocol = match
 		case "address":
