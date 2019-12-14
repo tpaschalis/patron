@@ -28,6 +28,7 @@ type Conn struct {
 // DSNInfo contains information extracted from a valid
 // connection string. Additional parameters provided are discarded
 type DSNInfo struct {
+	Driver   string
 	DBName   string
 	Address  string
 	User     string
@@ -392,7 +393,7 @@ func ParseDSN(dsn string) DSNInfo {
 	res := DSNInfo{}
 
 	dsnPattern := regexp.MustCompile(
-		`^(?:(?P<username>.*?)(?::(?P<passwd>.*))?@)?` + // [user[:password]@]
+		`^(?P<driver>.*:\/\/)?(?:(?P<username>.*?)(?::(?P<passwd>.*))?@)?` + // [driver://][user[:password]@]
 			`(?:(?P<protocol>[^\(]*)(?:\((?P<address>[^\)]*)\))?)?` + // [net[(addr)]]
 			`\/(?P<dbname>.*?)` + // /dbname
 			`(?:\?(?P<params>[^\?]*))?$`) // [?param1=value1&paramN=valueN]
@@ -402,6 +403,8 @@ func ParseDSN(dsn string) DSNInfo {
 
 	for i, match := range matches {
 		switch fields[i] {
+		case "driver":
+			res.Driver = match
 		case "username":
 			res.User = match
 		case "passwd":
