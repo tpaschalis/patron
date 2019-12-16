@@ -9,39 +9,15 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func ErrorOption() OptionFunc {
-	return func(s *Component) error {
-		return errors.New("TEST")
-	}
-}
-
-func TestNew(t *testing.T) {
-	tests := []struct {
-		name    string
-		options []OptionFunc
-		wantErr bool
-	}{
-		{"success with no options", []OptionFunc{}, false},
-		{"success with options", []OptionFunc{Port(50000)}, false},
-		{"failed with error option", []OptionFunc{ErrorOption()}, true},
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			got, err := New(tt.options...)
-			if tt.wantErr {
-				assert.Error(t, err)
-				assert.Nil(t, got)
-			} else {
-				assert.NoError(t, err)
-				assert.NotNil(t, got)
-			}
-		})
-	}
+func TestBuilderWithoutOptions(t *testing.T) {
+	got, err := NewBuilder().Create()
+	assert.NotNil(t, got)
+	assert.NoError(t, err)
 }
 
 func TestComponent_ListenAndServe_DefaultRoutes_Shutdown(t *testing.T) {
 	rr := []Route{NewRoute("/", "GET", nil, true, nil)}
-	s, err := New(Routes(rr), Port(50003))
+	s, err := NewBuilder().WithRoutes(rr).WithPort(50003).Create()
 	assert.NoError(t, err)
 	done := make(chan bool)
 	ctx, cnl := context.WithCancel(context.Background())
@@ -57,7 +33,7 @@ func TestComponent_ListenAndServe_DefaultRoutes_Shutdown(t *testing.T) {
 
 func TestComponent_ListenAndServeTLS_DefaultRoutes_Shutdown(t *testing.T) {
 	rr := []Route{NewRoute("/", "GET", nil, true, nil)}
-	s, err := New(Routes(rr), Secure("testdata/server.pem", "testdata/server.key"), Port(50003))
+	s, err := NewBuilder().WithRoutes(rr).WithSSL("testdata/server.pem", "testdata/server.key").WithPort(50003).Create()
 	assert.NoError(t, err)
 	done := make(chan bool)
 	ctx, cnl := context.WithCancel(context.Background())
@@ -73,7 +49,7 @@ func TestComponent_ListenAndServeTLS_DefaultRoutes_Shutdown(t *testing.T) {
 
 func TestComponent_ListenAndServeTLS_FailsInvalidCerts(t *testing.T) {
 	rr := []Route{NewRoute("/", "GET", nil, true, nil)}
-	s, err := New(Routes(rr), Secure("testdata/server.pem", "testdata/server.pem"))
+	s, err := NewBuilder().WithRoutes(rr).WithSSL("testdata/server.pem", "testdata/server.pem").Create()
 	assert.NoError(t, err)
 	assert.Error(t, s.Run(context.Background()))
 }
