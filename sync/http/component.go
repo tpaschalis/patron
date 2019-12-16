@@ -33,7 +33,6 @@ type Component struct {
 	httpPort         int
 	httpReadTimeout  time.Duration
 	httpWriteTimeout time.Duration
-	info             map[string]interface{}
 	sync.Mutex
 	routes      []Route
 	middlewares []MiddlewareFunc
@@ -240,7 +239,6 @@ func (cb *Builder) Create() (*Component, error) {
 		middlewares:      cb.middlewares,
 		certFile:         cb.certFile,
 		keyFile:          cb.keyFile,
-		info:             make(map[string]interface{}),
 	}
 
 	c.routes = append(c.routes, aliveCheckRoute(c.ac))
