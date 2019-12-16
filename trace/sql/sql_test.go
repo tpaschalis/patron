@@ -28,14 +28,8 @@ func TestParseDSN(t *testing.T) {
 
 	for name, tc := range tests {
 		t.Run(name, func(t *testing.T) {
-			got := ParseDSN(tc.dsn)
+			got := parseDSN(tc.dsn)
 			assert.Equal(t, got, tc.want)
 		})
-	}
-}
-
-func BenchmarkParseDSN(b *testing.B) {
-	for n := 0; n < b.N; n++ {
-		ParseDSN("bruce:hunter2@tcp(127.0.0.1)/arkhamdb?param=value")
 	}
 }
