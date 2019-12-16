@@ -127,7 +127,7 @@ func Open(driverName, dataSourceName string) (*DB, error) {
 	if err != nil {
 		return nil, err
 	}
-	info := ParseDSN(dataSourceName)
+	info := parseDSN(dataSourceName)
 
 	return &DB{connInfo: connInfo{info.DBName, info.User}, db: db}, nil
 }
@@ -387,8 +387,7 @@ func (tx *Tx) Stmt(ctx context.Context, stmt *Stmt) *Stmt {
 	return &Stmt{stmt: tx.tx.StmtContext(ctx, stmt.stmt)}
 }
 
-// ParseDSN unpacks the connections string to the relevant struct
-func ParseDSN(dsn string) DSNInfo {
+func parseDSN(dsn string) DSNInfo {
 	res := DSNInfo{}
 
 	dsnPattern := regexp.MustCompile(
