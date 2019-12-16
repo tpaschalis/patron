@@ -41,34 +41,6 @@ type Component struct {
 	keyFile     string
 }
 
-// New returns a new component.
-func New(oo ...OptionFunc) (*Component, error) {
-	c := Component{
-		ac:               DefaultAliveCheck,
-		rc:               DefaultReadyCheck,
-		httpPort:         httpPort,
-		httpReadTimeout:  httpReadTimeout,
-		httpWriteTimeout: httpWriteTimeout,
-		routes:           []Route{},
-		middlewares:      []MiddlewareFunc{},
-		info:             make(map[string]interface{}),
-	}
-
-	for _, o := range oo {
-		err := o(&c)
-		if err != nil {
-			return nil, err
-		}
-	}
-
-	c.routes = append(c.routes, aliveCheckRoute(c.ac))
-	c.routes = append(c.routes, readyCheckRoute(c.rc))
-	c.routes = append(c.routes, profilingRoutes()...)
-	c.routes = append(c.routes, metricRoute())
-
-	return &c, nil
-}
-
 // Run starts the HTTP server.
 func (c *Component) Run(ctx context.Context) error {
 	c.Lock()
@@ -269,6 +241,11 @@ func (cb *Builder) Create() (*Component, error) {
 		certFile:         cb.certFile,
 		keyFile:          cb.keyFile,
 	}
+
+	c.routes = append(c.routes, aliveCheckRoute(c.ac))
+	c.routes = append(c.routes, readyCheckRoute(c.rc))
+	c.routes = append(c.routes, profilingRoutes()...)
+	c.routes = append(c.routes, metricRoute())
 
 	return c, nil
 }
