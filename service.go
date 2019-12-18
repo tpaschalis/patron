@@ -188,6 +188,7 @@ func (s *Service) createHTTPComponent() (Component, error) {
 	log.Infof("creating default HTTP component at port %s", port)
 
 	b := http.NewBuilder()
+	b.WithPort(int(portVal))
 
 	if s.acf != nil {
 		b.WithAliveCheckFunc(s.acf)
