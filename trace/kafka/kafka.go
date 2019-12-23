@@ -12,6 +12,8 @@ import (
 	"github.com/beatlabs/patron/trace"
 	"github.com/opentracing/opentracing-go"
 	"github.com/opentracing/opentracing-go/ext"
+	"reflect"
+	"runtime"
 )
 
 // Message abstraction of a Kafka message.
@@ -82,7 +84,7 @@ func NewAsyncProducer(brokers []string, oo ...OptionFunc) (*AsyncProducer, error
 	for _, o := range oo {
 		err := o(&ap)
 		if err != nil {
-			return nil, err
+			return nil, errors.Errorf("Could not apply OptionFunc '%v' to producer : %v", runtime.FuncForPC(reflect.ValueOf(o).Pointer()).Name(), err)
 		}
 	}
 
