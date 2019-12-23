@@ -2,18 +2,19 @@ package kafka
 
 import (
 	"context"
-	"errors"
 	"fmt"
+	"reflect"
+	"runtime"
 
 	"github.com/Shopify/sarama"
 	"github.com/beatlabs/patron/correlation"
 	"github.com/beatlabs/patron/encoding"
 	"github.com/beatlabs/patron/encoding/json"
+	"github.com/beatlabs/patron/encoding/protobuf"
 	"github.com/beatlabs/patron/trace"
 	"github.com/opentracing/opentracing-go"
 	"github.com/opentracing/opentracing-go/ext"
-	"reflect"
-	"runtime"
+	"github.com/pkg/errors"
 )
 
 // Message abstraction of a Kafka message.
@@ -90,7 +91,7 @@ func NewAsyncProducer(brokers []string, oo ...OptionFunc) (*AsyncProducer, error
 
 	prod, err := sarama.NewAsyncProducer(brokers, ap.cfg)
 	if err != nil {
-		return nil, fmt.Errorf("failed to create sync producer: %w", err)
+		return nil, errors.Wrap(err, "failed to create async producer")
 	}
 	ap.prod = prod
 	go ap.propagateError()
@@ -156,4 +157,45 @@ type kafkaHeadersCarrier []sarama.RecordHeader
 // Set implements Set() of opentracing.TextMapWriter.
 func (c *kafkaHeadersCarrier) Set(key, val string) {
 	*c = append(*c, sarama.RecordHeader{Key: []byte(key), Value: []byte(val)})
+}
+
+func determineEncoder(ap *AsyncProducer, msg *sarama.ProducerMessage, sp opentracing.Span) (encoding.EncodeFunc, error) {
+	if ap.enc != nil {
+		return ap.enc, nil
+	}
+
+	ct, err := determineContentType(msg.Headers)
+	if err != nil {
+		trace.SpanError(sp)
+		return nil, errors.Errorf("failed to determine content type from message headers %v : %v", msg.Headers, err)
+	}
+
+	enc, err := DetermineEncoder(ct)
+	if err != nil {
+		trace.SpanError(sp)
+		return nil, errors.Errorf("failed to determine encoder from message content type %v %v", ct, err)
+	}
+
+	return enc, nil
+
+}
+
+func determineContentType(hdr []sarama.RecordHeader) (string, error) {
+	for _, h := range hdr {
+		if string(h.Key) == encoding.ContentTypeHeader {
+			return string(h.Value), nil
+		}
+	}
+	return "", errors.New("content type header is missing")
+}
+
+// DetermineEncoder determines the encoder based on the content type.
+func DetermineEncoder(contentType string) (encoding.EncodeFunc, error) {
+	switch contentType {
+	case json.Type, json.TypeCharset:
+		return json.Encode, nil
+	case protobuf.Type, protobuf.TypeGoogle:
+		return protobuf.Encode, nil
+	}
+	return nil, errors.Errorf("content header %s is unsupported", contentType)
 }
