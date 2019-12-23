@@ -7,6 +7,7 @@ import (
 
 	"github.com/Shopify/sarama"
 	"github.com/beatlabs/patron/correlation"
+	"github.com/beatlabs/patron/encoding"
 	"github.com/beatlabs/patron/encoding/json"
 	"github.com/beatlabs/patron/trace"
 	"github.com/opentracing/opentracing-go"
@@ -67,6 +68,7 @@ type AsyncProducer struct {
 	prod  sarama.AsyncProducer
 	chErr chan error
 	tag   opentracing.Tag
+	enc   encoding.EncodeFunc
 }
 
 // NewAsyncProducer creates a new async producer with default configuration.
