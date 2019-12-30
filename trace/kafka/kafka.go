@@ -8,9 +8,7 @@ import (
 
 	"github.com/Shopify/sarama"
 	"github.com/beatlabs/patron/correlation"
-	"github.com/beatlabs/patron/encoding"
 	"github.com/beatlabs/patron/encoding/json"
-	"github.com/beatlabs/patron/encoding/protobuf"
 	"github.com/beatlabs/patron/trace"
 	"github.com/opentracing/opentracing-go"
 	"github.com/opentracing/opentracing-go/ext"
@@ -71,7 +69,7 @@ type AsyncProducer struct {
 	prod  sarama.AsyncProducer
 	chErr chan error
 	tag   opentracing.Tag
-	enc   encoding.EncodeFunc
+	enc   sarama.Encoder
 }
 
 // NewAsyncProducer creates a new async producer with default configuration.
@@ -103,7 +101,7 @@ func (ap *AsyncProducer) Send(ctx context.Context, msg *Message) error {
 	sp, _ := trace.ChildSpan(ctx, trace.ComponentOpName(trace.KafkaAsyncProducerComponent, msg.topic),
 		trace.KafkaAsyncProducerComponent, ext.SpanKindProducer, ap.tag,
 		opentracing.Tag{Key: "topic", Value: msg.topic})
-	pm, err := createProducerMessage(ctx, msg, sp)
+	pm, err := createProducerMessage(ctx, msg, sp, ap.enc)
 	if err != nil {
 		trace.SpanError(sp)
 		return err
@@ -133,7 +131,7 @@ func (ap *AsyncProducer) propagateError() {
 	}
 }
 
-func createProducerMessage(ctx context.Context, msg *Message, sp opentracing.Span) (*sarama.ProducerMessage, error) {
+func createProducerMessage(ctx context.Context, msg *Message, sp opentracing.Span, enc sarama.Encoder) (*sarama.ProducerMessage, error) {
 	c := kafkaHeadersCarrier{}
 	err := sp.Tracer().Inject(sp.Context(), opentracing.TextMap, &c)
 	if err != nil {
@@ -141,13 +139,13 @@ func createProducerMessage(ctx context.Context, msg *Message, sp opentracing.Spa
 	}
 	var saramaKey sarama.Encoder
 	if msg.key != nil {
-		saramaKey = sarama.ByteEncoder(*msg.key)
+		saramaKey = encodeKey(enc, msg.key)
 	}
 	c.Set(correlation.HeaderID, correlation.IDFromContext(ctx))
 	return &sarama.ProducerMessage{
 		Topic:   msg.topic,
 		Key:     saramaKey,
-		Value:   sarama.ByteEncoder(msg.body),
+		Value:   encodeBody(enc, msg.body),
 		Headers: c,
 	}, nil
 }
@@ -159,43 +157,65 @@ func (c *kafkaHeadersCarrier) Set(key, val string) {
 	*c = append(*c, sarama.RecordHeader{Key: []byte(key), Value: []byte(val)})
 }
 
-func determineEncoder(ap *AsyncProducer, msg *sarama.ProducerMessage, sp opentracing.Span) (encoding.EncodeFunc, error) {
-	if ap.enc != nil {
-		return ap.enc, nil
+func encodeKey(enc sarama.Encoder, k *string) sarama.Encoder {
+	switch reflect.TypeOf(enc) {
+	case reflect.TypeOf(JSONEncoder{}):
+		return JSONEncoder(*k)
+	case reflect.TypeOf(ProtobufEncoder{}):
+		return ProtobufEncoder(*k)
+	default:
+		return sarama.ByteEncoder(*k)
 	}
-
-	ct, err := determineContentType(msg.Headers)
-	if err != nil {
-		trace.SpanError(sp)
-		return nil, errors.Errorf("failed to determine content type from message headers %v : %v", msg.Headers, err)
-	}
-
-	enc, err := DetermineEncoder(ct)
-	if err != nil {
-		trace.SpanError(sp)
-		return nil, errors.Errorf("failed to determine encoder from message content type %v %v", ct, err)
-	}
-
-	return enc, nil
-
 }
 
-func determineContentType(hdr []sarama.RecordHeader) (string, error) {
-	for _, h := range hdr {
-		if string(h.Key) == encoding.ContentTypeHeader {
-			return string(h.Value), nil
-		}
+func encodeBody(enc sarama.Encoder, b []byte) sarama.Encoder {
+	switch reflect.TypeOf(enc) {
+	case reflect.TypeOf(JSONEncoder{}):
+		return JSONEncoder(b)
+	case reflect.TypeOf(ProtobufEncoder{}):
+		return ProtobufEncoder(b)
+	default:
+		return sarama.ByteEncoder(b)
 	}
-	return "", errors.New("content type header is missing")
 }
 
-// DetermineEncoder determines the encoder based on the content type.
-func DetermineEncoder(contentType string) (encoding.EncodeFunc, error) {
-	switch contentType {
-	case json.Type, json.TypeCharset:
-		return json.Encode, nil
-	case protobuf.Type, protobuf.TypeGoogle:
-		return protobuf.Encode, nil
-	}
-	return nil, errors.Errorf("content header %s is unsupported", contentType)
-}
+// func determineEncoder(ap *AsyncProducer, msg *sarama.ProducerMessage, sp opentracing.Span) (sarama.Encoder, error) {
+// 	if ap.enc != nil {
+// 		return ap.enc, nil
+// 	}
+
+// 	ct, err := determineContentType(msg.Headers)
+// 	if err != nil {
+// 		trace.SpanError(sp)
+// 		return nil, errors.Errorf("failed to determine content type from message headers %v : %v", msg.Headers, err)
+// 	}
+
+// 	enc, err := DetermineEncoder(ct)
+// 	if err != nil {
+// 		trace.SpanError(sp)
+// 		return nil, errors.Errorf("failed to determine encoder from message content type %v %v", ct, err)
+// 	}
+
+// 	return enc, nil
+
+// }
+
+// func determineContentType(hdr []sarama.RecordHeader) (string, error) {
+// 	for _, h := range hdr {
+// 		if string(h.Key) == encoding.ContentTypeHeader {
+// 			return string(h.Value), nil
+// 		}
+// 	}
+// 	return "", errors.New("content type header is missing")
+// }
+
+// // DetermineEncoder determines the encoder based on the content type.
+// func DetermineEncoder(contentType string) (sarama.Encoder, error) {
+// 	switch contentType {
+// 	case json.Type, json.TypeCharset:
+// 		return JSONEncoder, nil
+// 	case protobuf.Type, protobuf.TypeGoogle:
+// 		return ProtobufEncoder, nil
+// 	}
+// 	return nil, errors.Errorf("content header %s is unsupported", contentType)
+// }
