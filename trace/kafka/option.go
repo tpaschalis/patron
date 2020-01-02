@@ -64,12 +64,13 @@ func RequiredAcksPolicy(ack RequiredAcks) OptionFunc {
 }
 
 // Encoder option for injecting a specific encoder implementation
-func Encoder(enc encoding.EncodeFunc) OptionFunc {
+func Encoder(enc encoding.EncodeFunc, ct string) OptionFunc {
 	return func(ap *AsyncProducer) error {
 		if enc == nil {
 			return errors.New("encoder is nil")
 		}
 		ap.enc = enc
+		ap.ct = ct
 		return nil
 	}
 }

@@ -98,6 +98,7 @@ func TestRequiredAcksPolicy(t *testing.T) {
 func TestEncoder(t *testing.T) {
 	type args struct {
 		enc encoding.EncodeFunc
+		ct  string
 	}
 
 	tests := []struct {
@@ -105,16 +106,16 @@ func TestEncoder(t *testing.T) {
 		args    args
 		wantErr bool
 	}{
-		{name: "json EncodeFunc", args: args{enc: json.Encode}, wantErr: false},
-		{name: "protobuf EncodeFunc", args: args{enc: protobuf.Encode}, wantErr: false},
-		{name: "default EncodeFunc", args: args{enc: defaultEncodeFunc}, wantErr: false},
+		{name: "json EncodeFunc", args: args{enc: json.Encode, ct: json.Type}, wantErr: false},
+		{name: "protobuf EncodeFunc", args: args{enc: protobuf.Encode, ct: protobuf.Type}, wantErr: false},
+		{name: "default EncodeFunc", args: args{enc: defaultEncodeFunc, ct: ""}, wantErr: false},
 		{name: "nil EncodeFunc", args: args{enc: nil}, wantErr: true},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			cfg := sarama.NewConfig()
 			ap := &AsyncProducer{cfg: cfg}
-			err := Encoder(tt.args.enc)(ap)
+			err := Encoder(tt.args.enc, tt.args.ct)(ap)
 			if tt.wantErr {
 				assert.Error(t, err)
 			} else {
