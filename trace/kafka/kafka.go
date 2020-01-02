@@ -157,6 +157,9 @@ func createProducerMessage(ctx context.Context, msg *Message, sp opentracing.Spa
 	}
 
 	b, err := enc(msg.body)
+	if err != nil {
+		return nil, errors.Wrap(err, "failed to encode message body")
+	}
 	saramaBody = encoder(b)
 
 	c.Set(correlation.HeaderID, correlation.IDFromContext(ctx))
