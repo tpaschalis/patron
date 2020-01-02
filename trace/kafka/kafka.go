@@ -146,11 +146,11 @@ func createProducerMessage(ctx context.Context, msg *Message, sp opentracing.Spa
 		if err != nil {
 			return nil, errors.Wrap(err, "failed to encode partition key")
 		}
-		saramaKey = Encoder(k)
+		saramaKey = encoder(k)
 	}
 
 	b, err := enc(msg.body)
-	saramaBody = Encoder(b)
+	saramaBody = encoder(b)
 
 	c.Set(correlation.HeaderID, correlation.IDFromContext(ctx))
 	return &sarama.ProducerMessage{
@@ -168,21 +168,17 @@ func (c *kafkaHeadersCarrier) Set(key, val string) {
 	*c = append(*c, sarama.RecordHeader{Key: []byte(key), Value: []byte(val)})
 }
 
-// Encoder satisfies the generic Encoder interface for Go byte slices
-// so that they can be used as the Key or Value in a ProducerMessage.
-type Encoder []byte
+type encoder []byte
 
-// Encode satisfies the Encode() function of the encoder interface
-func (e Encoder) Encode() ([]byte, error) {
+func (e encoder) Encode() ([]byte, error) {
 	return e, nil
 }
 
-// Length satisfies the Length() function of the encoder interface
-func (e Encoder) Length() int {
+func (e encoder) Length() int {
 	return len(e)
 }
 
-// DefaultEncodeFunc defines a default, pass-through encoder for byte slices.
+// DefaultEncodeFunc defines a default, pass-through encoder function for byte slices.
 func DefaultEncodeFunc(v interface{}) ([]byte, error) {
 	return v.([]byte), nil
 }
