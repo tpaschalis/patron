@@ -82,7 +82,7 @@ func NewAsyncProducer(brokers []string, oo ...OptionFunc) (*AsyncProducer, error
 	cfg := sarama.NewConfig()
 	cfg.Version = sarama.V0_11_0_0
 
-	ap := AsyncProducer{cfg: cfg, chErr: make(chan error), tag: opentracing.Tag{Key: "type", Value: "async"}, enc: DefaultEncodeFunc}
+	ap := AsyncProducer{cfg: cfg, chErr: make(chan error), tag: opentracing.Tag{Key: "type", Value: "async"}, enc: defaultEncodeFunc}
 
 	for _, o := range oo {
 		err := o(&ap)
@@ -191,8 +191,7 @@ func (e encoder) Length() int {
 	return len(e)
 }
 
-// DefaultEncodeFunc defines a default, pass-through encoder function for byte slices.
-func DefaultEncodeFunc(v interface{}) ([]byte, error) {
+func defaultEncodeFunc(v interface{}) ([]byte, error) {
 	b, ok := v.([]byte)
 	if ok {
 		return b, nil
