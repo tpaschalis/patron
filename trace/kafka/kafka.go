@@ -5,13 +5,11 @@ import (
 	"fmt"
 	"reflect"
 	"runtime"
-	"strings"
 
 	"github.com/Shopify/sarama"
 	"github.com/beatlabs/patron/correlation"
 	"github.com/beatlabs/patron/encoding"
 	"github.com/beatlabs/patron/encoding/json"
-	"github.com/beatlabs/patron/encoding/protobuf"
 	"github.com/beatlabs/patron/trace"
 	"github.com/opentracing/opentracing-go"
 	"github.com/opentracing/opentracing-go/ext"
@@ -21,17 +19,17 @@ import (
 // Message abstraction of a Kafka message.
 type Message struct {
 	topic string
-	body  []byte
+	body  interface{}
 	key   *string
 }
 
 // NewMessage creates a new message.
-func NewMessage(t string, b []byte) *Message {
+func NewMessage(t string, b interface{}) *Message {
 	return &Message{topic: t, body: b}
 }
 
 // NewMessageWithKey creates a new message with an associated key.
-func NewMessageWithKey(t string, b []byte, k string) (*Message, error) {
+func NewMessageWithKey(t string, b interface{}, k string) (*Message, error) {
 	if k == "" {
 		return nil, errors.New("key string can not be null")
 	}
@@ -90,7 +88,6 @@ func NewAsyncProducer(brokers []string, oo ...OptionFunc) (*AsyncProducer, error
 			return nil, errors.Errorf("Could not apply OptionFunc '%v' to producer : %v", runtime.FuncForPC(reflect.ValueOf(o).Pointer()).Name(), err)
 		}
 	}
-	ap.ct = setContentType(ap.enc)
 
 	prod, err := sarama.NewAsyncProducer(brokers, ap.cfg)
 	if err != nil {
@@ -149,7 +146,7 @@ func createProducerMessage(ctx context.Context, msg *Message, sp opentracing.Spa
 
 	var saramaKey, saramaBody sarama.Encoder
 	if msg.key != nil {
-		k, err := enc(*msg.key)
+		k, err := defaultEncodeFunc(*msg.key)
 		if err != nil {
 			return nil, errors.Wrap(err, "failed to encode partition key")
 		}
@@ -203,16 +200,17 @@ func defaultEncodeFunc(v interface{}) ([]byte, error) {
 	return nil, errors.New("could not encode msg with default encodefunc")
 }
 
-func setContentType(enc encoding.EncodeFunc) string {
-	encodeFuncName := runtime.FuncForPC(reflect.ValueOf(enc).Pointer()).Name()
-	isJSON := strings.Contains(encodeFuncName, "json.Encode")
-	isProtobuf := strings.Contains(encodeFuncName, "protobuf.Encode")
-	switch {
-	case isJSON:
-		return json.Type
-	case isProtobuf:
-		return protobuf.Type
-	default:
-		return ""
-	}
-}
+// // Opted to use the Encoder option to set the content type along the EncodeFunc
+// func setContentType(enc encoding.EncodeFunc) string {
+// 	encodeFuncName := runtime.FuncForPC(reflect.ValueOf(enc).Pointer()).Name()
+// 	isJSON := strings.Contains(encodeFuncName, "json.Encode")
+// 	isProtobuf := strings.Contains(encodeFuncName, "protobuf.Encode")
+// 	switch {
+// 	case isJSON:
+// 		return json.Type
+// 	case isProtobuf:
+// 		return protobuf.Type
+// 	default:
+// 		return ""
+// 	}
+// }

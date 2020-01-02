@@ -2,6 +2,10 @@ package kafka
 
 import (
 	"context"
+	"github.com/beatlabs/patron/encoding"
+	"github.com/beatlabs/patron/encoding/json"
+	"github.com/beatlabs/patron/encoding/protobuf"
+	"github.com/beatlabs/patron/examples"
 	"testing"
 
 	"github.com/Shopify/sarama"
@@ -159,4 +163,54 @@ func createKafkaBroker(t *testing.T, retError bool) *sarama.MockBroker {
 	seed := sarama.NewMockBroker(t, 1)
 	seed.Returns(metadataResponse)
 	return seed
+}
+
+func TestCustomEncoder(t *testing.T) {
+	var u examples.User
+	firstname, lastname := "John", "Doe"
+	u.Firstname = &firstname
+	u.Lastname = &lastname
+	tests := []struct {
+		name        string
+		data        interface{}
+		key         string
+		enc         encoding.EncodeFunc
+		ct          string
+		wantMsgErr  bool
+		wantSendErr bool
+	}{
+		{name: "json success", data: "testdata1", key: "testkey1", enc: json.Encode, ct: json.Type, wantMsgErr: false, wantSendErr: false},
+		{name: "protobuf success", data: &u, key: "testkey2", enc: protobuf.Encode, ct: protobuf.Type, wantMsgErr: false, wantSendErr: false},
+		{name: "failure due to invalid data", enc: defaultEncodeFunc, data: make(chan bool), key: "testkey3", wantMsgErr: false, wantSendErr: true},
+		{name: "nil message data", enc: defaultEncodeFunc, data: nil, key: "testkey3", wantMsgErr: false, wantSendErr: true},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			msg, err := NewMessageWithKey("TOPIC", tt.data, tt.key)
+			if tt.key != "" {
+				assert.Equal(t, tt.key, *msg.key)
+			}
+			if tt.wantMsgErr == false {
+				assert.NoError(t, err)
+			} else {
+				assert.Error(t, err)
+			}
+
+			seed := createKafkaBroker(t, true)
+			ap, err := NewAsyncProducer([]string{seed.Addr()}, Version(sarama.V0_8_2_0.String()))
+			err = Encoder(tt.enc, tt.ct)(ap)
+			assert.NoError(t, err)
+			assert.NotNil(t, ap)
+
+			err = trace.Setup("test", "1.0.0", "0.0.0.0:6831", jaeger.SamplerTypeProbabilistic, 0.1)
+			assert.NoError(t, err)
+			_, ctx := trace.ChildSpan(context.Background(), "123", "cmp")
+			err = ap.Send(ctx, msg)
+			if tt.wantSendErr == false {
+				assert.NoError(t, err)
+			} else {
+				assert.Error(t, err)
+			}
+		})
+	}
 }
