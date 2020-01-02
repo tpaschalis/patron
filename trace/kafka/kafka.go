@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"reflect"
 	"runtime"
+	"strings"
 
 	"github.com/Shopify/sarama"
 	"github.com/beatlabs/patron/correlation"
@@ -72,6 +73,7 @@ type AsyncProducer struct {
 	chErr chan error
 	tag   opentracing.Tag
 	enc   encoding.EncodeFunc
+	ct    string
 }
 
 // NewAsyncProducer creates a new async producer with default configuration.
@@ -88,6 +90,7 @@ func NewAsyncProducer(brokers []string, oo ...OptionFunc) (*AsyncProducer, error
 			return nil, errors.Errorf("Could not apply OptionFunc '%v' to producer : %v", runtime.FuncForPC(reflect.ValueOf(o).Pointer()).Name(), err)
 		}
 	}
+	ap.ct = setContentType(ap.enc)
 
 	prod, err := sarama.NewAsyncProducer(brokers, ap.cfg)
 	if err != nil {
@@ -103,7 +106,7 @@ func (ap *AsyncProducer) Send(ctx context.Context, msg *Message) error {
 	sp, _ := trace.ChildSpan(ctx, trace.ComponentOpName(trace.KafkaAsyncProducerComponent, msg.topic),
 		trace.KafkaAsyncProducerComponent, ext.SpanKindProducer, ap.tag,
 		opentracing.Tag{Key: "topic", Value: msg.topic})
-	pm, err := createProducerMessage(ctx, msg, sp, ap.enc)
+	pm, err := createProducerMessage(ctx, msg, sp, ap.enc, ap.ct)
 	if err != nil {
 		trace.SpanError(sp)
 		return err
@@ -133,13 +136,17 @@ func (ap *AsyncProducer) propagateError() {
 	}
 }
 
-func createProducerMessage(ctx context.Context, msg *Message, sp opentracing.Span, enc encoding.EncodeFunc) (*sarama.ProducerMessage, error) {
+func createProducerMessage(ctx context.Context, msg *Message, sp opentracing.Span, enc encoding.EncodeFunc, ct string) (*sarama.ProducerMessage, error) {
 	c := kafkaHeadersCarrier{}
 	err := sp.Tracer().Inject(sp.Context(), opentracing.TextMap, &c)
 	if err != nil {
 		return nil, fmt.Errorf("failed to inject tracing headers: %w", err)
 	}
-	setEncoderHeaders(c, enc)
+
+	if len(ct) != 0 {
+		c.Set(encoding.ContentTypeHeader, ct)
+	}
+
 	var saramaKey, saramaBody sarama.Encoder
 	if msg.key != nil {
 		k, err := enc(*msg.key)
@@ -171,7 +178,10 @@ func (c *kafkaHeadersCarrier) Set(key, val string) {
 type encoder []byte
 
 func (e encoder) Encode() ([]byte, error) {
-	return e, nil
+	if e != nil {
+		return e, nil
+	}
+	return nil, errors.New("empty encoder interface")
 }
 
 func (e encoder) Length() int {
@@ -180,14 +190,27 @@ func (e encoder) Length() int {
 
 // DefaultEncodeFunc defines a default, pass-through encoder function for byte slices.
 func DefaultEncodeFunc(v interface{}) ([]byte, error) {
-	return v.([]byte), nil
+	b, ok := v.([]byte)
+	if ok {
+		return b, nil
+	}
+	s, ok := v.(string)
+	if ok {
+		return []byte(s), nil
+	}
+	return nil, errors.New("could not encode msg with default encodefunc")
 }
 
-func setEncoderHeaders(c kafkaHeadersCarrier, enc encoding.EncodeFunc) {
-	switch reflect.TypeOf(enc) {
-	case reflect.TypeOf(json.Encode):
-		c.Set("Content-Type", "application/json")
-	case reflect.TypeOf(protobuf.Encode):
-		c.Set("Content-Type", "application/x-protobuf")
+func setContentType(enc encoding.EncodeFunc) string {
+	encodeFuncName := runtime.FuncForPC(reflect.ValueOf(enc).Pointer()).Name()
+	isJSON := strings.Contains(encodeFuncName, "json.Encode")
+	isProtobuf := strings.Contains(encodeFuncName, "protobuf.Encode")
+	switch {
+	case isJSON:
+		return json.Type
+	case isProtobuf:
+		return protobuf.Type
+	default:
+		return ""
 	}
 }
