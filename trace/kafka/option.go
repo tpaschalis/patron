@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/Shopify/sarama"
+	"github.com/beatlabs/patron/encoding"
 	"github.com/beatlabs/patron/log"
 )
 
@@ -62,8 +63,8 @@ func RequiredAcksPolicy(ack RequiredAcks) OptionFunc {
 	}
 }
 
-// Encoder option for injecting a specific encoder implementation
-func Encoder(enc sarama.Encoder) OptionFunc {
+// EncoderOpt option for injecting a specific encoder implementation
+func EncoderOpt(enc encoding.EncodeFunc) OptionFunc {
 	return func(ap *AsyncProducer) error {
 		if enc == nil {
 			return errors.New("encoder is nil")

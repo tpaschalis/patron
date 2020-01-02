@@ -8,7 +8,9 @@ import (
 
 	"github.com/Shopify/sarama"
 	"github.com/beatlabs/patron/correlation"
+	"github.com/beatlabs/patron/encoding"
 	"github.com/beatlabs/patron/encoding/json"
+	"github.com/beatlabs/patron/encoding/protobuf"
 	"github.com/beatlabs/patron/trace"
 	"github.com/opentracing/opentracing-go"
 	"github.com/opentracing/opentracing-go/ext"
@@ -69,7 +71,7 @@ type AsyncProducer struct {
 	prod  sarama.AsyncProducer
 	chErr chan error
 	tag   opentracing.Tag
-	enc   sarama.Encoder
+	enc   encoding.EncodeFunc
 }
 
 // NewAsyncProducer creates a new async producer with default configuration.
@@ -78,7 +80,7 @@ func NewAsyncProducer(brokers []string, oo ...OptionFunc) (*AsyncProducer, error
 	cfg := sarama.NewConfig()
 	cfg.Version = sarama.V0_11_0_0
 
-	ap := AsyncProducer{cfg: cfg, chErr: make(chan error), tag: opentracing.Tag{Key: "type", Value: "async"}}
+	ap := AsyncProducer{cfg: cfg, chErr: make(chan error), tag: opentracing.Tag{Key: "type", Value: "async"}, enc: DefaultEncodeFunc}
 
 	for _, o := range oo {
 		err := o(&ap)
@@ -131,22 +133,30 @@ func (ap *AsyncProducer) propagateError() {
 	}
 }
 
-func createProducerMessage(ctx context.Context, msg *Message, sp opentracing.Span, enc sarama.Encoder) (*sarama.ProducerMessage, error) {
+func createProducerMessage(ctx context.Context, msg *Message, sp opentracing.Span, enc encoding.EncodeFunc) (*sarama.ProducerMessage, error) {
 	c := kafkaHeadersCarrier{}
 	err := sp.Tracer().Inject(sp.Context(), opentracing.TextMap, &c)
 	if err != nil {
 		return nil, fmt.Errorf("failed to inject tracing headers: %w", err)
 	}
 	setEncoderHeaders(c, enc)
-	var saramaKey sarama.Encoder
+	var saramaKey, saramaBody sarama.Encoder
 	if msg.key != nil {
-		saramaKey = encodeKey(enc, msg.key)
+		k, err := enc(*msg.key)
+		if err != nil {
+			return nil, errors.Wrap(err, "failed to encode partition key")
+		}
+		saramaKey = Encoder(k)
 	}
+
+	b, err := enc(msg.body)
+	saramaBody = Encoder(b)
+
 	c.Set(correlation.HeaderID, correlation.IDFromContext(ctx))
 	return &sarama.ProducerMessage{
 		Topic:   msg.topic,
 		Key:     saramaKey,
-		Value:   encodeBody(enc, msg.body),
+		Value:   saramaBody,
 		Headers: c,
 	}, nil
 }
@@ -158,33 +168,30 @@ func (c *kafkaHeadersCarrier) Set(key, val string) {
 	*c = append(*c, sarama.RecordHeader{Key: []byte(key), Value: []byte(val)})
 }
 
-func encodeKey(enc sarama.Encoder, k *string) sarama.Encoder {
-	switch reflect.TypeOf(enc) {
-	case reflect.TypeOf(JSONEncoder{}):
-		return JSONEncoder(*k)
-	case reflect.TypeOf(ProtobufEncoder{}):
-		return ProtobufEncoder(*k)
-	default:
-		return sarama.ByteEncoder(*k)
-	}
+// Encoder satisfies the generic Encoder interface for Go byte slices
+// so that they can be used as the Key or Value in a ProducerMessage.
+type Encoder []byte
+
+// Encode satisfies the Encode() function of the encoder interface
+func (e Encoder) Encode() ([]byte, error) {
+	return e, nil
 }
 
-func encodeBody(enc sarama.Encoder, b []byte) sarama.Encoder {
-	switch reflect.TypeOf(enc) {
-	case reflect.TypeOf(JSONEncoder{}):
-		return JSONEncoder(b)
-	case reflect.TypeOf(ProtobufEncoder{}):
-		return ProtobufEncoder(b)
-	default:
-		return sarama.ByteEncoder(b)
-	}
+// Length satisfies the Length() function of the encoder interface
+func (e Encoder) Length() int {
+	return len(e)
 }
 
-func setEncoderHeaders(c kafkaHeadersCarrier, enc sarama.Encoder) {
+// DefaultEncodeFunc defines a default, pass-through encoder for byte slices.
+func DefaultEncodeFunc(v interface{}) ([]byte, error) {
+	return v.([]byte), nil
+}
+
+func setEncoderHeaders(c kafkaHeadersCarrier, enc encoding.EncodeFunc) {
 	switch reflect.TypeOf(enc) {
-	case reflect.TypeOf(JSONEncoder{}):
+	case reflect.TypeOf(json.Encode):
 		c.Set("Content-Type", "application/json")
-	case reflect.TypeOf(ProtobufEncoder{}):
+	case reflect.TypeOf(protobuf.Encode):
 		c.Set("Content-Type", "application/x-protobuf")
 	}
 }
