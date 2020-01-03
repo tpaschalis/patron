@@ -191,17 +191,6 @@ func (c *kafkaHeadersCarrier) Set(key, val string) {
 	*c = append(*c, sarama.RecordHeader{Key: []byte(key), Value: []byte(val)})
 }
 
-// type encoder []byte
-// func (e encoder) Encode() ([]byte, error) {
-// 	if e != nil {
-// 		return e, nil
-// 	}
-// 	return nil, errors.New("empty encoder interface")
-// }
-// func (e encoder) Length() int {
-// 	return len(e)
-// }
-
 func rawEncodeFunc(v interface{}) ([]byte, error) {
 	b, ok := v.([]byte)
 	if ok {
