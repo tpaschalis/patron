@@ -113,6 +113,21 @@ func (ap *AsyncProducer) Send(ctx context.Context, msg *Message) error {
 	return nil
 }
 
+// SendRaw sends an serialized message to a topic.
+func (ap *AsyncProducer) SendRaw(ctx context.Context, msg *Message, ct string) error {
+	sp, _ := trace.ChildSpan(ctx, trace.ComponentOpName(trace.KafkaAsyncProducerComponent, msg.topic),
+		trace.KafkaAsyncProducerComponent, ext.SpanKindProducer, ap.tag,
+		opentracing.Tag{Key: "topic", Value: msg.topic})
+	pm, err := createProducerMessage(ctx, msg, sp, defaultEncodeFunc, ct)
+	if err != nil {
+		trace.SpanError(sp)
+		return err
+	}
+	ap.prod.Input() <- pm
+	trace.SpanSuccess(sp)
+	return nil
+}
+
 // Error returns a chanel to monitor for errors.
 func (ap *AsyncProducer) Error() <-chan error {
 	return ap.chErr
@@ -150,14 +165,14 @@ func createProducerMessage(ctx context.Context, msg *Message, sp opentracing.Spa
 		if err != nil {
 			return nil, errors.Wrap(err, "failed to encode partition key")
 		}
-		saramaKey = encoder(k)
+		saramaKey = sarama.ByteEncoder(k)
 	}
 
 	b, err := enc(msg.body)
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to encode message body")
 	}
-	saramaBody = encoder(b)
+	saramaBody = sarama.ByteEncoder(b)
 
 	c.Set(correlation.HeaderID, correlation.IDFromContext(ctx))
 	return &sarama.ProducerMessage{
@@ -175,18 +190,16 @@ func (c *kafkaHeadersCarrier) Set(key, val string) {
 	*c = append(*c, sarama.RecordHeader{Key: []byte(key), Value: []byte(val)})
 }
 
-type encoder []byte
-
-func (e encoder) Encode() ([]byte, error) {
-	if e != nil {
-		return e, nil
-	}
-	return nil, errors.New("empty encoder interface")
-}
-
-func (e encoder) Length() int {
-	return len(e)
-}
+// type encoder []byte
+// func (e encoder) Encode() ([]byte, error) {
+// 	if e != nil {
+// 		return e, nil
+// 	}
+// 	return nil, errors.New("empty encoder interface")
+// }
+// func (e encoder) Length() int {
+// 	return len(e)
+// }
 
 func defaultEncodeFunc(v interface{}) ([]byte, error) {
 	b, ok := v.([]byte)
