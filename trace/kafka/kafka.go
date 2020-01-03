@@ -3,8 +3,6 @@ package kafka
 import (
 	"context"
 	"fmt"
-	"reflect"
-	"runtime"
 
 	"github.com/Shopify/sarama"
 	"github.com/beatlabs/patron/correlation"
@@ -85,7 +83,7 @@ func NewAsyncProducer(brokers []string, oo ...OptionFunc) (*AsyncProducer, error
 	for _, o := range oo {
 		err := o(&ap)
 		if err != nil {
-			return nil, errors.Errorf("Could not apply OptionFunc '%v' to producer : %v", runtime.FuncForPC(reflect.ValueOf(o).Pointer()).Name(), err)
+			return nil, err
 		}
 	}
 
