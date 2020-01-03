@@ -119,7 +119,7 @@ func (ap *AsyncProducer) SendRaw(ctx context.Context, msg *Message, ct string) e
 	sp, _ := trace.ChildSpan(ctx, trace.ComponentOpName(trace.KafkaAsyncProducerComponent, msg.topic),
 		trace.KafkaAsyncProducerComponent, ext.SpanKindProducer, ap.tag,
 		opentracing.Tag{Key: "topic", Value: msg.topic})
-	pm, err := createProducerMessage(ctx, msg, sp, defaultEncodeFunc, ct)
+	pm, err := createProducerMessage(ctx, msg, sp, rawEncodeFunc, ct)
 	if err != nil {
 		trace.SpanError(sp)
 		return err
@@ -162,7 +162,7 @@ func createProducerMessage(ctx context.Context, msg *Message, sp opentracing.Spa
 
 	var saramaKey, saramaBody sarama.Encoder
 	if msg.key != nil {
-		k, err := defaultEncodeFunc(*msg.key)
+		k, err := rawEncodeFunc(*msg.key)
 		if err != nil {
 			return nil, errors.Wrap(err, "failed to encode partition key")
 		}
@@ -202,7 +202,7 @@ func (c *kafkaHeadersCarrier) Set(key, val string) {
 // 	return len(e)
 // }
 
-func defaultEncodeFunc(v interface{}) ([]byte, error) {
+func rawEncodeFunc(v interface{}) ([]byte, error) {
 	b, ok := v.([]byte)
 	if ok {
 		return b, nil

@@ -181,9 +181,9 @@ func TestSendWithCustomEncoder(t *testing.T) {
 	}{
 		{name: "json success", data: "testdata1", key: "testkey1", enc: json.Encode, ct: json.Type, wantMsgErr: false, wantSendErr: false},
 		{name: "protobuf success", data: &u, key: "testkey2", enc: protobuf.Encode, ct: protobuf.Type, wantMsgErr: false, wantSendErr: false},
-		{name: "failure due to invalid data", enc: defaultEncodeFunc, data: make(chan bool), key: "testkey3", wantMsgErr: false, wantSendErr: true},
-		{name: "nil message data", enc: defaultEncodeFunc, data: nil, key: "testkey4", wantMsgErr: false, wantSendErr: true},
-		{name: "nil message data", enc: defaultEncodeFunc, data: nil, key: "testkey4", wantMsgErr: false, wantSendErr: true},
+		{name: "failure due to invalid data", enc: rawEncodeFunc, data: make(chan bool), key: "testkey3", wantMsgErr: false, wantSendErr: true},
+		{name: "nil message data", enc: rawEncodeFunc, data: nil, key: "testkey4", wantMsgErr: false, wantSendErr: true},
+		{name: "nil message data", enc: rawEncodeFunc, data: nil, key: "testkey4", wantMsgErr: false, wantSendErr: true},
 		{name: "nil encoder", data: "somedata", key: "testkey5", ct: json.Type, wantMsgErr: false, wantSendErr: false},
 		{name: "json success", data: "", key: "testkey1", enc: json.Encode, ct: json.Type, wantMsgErr: false, wantSendErr: false},
 	}
