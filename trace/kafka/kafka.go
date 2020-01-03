@@ -100,6 +100,7 @@ func NewAsyncProducer(brokers []string, oo ...OptionFunc) (*AsyncProducer, error
 
 // Send a message to a topic.
 func (ap *AsyncProducer) Send(ctx context.Context, msg *Message) error {
+
 	sp, _ := trace.ChildSpan(ctx, trace.ComponentOpName(trace.KafkaAsyncProducerComponent, msg.topic),
 		trace.KafkaAsyncProducerComponent, ext.SpanKindProducer, ap.tag,
 		opentracing.Tag{Key: "topic", Value: msg.topic})
@@ -113,7 +114,7 @@ func (ap *AsyncProducer) Send(ctx context.Context, msg *Message) error {
 	return nil
 }
 
-// SendRaw sends an serialized message to a topic.
+// SendRaw sends an already-serialized message to a topic.
 func (ap *AsyncProducer) SendRaw(ctx context.Context, msg *Message, ct string) error {
 	sp, _ := trace.ChildSpan(ctx, trace.ComponentOpName(trace.KafkaAsyncProducerComponent, msg.topic),
 		trace.KafkaAsyncProducerComponent, ext.SpanKindProducer, ap.tag,
@@ -212,18 +213,3 @@ func defaultEncodeFunc(v interface{}) ([]byte, error) {
 	}
 	return nil, errors.New("could not encode msg with default encodefunc")
 }
-
-// // Opted to use the Encoder option to set the content type along the EncodeFunc
-// func setContentType(enc encoding.EncodeFunc) string {
-// 	encodeFuncName := runtime.FuncForPC(reflect.ValueOf(enc).Pointer()).Name()
-// 	isJSON := strings.Contains(encodeFuncName, "json.Encode")
-// 	isProtobuf := strings.Contains(encodeFuncName, "protobuf.Encode")
-// 	switch {
-// 	case isJSON:
-// 		return json.Type
-// 	case isProtobuf:
-// 		return protobuf.Type
-// 	default:
-// 		return ""
-// 	}
-// }

@@ -165,7 +165,7 @@ func createKafkaBroker(t *testing.T, retError bool) *sarama.MockBroker {
 	return seed
 }
 
-func TestCustomEncoder(t *testing.T) {
+func TestSendWithCustomEncoder(t *testing.T) {
 	var u examples.User
 	firstname, lastname := "John", "Doe"
 	u.Firstname = &firstname
@@ -182,7 +182,10 @@ func TestCustomEncoder(t *testing.T) {
 		{name: "json success", data: "testdata1", key: "testkey1", enc: json.Encode, ct: json.Type, wantMsgErr: false, wantSendErr: false},
 		{name: "protobuf success", data: &u, key: "testkey2", enc: protobuf.Encode, ct: protobuf.Type, wantMsgErr: false, wantSendErr: false},
 		{name: "failure due to invalid data", enc: defaultEncodeFunc, data: make(chan bool), key: "testkey3", wantMsgErr: false, wantSendErr: true},
-		{name: "nil message data", enc: defaultEncodeFunc, data: nil, key: "testkey3", wantMsgErr: false, wantSendErr: true},
+		{name: "nil message data", enc: defaultEncodeFunc, data: nil, key: "testkey4", wantMsgErr: false, wantSendErr: true},
+		{name: "nil message data", enc: defaultEncodeFunc, data: nil, key: "testkey4", wantMsgErr: false, wantSendErr: true},
+		{name: "nil encoder", data: "somedata", key: "testkey5", ct: json.Type, wantMsgErr: false, wantSendErr: false},
+		{name: "json success", data: "", key: "testkey1", enc: json.Encode, ct: json.Type, wantMsgErr: false, wantSendErr: false},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -199,13 +202,61 @@ func TestCustomEncoder(t *testing.T) {
 			seed := createKafkaBroker(t, true)
 			ap, _ := NewAsyncProducer([]string{seed.Addr()}, Version(sarama.V0_8_2_0.String()))
 			err = Encoder(tt.enc, tt.ct)(ap)
-			assert.NoError(t, err)
+			if tt.enc != nil {
+				assert.NoError(t, err)
+			} else {
+				assert.Error(t, err)
+			}
 			assert.NotNil(t, ap)
 
 			err = trace.Setup("test", "1.0.0", "0.0.0.0:6831", jaeger.SamplerTypeProbabilistic, 0.1)
 			assert.NoError(t, err)
 			_, ctx := trace.ChildSpan(context.Background(), "123", "cmp")
 			err = ap.Send(ctx, msg)
+			if tt.wantSendErr == false {
+				assert.NoError(t, err)
+			} else {
+				assert.Error(t, err)
+			}
+		})
+	}
+}
+
+func TestSendRaw(t *testing.T) {
+	tests := []struct {
+		name        string
+		data        []byte
+		key         string
+		ct          string
+		wantMsgErr  bool
+		wantSendErr bool
+	}{
+		{name: "json success", data: []byte("{testdata1}"), key: "testkey1", ct: json.Type, wantMsgErr: false, wantSendErr: false},
+		{name: "empty data byte slice", data: []byte{}, key: "testkey2", ct: json.Type, wantMsgErr: false, wantSendErr: false},
+		{name: "nil data byte slice", data: nil, key: "testkey3", ct: json.Type, wantMsgErr: false, wantSendErr: false},
+		{name: "nil data byte slice", data: nil, key: "🚖", ct: json.Type, wantMsgErr: false, wantSendErr: false},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			msg, err := NewMessageWithKey("TOPIC", tt.data, tt.key)
+			if tt.key != "" {
+				assert.Equal(t, tt.key, *msg.key)
+			}
+			if tt.wantMsgErr == false {
+				assert.NoError(t, err)
+			} else {
+				assert.Error(t, err)
+			}
+
+			seed := createKafkaBroker(t, true)
+			ap, _ := NewAsyncProducer([]string{seed.Addr()}, Version(sarama.V0_8_2_0.String()))
+			assert.NoError(t, err)
+			assert.NotNil(t, ap)
+
+			err = trace.Setup("test", "1.0.0", "0.0.0.0:6831", jaeger.SamplerTypeProbabilistic, 0.1)
+			assert.NoError(t, err)
+			_, ctx := trace.ChildSpan(context.Background(), "123", "cmp")
+			err = ap.SendRaw(ctx, msg, tt.ct)
 			if tt.wantSendErr == false {
 				assert.NoError(t, err)
 			} else {
