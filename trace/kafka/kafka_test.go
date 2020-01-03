@@ -2,13 +2,13 @@ package kafka
 
 import (
 	"context"
+	"testing"
+
+	"github.com/Shopify/sarama"
 	"github.com/beatlabs/patron/encoding"
 	"github.com/beatlabs/patron/encoding/json"
 	"github.com/beatlabs/patron/encoding/protobuf"
 	"github.com/beatlabs/patron/examples"
-	"testing"
-
-	"github.com/Shopify/sarama"
 	"github.com/beatlabs/patron/trace"
 	"github.com/stretchr/testify/assert"
 	"github.com/uber/jaeger-client-go"
