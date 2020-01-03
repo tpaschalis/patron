@@ -197,7 +197,7 @@ func TestCustomEncoder(t *testing.T) {
 			}
 
 			seed := createKafkaBroker(t, true)
-			ap, err := NewAsyncProducer([]string{seed.Addr()}, Version(sarama.V0_8_2_0.String()))
+			ap, _ := NewAsyncProducer([]string{seed.Addr()}, Version(sarama.V0_8_2_0.String()))
 			err = Encoder(tt.enc, tt.ct)(ap)
 			assert.NoError(t, err)
 			assert.NotNil(t, ap)

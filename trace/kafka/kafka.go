@@ -80,7 +80,7 @@ func NewAsyncProducer(brokers []string, oo ...OptionFunc) (*AsyncProducer, error
 	cfg := sarama.NewConfig()
 	cfg.Version = sarama.V0_11_0_0
 
-	ap := AsyncProducer{cfg: cfg, chErr: make(chan error), tag: opentracing.Tag{Key: "type", Value: "async"}, enc: defaultEncodeFunc}
+	ap := AsyncProducer{cfg: cfg, chErr: make(chan error), tag: opentracing.Tag{Key: "type", Value: "async"}, enc: json.Encode}
 
 	for _, o := range oo {
 		err := o(&ap)
