@@ -108,7 +108,6 @@ func TestEncoder(t *testing.T) {
 	}{
 		{name: "json EncodeFunc", args: args{enc: json.Encode, ct: json.Type}, wantErr: false},
 		{name: "protobuf EncodeFunc", args: args{enc: protobuf.Encode, ct: protobuf.Type}, wantErr: false},
-		{name: "default EncodeFunc", args: args{enc: rawEncodeFunc, ct: ""}, wantErr: false},
 		{name: "nil EncodeFunc", args: args{enc: nil}, wantErr: true},
 	}
 	for _, tt := range tests {
