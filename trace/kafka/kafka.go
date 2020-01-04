@@ -64,12 +64,12 @@ type Producer interface {
 
 // AsyncProducer defines a async Kafka producer.
 type AsyncProducer struct {
-	cfg   *sarama.Config
-	prod  sarama.AsyncProducer
-	chErr chan error
-	tag   opentracing.Tag
-	enc   encoding.EncodeFunc
-	ct    string
+	cfg         *sarama.Config
+	prod        sarama.AsyncProducer
+	chErr       chan error
+	tag         opentracing.Tag
+	enc         encoding.EncodeFunc
+	contentType string
 }
 
 // NewAsyncProducer creates a new async producer with default configuration.
@@ -78,7 +78,7 @@ func NewAsyncProducer(brokers []string, oo ...OptionFunc) (*AsyncProducer, error
 	cfg := sarama.NewConfig()
 	cfg.Version = sarama.V0_11_0_0
 
-	ap := AsyncProducer{cfg: cfg, chErr: make(chan error), tag: opentracing.Tag{Key: "type", Value: "async"}, enc: json.Encode}
+	ap := AsyncProducer{cfg: cfg, chErr: make(chan error), tag: opentracing.Tag{Key: "type", Value: "async"}, enc: json.Encode, contentType: json.Type}
 
 	for _, o := range oo {
 		err := o(&ap)
@@ -98,11 +98,10 @@ func NewAsyncProducer(brokers []string, oo ...OptionFunc) (*AsyncProducer, error
 
 // Send a message to a topic.
 func (ap *AsyncProducer) Send(ctx context.Context, msg *Message) error {
-
 	sp, _ := trace.ChildSpan(ctx, trace.ComponentOpName(trace.KafkaAsyncProducerComponent, msg.topic),
 		trace.KafkaAsyncProducerComponent, ext.SpanKindProducer, ap.tag,
 		opentracing.Tag{Key: "topic", Value: msg.topic})
-	pm, err := createProducerMessage(ctx, msg, sp, ap.enc, ap.ct)
+	pm, err := createProducerMessage(ctx, msg, sp, ap.enc, ap.contentType)
 	if err != nil {
 		trace.SpanError(sp)
 		return err
@@ -132,23 +131,21 @@ func (ap *AsyncProducer) propagateError() {
 	}
 }
 
-func createProducerMessage(ctx context.Context, msg *Message, sp opentracing.Span, enc encoding.EncodeFunc, ct string) (*sarama.ProducerMessage, error) {
+func (ap *AsyncProducer) createProducerMessage(ctx context.Context, msg *Message, sp opentracing.Span) (*sarama.ProducerMessage, error) {
 	c := kafkaHeadersCarrier{}
 	err := sp.Tracer().Inject(sp.Context(), opentracing.TextMap, &c)
 	if err != nil {
 		return nil, fmt.Errorf("failed to inject tracing headers: %w", err)
 	}
 
-	if len(ct) != 0 {
-		c.Set(encoding.ContentTypeHeader, ct)
-	}
+	c.Set(encoding.ContentTypeHeader, ap.contentType)
 
 	var saramaKey, saramaBody sarama.Encoder
 	if msg.key != nil {
 		saramaKey = sarama.StringEncoder(*msg.key)
 	}
 
-	b, err := enc(msg.body)
+	b, err := ap.enc(msg.body)
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to encode message body")
 	}
