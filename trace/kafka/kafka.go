@@ -9,6 +9,8 @@ import (
 	"github.com/beatlabs/patron/correlation"
 	"github.com/beatlabs/patron/encoding"
 	"github.com/beatlabs/patron/encoding/json"
+	"github.com/beatlabs/patron/errors"
+	"github.com/beatlabs/patron/log"
 	"github.com/beatlabs/patron/trace"
 	"github.com/opentracing/opentracing-go"
 	"github.com/opentracing/opentracing-go/ext"
@@ -163,4 +165,67 @@ type kafkaHeadersCarrier []sarama.RecordHeader
 // Set implements Set() of opentracing.TextMapWriter.
 func (c *kafkaHeadersCarrier) Set(key, val string) {
 	*c = append(*c, sarama.RecordHeader{Key: []byte(key), Value: []byte(val)})
+}
+
+const fieldSetMsg = "Setting property '%v' for '%v'"
+
+// Builder gathers all required and optional properties, in order
+// to construct a Kafka AsyncProducer.
+type Builder struct {
+	brokers []string
+	cfg     *sarama.Config
+	prod    sarama.AsyncProducer
+	chErr   chan error
+	tag     opentracing.Tag
+	errors  []error
+}
+
+// NewBuilder initiates the AsyncProducer builder chain.
+// The builder instantiates the component using default values for
+// HTTP Port, Alive/Ready check functions and Read/Write timeouts.
+func NewBuilder() *Builder {
+	cfg := sarama.NewConfig()
+	cfg.Version = sarama.V0_11_0_0
+	var errs []error
+	return &Builder{
+		cfg:    cfg,
+		chErr:  make(chan error),
+		tag:    opentracing.Tag{Key: "type", Value: "async"},
+		errors: errs,
+	}
+}
+
+// WithSSL sets the filenames for the Certificate and Keyfile, in order to enable SSL.
+func (ab *Builder) WithSSL(c, k string) *Builder {
+	if c == "" || k == "" {
+		ab.errors = append(ab.errors, errors.New("Invalid cert or key provided"))
+	} else {
+		log.Info(fieldSetMsg, "Cert, Key", c+","+k)
+		// ab.certFile = c
+		// ab.keyFile = k
+	}
+
+	return ab
+}
+
+// Create constructs the HTTP component by applying the gathered properties.
+func (ab *Builder) Create() (*AsyncProducer, error) {
+	if len(ab.errors) > 0 {
+		return nil, errors.Aggregate(ab.errors...)
+	}
+
+	prod, err := sarama.NewAsyncProducer(ab.brokers, ab.cfg)
+	if err != nil {
+		return nil, errors.Wrap(err, "failed to create async producer")
+	}
+
+	ap := AsyncProducer{
+		cfg:   ab.cfg,
+		prod:  prod,
+		chErr: ab.chErr,
+		tag:   ab.tag,
+	}
+
+	go ap.propagateError()
+	return &ap, nil
 }
