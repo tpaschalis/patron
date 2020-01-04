@@ -1,14 +1,13 @@
 package kafka
 
 import (
-	"github.com/beatlabs/patron/encoding"
-	"github.com/beatlabs/patron/encoding/json"
-	"github.com/beatlabs/patron/encoding/protobuf"
-
 	"testing"
 	"time"
 
 	"github.com/Shopify/sarama"
+	"github.com/beatlabs/patron/encoding"
+	"github.com/beatlabs/patron/encoding/json"
+	"github.com/beatlabs/patron/encoding/protobuf"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -97,8 +96,8 @@ func TestRequiredAcksPolicy(t *testing.T) {
 
 func TestEncoder(t *testing.T) {
 	type args struct {
-		enc encoding.EncodeFunc
-		ct  string
+		enc         encoding.EncodeFunc
+		contentType string
 	}
 
 	tests := []struct {
@@ -106,19 +105,23 @@ func TestEncoder(t *testing.T) {
 		args    args
 		wantErr bool
 	}{
-		{name: "json EncodeFunc", args: args{enc: json.Encode, ct: json.Type}, wantErr: false},
-		{name: "protobuf EncodeFunc", args: args{enc: protobuf.Encode, ct: protobuf.Type}, wantErr: false},
+		{name: "json EncodeFunc", args: args{enc: json.Encode, contentType: json.Type}, wantErr: false},
+		{name: "protobuf EncodeFunc", args: args{enc: protobuf.Encode, contentType: protobuf.Type}, wantErr: false},
+		{name: "empty content type", args: args{enc: protobuf.Encode, contentType: ""}, wantErr: true},
 		{name: "nil EncodeFunc", args: args{enc: nil}, wantErr: true},
+		{name: "nil EncodeFunc w/ ct", args: args{enc: nil, contentType: protobuf.Type}, wantErr: true},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			cfg := sarama.NewConfig()
 			ap := &AsyncProducer{cfg: cfg}
-			err := Encoder(tt.args.enc, tt.args.ct)(ap)
+			err := Encoder(tt.args.enc, tt.args.contentType)(ap)
 			if tt.wantErr {
 				assert.Error(t, err)
 			} else {
 				assert.NoError(t, err)
+				assert.NotNil(t, ap.enc)
+				assert.Equal(t, tt.args.contentType, ap.contentType)
 			}
 		})
 	}
