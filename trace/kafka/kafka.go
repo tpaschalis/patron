@@ -101,7 +101,7 @@ func (ap *AsyncProducer) Send(ctx context.Context, msg *Message) error {
 	sp, _ := trace.ChildSpan(ctx, trace.ComponentOpName(trace.KafkaAsyncProducerComponent, msg.topic),
 		trace.KafkaAsyncProducerComponent, ext.SpanKindProducer, ap.tag,
 		opentracing.Tag{Key: "topic", Value: msg.topic})
-	pm, err := createProducerMessage(ctx, msg, sp, ap.enc, ap.contentType)
+	pm, err := ap.createProducerMessage(ctx, msg, sp)
 	if err != nil {
 		trace.SpanError(sp)
 		return err
@@ -137,10 +137,9 @@ func (ap *AsyncProducer) createProducerMessage(ctx context.Context, msg *Message
 	if err != nil {
 		return nil, fmt.Errorf("failed to inject tracing headers: %w", err)
 	}
-
 	c.Set(encoding.ContentTypeHeader, ap.contentType)
 
-	var saramaKey, saramaBody sarama.Encoder
+	var saramaKey sarama.Encoder
 	if msg.key != nil {
 		saramaKey = sarama.StringEncoder(*msg.key)
 	}
@@ -149,13 +148,12 @@ func (ap *AsyncProducer) createProducerMessage(ctx context.Context, msg *Message
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to encode message body")
 	}
-	saramaBody = sarama.ByteEncoder(b)
 
 	c.Set(correlation.HeaderID, correlation.IDFromContext(ctx))
 	return &sarama.ProducerMessage{
 		Topic:   msg.topic,
 		Key:     saramaKey,
-		Value:   saramaBody,
+		Value:   sarama.ByteEncoder(b),
 		Headers: c,
 	}, nil
 }
