@@ -41,7 +41,7 @@ type Builder struct {
 
 // NewBuilder initiates the AsyncProducer builder chain.
 // The builder instantiates the component using default values for
-// HTTP Port, Alive/Ready check functions and Read/Write timeouts.
+// EncodeFunc and Content-Type header.
 func NewBuilder() *Builder {
 	cfg := sarama.NewConfig()
 	cfg.Version = sarama.V0_11_0_0
@@ -71,14 +71,15 @@ func (ab *Builder) WithTimeout(dial time.Duration) *Builder {
 func (ab *Builder) WithVersion(version string) *Builder {
 	if version == "" {
 		ab.errors = append(ab.errors, errors.New("version is required"))
+		return ab
 	}
 	v, err := sarama.ParseKafkaVersion(version)
 	if err != nil {
 		ab.errors = append(ab.errors, errors.New("failed to parse kafka version"))
+		return ab
 	}
-
-	ab.cfg.Version = v
 	log.Info(fieldSetMsg, "version", version)
+	ab.cfg.Version = v
 
 	return ab
 }
@@ -86,6 +87,7 @@ func (ab *Builder) WithVersion(version string) *Builder {
 // WithRequiredAcksPolicy adjusts how many replica acknowledgements
 // broker must see before responding
 func (ab *Builder) WithRequiredAcksPolicy(ack RequiredAcks) *Builder {
+	log.Info(fieldSetMsg, "required acks", ack)
 	ab.cfg.Producer.RequiredAcks = sarama.RequiredAcks(ack)
 
 	return ab
@@ -96,29 +98,31 @@ func (ab *Builder) WithRequiredAcksPolicy(ack RequiredAcks) *Builder {
 func (ab *Builder) WithEncoder(enc encoding.EncodeFunc, contentType string) *Builder {
 	if enc == nil {
 		ab.errors = append(ab.errors, errors.New("encoder is nil"))
+	} else {
+		log.Info(fieldSetMsg, "encoder", enc)
+		ab.enc = enc
 	}
 	if contentType == "" {
 		ab.errors = append(ab.errors, errors.New("content type is empty"))
+	} else {
+		log.Info(fieldSetMsg, "content type", contentType)
+		ab.contentType = contentType
 	}
-	ab.enc = enc
-	ab.contentType = contentType
 
 	return ab
 }
 
-// Encoder option for injecting a specific encoder implementation
-func Encoder(enc encoding.EncodeFunc, contentType string) OptionFunc {
-	return func(ap *AsyncProducer) error {
-		if enc == nil {
-			return errors.New("encoder is nil")
-		}
-		if contentType == "" {
-			return errors.New("content type is empty")
-		}
-		ap.enc = enc
-		ap.contentType = contentType
-		return nil
+// WithBrokers sets a specific encoder implementation and Content-Type string header;
+// if no option is provided it defaults to json.
+func (ab *Builder) WithBrokers(brokers []string) *Builder {
+	if len(brokers) == 0 {
+		ab.errors = append(ab.errors, errors.New("content type is empty"))
+	} else {
+		log.Info(fieldSetMsg, "brokers", brokers)
+		ab.brokers = append(ab.brokers, brokers...)
 	}
+
+	return ab
 }
 
 // Create constructs the HTTP component by applying the gathered properties.
