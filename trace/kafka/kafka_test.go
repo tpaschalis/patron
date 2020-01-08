@@ -188,11 +188,11 @@ func TestSendWithCustomEncoder(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			msg, err := NewMessageWithKey("TOPIC", tt.data, tt.key)
+			msg, _ := NewMessageWithKey("TOPIC", tt.data, tt.key)
 
 			seed := createKafkaBroker(t, true)
 			ap, _ := NewAsyncProducer([]string{seed.Addr()}, Version(sarama.V0_8_2_0.String()))
-			err = Encoder(tt.enc, tt.ct)(ap)
+			err := Encoder(tt.enc, tt.ct)(ap)
 			if tt.enc != nil {
 				assert.NoError(t, err)
 			} else {
