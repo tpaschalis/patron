@@ -176,28 +176,19 @@ func TestSendWithCustomEncoder(t *testing.T) {
 		key         string
 		enc         encoding.EncodeFunc
 		ct          string
-		wantMsgErr  bool
 		wantSendErr bool
 	}{
-		{name: "json success", data: "testdata1", key: "testkey1", enc: json.Encode, ct: json.Type, wantMsgErr: false, wantSendErr: false},
-		{name: "protobuf success", data: &u, key: "testkey2", enc: protobuf.Encode, ct: protobuf.Type, wantMsgErr: false, wantSendErr: false},
-		{name: "failure due to invalid data", data: make(chan bool), key: "testkey3", wantMsgErr: false, wantSendErr: true},
-		{name: "nil message data", data: nil, key: "testkey4", wantMsgErr: false, wantSendErr: false},
-		{name: "nil encoder", data: "somedata", key: "testkey5", ct: json.Type, wantMsgErr: false, wantSendErr: false},
-		{name: "json success", data: "", key: "testkey6", enc: json.Encode, ct: json.Type, wantMsgErr: false, wantSendErr: false},
-		{name: "json success", data: "", key: "🚖", enc: json.Encode, ct: json.Type, wantMsgErr: false, wantSendErr: false},
+		{name: "json success", data: "testdata1", key: "testkey1", enc: json.Encode, ct: json.Type, wantSendErr: false},
+		{name: "protobuf success", data: &u, key: "testkey2", enc: protobuf.Encode, ct: protobuf.Type, wantSendErr: false},
+		{name: "failure due to invalid data", data: make(chan bool), key: "testkey3", wantSendErr: true},
+		{name: "nil message data", data: nil, key: "testkey4", wantSendErr: false},
+		{name: "nil encoder", data: "somedata", key: "testkey5", ct: json.Type, wantSendErr: false},
+		{name: "empty data", data: "", key: "testkey6", enc: json.Encode, ct: json.Type, wantSendErr: false},
+		{name: "empty data two", data: "", key: "🚖", enc: json.Encode, ct: json.Type, wantSendErr: false},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			msg, err := NewMessageWithKey("TOPIC", tt.data, tt.key)
-			if tt.key != "" {
-				assert.Equal(t, tt.key, *msg.key)
-			}
-			if tt.wantMsgErr == false {
-				assert.NoError(t, err)
-			} else {
-				assert.Error(t, err)
-			}
 
 			seed := createKafkaBroker(t, true)
 			ap, _ := NewAsyncProducer([]string{seed.Addr()}, Version(sarama.V0_8_2_0.String()))

@@ -89,7 +89,7 @@ func NewAsyncProducer(brokers []string, oo ...OptionFunc) (*AsyncProducer, error
 
 	prod, err := sarama.NewAsyncProducer(brokers, ap.cfg)
 	if err != nil {
-		return nil, errors.Wrap(err, "failed to create async producer")
+		return nil, fmt.Errorf("failed to create async producer: %w", err)
 	}
 	ap.prod = prod
 	go ap.propagateError()
@@ -146,7 +146,7 @@ func (ap *AsyncProducer) createProducerMessage(ctx context.Context, msg *Message
 
 	b, err := ap.enc(msg.body)
 	if err != nil {
-		return nil, errors.Wrap(err, "failed to encode message body")
+		return nil, fmt.Errorf("failed to encode message body")
 	}
 
 	c.Set(correlation.HeaderID, correlation.IDFromContext(ctx))
