@@ -63,7 +63,7 @@ func RequiredAcksPolicy(ack RequiredAcks) OptionFunc {
 	}
 }
 
-// Encoder option for injecting a specific encoder implementation
+// Encoder option for injecting a specific encoder implementation.
 func Encoder(enc encoding.EncodeFunc, contentType string) OptionFunc {
 	return func(ap *AsyncProducer) error {
 		if enc == nil {
