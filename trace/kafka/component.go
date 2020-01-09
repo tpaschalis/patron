@@ -112,11 +112,10 @@ func (ab *Builder) WithEncoder(enc encoding.EncodeFunc, contentType string) *Bui
 	return ab
 }
 
-// WithBrokers sets a specific encoder implementation and Content-Type string header;
-// if no option is provided it defaults to json.
+// WithBrokers sets the list of brokers the AsyncProducer will work with.
 func (ab *Builder) WithBrokers(brokers []string) *Builder {
 	if len(brokers) == 0 {
-		ab.errors = append(ab.errors, errors.New("content type is empty"))
+		ab.errors = append(ab.errors, errors.New("brokers list is empty"))
 	} else {
 		log.Info(fieldSetMsg, "brokers", brokers)
 		ab.brokers = append(ab.brokers, brokers...)
@@ -125,7 +124,7 @@ func (ab *Builder) WithBrokers(brokers []string) *Builder {
 	return ab
 }
 
-// Create constructs the HTTP component by applying the gathered properties.
+// Create constructs the AsyncProducer component by applying the gathered properties.
 func (ab *Builder) Create() (*AsyncProducer, error) {
 	if len(ab.errors) > 0 {
 		return nil, errors.Aggregate(ab.errors...)
