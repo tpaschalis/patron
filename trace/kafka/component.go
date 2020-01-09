@@ -31,7 +31,6 @@ const fieldSetMsg = "Setting property '%v' for '%v'"
 type Builder struct {
 	brokers     []string
 	cfg         *sarama.Config
-	prod        sarama.AsyncProducer
 	chErr       chan error
 	tag         opentracing.Tag
 	enc         encoding.EncodeFunc
