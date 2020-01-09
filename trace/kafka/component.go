@@ -1,12 +1,13 @@
 package kafka
 
 import (
+	"errors"
 	"time"
 
 	"github.com/Shopify/sarama"
 	"github.com/beatlabs/patron/encoding"
 	"github.com/beatlabs/patron/encoding/json"
-	"github.com/beatlabs/patron/errors"
+	patronErrors "github.com/beatlabs/patron/errors"
 	"github.com/beatlabs/patron/log"
 	"github.com/opentracing/opentracing-go"
 )
@@ -126,12 +127,12 @@ func (ab *Builder) WithBrokers(brokers []string) *Builder {
 // Create constructs the AsyncProducer component by applying the gathered properties.
 func (ab *Builder) Create() (*AsyncProducer, error) {
 	if len(ab.errors) > 0 {
-		return nil, errors.Aggregate(ab.errors...)
+		return nil, patronErrors.Aggregate(ab.errors...)
 	}
 
 	prod, err := sarama.NewAsyncProducer(ab.brokers, ab.cfg)
 	if err != nil {
-		return nil, errors.Wrap(err, "failed to create async producer")
+		return nil, errors.New("failed to create async producer")
 	}
 
 	ap := AsyncProducer{
