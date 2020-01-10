@@ -1,6 +1,7 @@
 package kafka
 
 import (
+	"errors"
 	"fmt"
 	"testing"
 	"time"
@@ -101,7 +102,6 @@ func TestEncoder(t *testing.T) {
 		args    args
 		wantErr bool
 	}{
-
 		{name: "json EncodeFunc", args: args{enc: json.Encode, contentType: json.Type}, wantErr: false},
 		{name: "protobuf EncodeFunc", args: args{enc: protobuf.Encode, contentType: protobuf.Type}, wantErr: false},
 		{name: "empty content type", args: args{enc: protobuf.Encode, contentType: ""}, wantErr: true},
@@ -120,4 +120,87 @@ func TestEncoder(t *testing.T) {
 			}
 		})
 	}
+}
+
+func TestBrokers(t *testing.T) {
+	seed := createKafkaBroker(t, true)
+
+	type args struct {
+		brokers []string
+	}
+	tests := []struct {
+		name    string
+		args    args
+		wantErr bool
+	}{
+		{name: "single mock broker", args: args{brokers: []string{seed.Addr()}}, wantErr: false},
+		{name: "multiple mock brokers", args: args{brokers: []string{seed.Addr(), seed.Addr(), seed.Addr()}}, wantErr: false},
+		{name: "empty brokers list", args: args{brokers: []string{}}, wantErr: true},
+		{name: "nil brokers list", args: args{brokers: nil}, wantErr: true},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			ab := NewBuilder().WithBrokers(tt.args.brokers)
+			if tt.wantErr {
+				assert.NotEmpty(t, ab.errors)
+				assert.Empty(t, ab.brokers)
+			} else {
+				assert.Empty(t, ab.errors)
+				assert.NotEmpty(t, ab.brokers)
+			}
+		})
+	}
+}
+
+func Test_createHTTPServerUsingBuilder(t *testing.T) {
+	seed := createKafkaBroker(t, true)
+
+	var builderNoErrors = []error{}
+	var builderAllErrors = []error{
+		errors.New("brokers list is empty"),
+		errors.New("encoder is nil"),
+		errors.New("content type is empty"),
+	}
+
+	tests := map[string]struct {
+		brokers     []string
+		version     string
+		enc         encoding.EncodeFunc
+		contentType string
+		wantErrs    []error
+	}{
+		"success": {
+			brokers:     []string{seed.Addr()},
+			enc:         json.Encode,
+			contentType: json.Type,
+			version:     sarama.V0_8_2_0.String(),
+			wantErrs:    builderNoErrors,
+		},
+		"error in all builder steps": {
+			brokers:     []string{},
+			enc:         nil,
+			contentType: "",
+			version:     "",
+			wantErrs:    builderAllErrors,
+		},
+	}
+
+	for name, tc := range tests {
+		t.Run(name, func(t *testing.T) {
+			gotAsyncProducer, gotErrs := NewBuilder().
+				WithBrokers(tc.brokers).
+				WithVersion(tc.version).
+				WithEncoder(tc.enc, tc.contentType).
+				Create()
+
+			if len(tc.wantErrs) > 0 {
+				assert.ObjectsAreEqual(tc.wantErrs, gotErrs)
+				assert.Nil(t, gotAsyncProducer)
+			} else {
+				assert.NotNil(t, gotAsyncProducer)
+				assert.IsType(t, &AsyncProducer{}, gotAsyncProducer)
+			}
+		})
+	}
+
 }
