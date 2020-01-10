@@ -60,9 +60,10 @@ func NewBuilder() *Builder {
 func (ab *Builder) WithTimeout(dial time.Duration) *Builder {
 	if dial <= 0*time.Second {
 		ab.errors = append(ab.errors, errors.New("dial timeout has to be positive"))
+	} else {
+		ab.cfg.Net.DialTimeout = dial
+		log.Info(fieldSetMsg, "dial timeout", dial)
 	}
-	ab.cfg.Net.DialTimeout = dial
-	log.Info(fieldSetMsg, "dial timeout", dial)
 
 	return ab
 }

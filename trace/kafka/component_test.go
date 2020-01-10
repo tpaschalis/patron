@@ -152,7 +152,7 @@ func TestBrokers(t *testing.T) {
 	}
 }
 
-func Test_createHTTPServerUsingBuilder(t *testing.T) {
+func Test_createAsyncProducerUsingBuilder(t *testing.T) {
 	seed := createKafkaBroker(t, true)
 
 	var builderNoErrors = []error{}
