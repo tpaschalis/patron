@@ -89,8 +89,12 @@ func (ab *Builder) WithVersion(version string) *Builder {
 // WithRequiredAcksPolicy adjusts how many replica acknowledgements
 // broker must see before responding.
 func (ab *Builder) WithRequiredAcksPolicy(ack RequiredAcks) *Builder {
-	log.Info(fieldSetMsg, "required acks", ack)
-	ab.cfg.Producer.RequiredAcks = sarama.RequiredAcks(ack)
+	if !isValidRequiredAcks(ack) {
+		ab.errors = append(ab.errors, errors.New("invalid value for required acks policy provided"))
+	} else {
+		log.Info(fieldSetMsg, "required acks", ack)
+		ab.cfg.Producer.RequiredAcks = sarama.RequiredAcks(ack)
+	}
 
 	return ab
 }
@@ -140,4 +144,15 @@ func (ab *Builder) Create() (*AsyncProducer, error) {
 
 	go ap.propagateError()
 	return &ap, nil
+}
+
+func isValidRequiredAcks(ack RequiredAcks) bool {
+	switch ack {
+	case
+		NoResponse,
+		WaitForLocal,
+		WaitForAll:
+		return true
+	}
+	return false
 }
