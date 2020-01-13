@@ -42,17 +42,18 @@ type Builder struct {
 // NewBuilder initiates the AsyncProducer builder chain.
 // The builder instantiates the component using default values for
 // EncodeFunc and Content-Type header.
-func NewBuilder() *Builder {
+func NewBuilder(brokers []string) *Builder {
 	cfg := sarama.NewConfig()
 	cfg.Version = sarama.V0_11_0_0
-	var errs []error
+
 	return &Builder{
+		brokers:     brokers,
 		cfg:         cfg,
 		chErr:       make(chan error),
 		tag:         opentracing.Tag{Key: "type", Value: "async"},
 		enc:         json.Encode,
 		contentType: json.Type,
-		errors:      errs,
+		errors:      []error{},
 	}
 }
 
@@ -86,7 +87,7 @@ func (ab *Builder) WithVersion(version string) *Builder {
 }
 
 // WithRequiredAcksPolicy adjusts how many replica acknowledgements
-// broker must see before responding
+// broker must see before responding.
 func (ab *Builder) WithRequiredAcksPolicy(ack RequiredAcks) *Builder {
 	log.Info(fieldSetMsg, "required acks", ack)
 	ab.cfg.Producer.RequiredAcks = sarama.RequiredAcks(ack)
@@ -113,20 +114,12 @@ func (ab *Builder) WithEncoder(enc encoding.EncodeFunc, contentType string) *Bui
 	return ab
 }
 
-// WithBrokers sets the list of brokers the AsyncProducer will work with.
-func (ab *Builder) WithBrokers(brokers []string) *Builder {
-	if len(brokers) == 0 {
-		ab.errors = append(ab.errors, errors.New("brokers list is empty"))
-	} else {
-		log.Info(fieldSetMsg, "brokers", brokers)
-		ab.brokers = append(ab.brokers, brokers...)
-	}
-
-	return ab
-}
-
 // Create constructs the AsyncProducer component by applying the gathered properties.
 func (ab *Builder) Create() (*AsyncProducer, error) {
+	if len(ab.brokers) == 0 {
+		ab.errors = append(ab.errors, errors.New("brokers list is empty"))
+	}
+
 	if len(ab.errors) > 0 {
 		return nil, patronErrors.Aggregate(ab.errors...)
 	}
