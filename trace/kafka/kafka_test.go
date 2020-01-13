@@ -196,6 +196,7 @@ func TestSendWithCustomEncoder(t *testing.T) {
 				assert.NoError(t, err)
 			} else {
 				assert.Error(t, err)
+				return
 			}
 			assert.NotNil(t, ap)
 
