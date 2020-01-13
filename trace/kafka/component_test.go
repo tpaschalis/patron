@@ -2,7 +2,6 @@ package kafka
 
 import (
 	"errors"
-	"fmt"
 	"testing"
 	"time"
 
@@ -28,9 +27,8 @@ func TestVersion(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			ab := NewBuilder().WithVersion(tt.args.version)
+			ab := NewBuilder([]string{}).WithVersion(tt.args.version)
 			if tt.wantErr {
-				fmt.Println(ab.errors)
 				assert.NotEmpty(t, ab.errors)
 			} else {
 				assert.Empty(t, ab.errors)
@@ -56,7 +54,7 @@ func TestTimeouts(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			ab := NewBuilder().WithTimeout(tt.args.dial)
+			ab := NewBuilder([]string{}).WithTimeout(tt.args.dial)
 			if tt.wantErr {
 				assert.NotEmpty(t, ab.errors)
 			} else {
@@ -82,7 +80,7 @@ func TestRequiredAcksPolicy(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			ab := NewBuilder().WithRequiredAcksPolicy(tt.args.requiredAcks)
+			ab := NewBuilder([]string{}).WithRequiredAcksPolicy(tt.args.requiredAcks)
 			if tt.wantErr {
 				assert.NotEmpty(t, ab.errors)
 			} else {
@@ -110,7 +108,7 @@ func TestEncoder(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			ab := NewBuilder().WithEncoder(tt.args.enc, tt.args.contentType)
+			ab := NewBuilder([]string{}).WithEncoder(tt.args.enc, tt.args.contentType)
 			if tt.wantErr {
 				assert.NotEmpty(t, ab.errors)
 			} else {
@@ -123,6 +121,7 @@ func TestEncoder(t *testing.T) {
 }
 
 func TestBrokers(t *testing.T) {
+
 	seed := createKafkaBroker(t, true)
 
 	type args struct {
@@ -140,12 +139,10 @@ func TestBrokers(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			ab := NewBuilder().WithBrokers(tt.args.brokers)
+			ab := NewBuilder(tt.args.brokers)
 			if tt.wantErr {
-				assert.NotEmpty(t, ab.errors)
 				assert.Empty(t, ab.brokers)
 			} else {
-				assert.Empty(t, ab.errors)
 				assert.NotEmpty(t, ab.brokers)
 			}
 		})
@@ -187,8 +184,7 @@ func Test_createAsyncProducerUsingBuilder(t *testing.T) {
 
 	for name, tc := range tests {
 		t.Run(name, func(t *testing.T) {
-			gotAsyncProducer, gotErrs := NewBuilder().
-				WithBrokers(tc.brokers).
+			gotAsyncProducer, gotErrs := NewBuilder(tc.brokers).
 				WithVersion(tc.version).
 				WithEncoder(tc.enc, tc.contentType).
 				Create()
