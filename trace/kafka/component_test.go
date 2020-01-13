@@ -121,7 +121,6 @@ func TestEncoder(t *testing.T) {
 }
 
 func TestBrokers(t *testing.T) {
-
 	seed := createKafkaBroker(t, true)
 
 	type args struct {
