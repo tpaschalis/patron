@@ -2,6 +2,7 @@ package kafka
 
 import (
 	"errors"
+	"fmt"
 	"time"
 
 	"github.com/Shopify/sarama"
@@ -59,7 +60,7 @@ func NewBuilder(brokers []string) *Builder {
 
 // WithTimeout sets the dial timeout for the AsyncProducer.
 func (ab *Builder) WithTimeout(dial time.Duration) *Builder {
-	if dial <= 0*time.Second {
+	if dial <= 0 {
 		ab.errors = append(ab.errors, errors.New("dial timeout has to be positive"))
 	} else {
 		ab.cfg.Net.DialTimeout = dial
@@ -130,7 +131,7 @@ func (ab *Builder) Create() (*AsyncProducer, error) {
 
 	prod, err := sarama.NewAsyncProducer(ab.brokers, ab.cfg)
 	if err != nil {
-		return nil, errors.New("failed to create async producer")
+		return nil, fmt.Errorf("failed to create async producer: %w", err)
 	}
 
 	ap := AsyncProducer{
