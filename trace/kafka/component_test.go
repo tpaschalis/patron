@@ -77,6 +77,7 @@ func TestRequiredAcksPolicy(t *testing.T) {
 		{name: "success", args: args{requiredAcks: NoResponse}, wantErr: false},
 		{name: "success", args: args{requiredAcks: WaitForAll}, wantErr: false},
 		{name: "success", args: args{requiredAcks: WaitForLocal}, wantErr: false},
+		{name: "failure", args: args{requiredAcks: -5}, wantErr: true},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
