@@ -47,6 +47,11 @@ func NewBuilder(brokers []string) *Builder {
 	cfg := sarama.NewConfig()
 	cfg.Version = sarama.V0_11_0_0
 
+	errs := []error{}
+	if len(brokers) == 0 {
+		errs = append(errs, errors.New("brokers list is empty"))
+	}
+
 	return &Builder{
 		brokers:     brokers,
 		cfg:         cfg,
@@ -54,7 +59,7 @@ func NewBuilder(brokers []string) *Builder {
 		tag:         opentracing.Tag{Key: "type", Value: "async"},
 		enc:         json.Encode,
 		contentType: json.Type,
-		errors:      []error{},
+		errors:      errs,
 	}
 }
 
@@ -121,9 +126,6 @@ func (ab *Builder) WithEncoder(enc encoding.EncodeFunc, contentType string) *Bui
 
 // Create constructs the AsyncProducer component by applying the gathered properties.
 func (ab *Builder) Create() (*AsyncProducer, error) {
-	if len(ab.brokers) == 0 {
-		ab.errors = append(ab.errors, errors.New("brokers list is empty"))
-	}
 
 	if len(ab.errors) > 0 {
 		return nil, patronErrors.Aggregate(ab.errors...)
