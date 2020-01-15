@@ -158,44 +158,59 @@ func Test_createAsyncProducerUsingBuilder(t *testing.T) {
 		errors.New("brokers list is empty"),
 		errors.New("encoder is nil"),
 		errors.New("content type is empty"),
+		errors.New("dial timeout has to be positive"),
+		errors.New("version is required"),
+		errors.New("invalid value for required acks policy provided"),
 	}
 
 	tests := map[string]struct {
 		brokers     []string
 		version     string
+		ack         RequiredAcks
+		timeout     time.Duration
 		enc         encoding.EncodeFunc
 		contentType string
 		wantErrs    []error
 	}{
 		"success": {
 			brokers:     []string{seed.Addr()},
+			version:     sarama.V0_8_2_0.String(),
+			ack:         NoResponse,
+			timeout:     1 * time.Second,
 			enc:         json.Encode,
 			contentType: json.Type,
-			version:     sarama.V0_8_2_0.String(),
 			wantErrs:    builderNoErrors,
 		},
 		"error in all builder steps": {
 			brokers:     []string{},
+			version:     "",
+			ack:         -5,
+			timeout:     -1 * time.Second,
 			enc:         nil,
 			contentType: "",
-			version:     "",
 			wantErrs:    builderAllErrors,
 		},
 	}
 
-	for name, tc := range tests {
+	for name, tt := range tests {
 		t.Run(name, func(t *testing.T) {
-			gotAsyncProducer, gotErrs := NewBuilder(tc.brokers).
-				WithVersion(tc.version).
-				WithEncoder(tc.enc, tc.contentType).
+			gotAsyncProducer, gotErrs := NewBuilder(tt.brokers).
+				WithVersion(tt.version).
+				WithRequiredAcksPolicy(tt.ack).
+				WithTimeout(tt.timeout).
+				WithEncoder(tt.enc, tt.contentType).
 				Create()
 
-			if len(tc.wantErrs) > 0 {
-				assert.ObjectsAreEqual(tc.wantErrs, gotErrs)
+			v, _ := sarama.ParseKafkaVersion(tt.version)
+			if len(tt.wantErrs) > 0 {
+				assert.ObjectsAreEqual(tt.wantErrs, gotErrs)
 				assert.Nil(t, gotAsyncProducer)
 			} else {
 				assert.NotNil(t, gotAsyncProducer)
 				assert.IsType(t, &AsyncProducer{}, gotAsyncProducer)
+				assert.EqualValues(t, v, gotAsyncProducer.cfg.Version)
+				assert.EqualValues(t, tt.ack, gotAsyncProducer.cfg.Producer.RequiredAcks)
+				assert.Equal(t, tt.timeout, gotAsyncProducer.cfg.Net.DialTimeout)
 			}
 		})
 	}
