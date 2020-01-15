@@ -54,7 +54,7 @@ func (c *Cache) Get(key string) (interface{}, bool, error) {
 
 // Purge evicts all keys present in the cache.
 func (c *Cache) Purge() {
-	c.rdb.FlushDBAsync().Err()
+	c.rdb.FlushDBAsync()
 }
 
 // Remove evicts a specific key from the cache.
