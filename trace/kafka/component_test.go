@@ -13,6 +13,7 @@ import (
 )
 
 func TestVersion(t *testing.T) {
+	seed := createKafkaBroker(t, true)
 	type args struct {
 		version string
 	}
@@ -27,7 +28,7 @@ func TestVersion(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			ab := NewBuilder([]string{}).WithVersion(tt.args.version)
+			ab := NewBuilder([]string{seed.Addr()}).WithVersion(tt.args.version)
 			if tt.wantErr {
 				assert.NotEmpty(t, ab.errors)
 			} else {
@@ -41,6 +42,7 @@ func TestVersion(t *testing.T) {
 }
 
 func TestTimeouts(t *testing.T) {
+	seed := createKafkaBroker(t, true)
 	type args struct {
 		dial time.Duration
 	}
@@ -54,7 +56,7 @@ func TestTimeouts(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			ab := NewBuilder([]string{}).WithTimeout(tt.args.dial)
+			ab := NewBuilder([]string{seed.Addr()}).WithTimeout(tt.args.dial)
 			if tt.wantErr {
 				assert.NotEmpty(t, ab.errors)
 			} else {
@@ -66,6 +68,7 @@ func TestTimeouts(t *testing.T) {
 }
 
 func TestRequiredAcksPolicy(t *testing.T) {
+	seed := createKafkaBroker(t, true)
 	type args struct {
 		requiredAcks RequiredAcks
 	}
@@ -81,7 +84,7 @@ func TestRequiredAcksPolicy(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			ab := NewBuilder([]string{}).WithRequiredAcksPolicy(tt.args.requiredAcks)
+			ab := NewBuilder([]string{seed.Addr()}).WithRequiredAcksPolicy(tt.args.requiredAcks)
 			if tt.wantErr {
 				assert.NotEmpty(t, ab.errors)
 			} else {
@@ -93,6 +96,7 @@ func TestRequiredAcksPolicy(t *testing.T) {
 }
 
 func TestEncoder(t *testing.T) {
+	seed := createKafkaBroker(t, true)
 	type args struct {
 		enc         encoding.EncodeFunc
 		contentType string
@@ -110,7 +114,7 @@ func TestEncoder(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			ab := NewBuilder([]string{}).WithEncoder(tt.args.enc, tt.args.contentType)
+			ab := NewBuilder([]string{seed.Addr()}).WithEncoder(tt.args.enc, tt.args.contentType)
 			if tt.wantErr {
 				assert.NotEmpty(t, ab.errors)
 			} else {
