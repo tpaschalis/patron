@@ -42,9 +42,6 @@ func (c *Cache) Contains(key string) (bool, error) {
 func (c *Cache) Get(key string) (interface{}, bool, error) {
 	value, err := c.rdb.Get(key).Result()
 
-	if err == redis.Nil {
-		return nil, false, err
-	}
 	if err != nil {
 		return nil, false, err
 	}
@@ -53,12 +50,24 @@ func (c *Cache) Get(key string) (interface{}, bool, error) {
 }
 
 // Purge evicts all keys present in the cache.
-func (c *Cache) Purge() {
-	c.rdb.FlushDBAsync()
+func (c *Cache) Purge() error {
+	err := c.rdb.FlushDBAsync().Err()
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
 
 // Remove evicts a specific key from the cache.
-func (c *Cache) Remove(key string) {}
+func (c *Cache) Remove(key string) error {
+	err := c.rdb.Del("key").Err()
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
 
 // Set registers a key-value pair to the cache.
 func (c *Cache) Set(key string, value interface{}) error {

@@ -8,8 +8,8 @@ import (
 type Cache interface {
 	Contains(key string) bool
 	Get(key string) (interface{}, bool, error)
-	Purge()
-	Remove(key string)
+	Purge() error
+	Remove(key string) error
 	Set(key string, value interface{}) error
 	SetTTL(key string, value interface{}, ttl time.Duration) error
 }

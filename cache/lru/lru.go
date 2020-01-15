@@ -33,13 +33,17 @@ func (c *Cache) Get(key string) (interface{}, bool, error) {
 }
 
 // Purge evicts all keys present in the cache.
-func (c *Cache) Purge() {
+func (c *Cache) Purge() error {
 	c.lru.Purge()
+
+	return nil
 }
 
 // Remove evicts a specific key from the cache.
-func (c *Cache) Remove(key string) {
+func (c *Cache) Remove(key string) error {
 	c.lru.Remove(key)
+
+	return nil
 }
 
 // Set registers a key-value pair to the cache.
