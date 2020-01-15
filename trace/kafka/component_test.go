@@ -86,6 +86,7 @@ func TestRequiredAcksPolicy(t *testing.T) {
 				assert.NotEmpty(t, ab.errors)
 			} else {
 				assert.Empty(t, ab.errors)
+				assert.EqualValues(t, tt.args.requiredAcks, ab.cfg.Producer.RequiredAcks)
 			}
 		})
 	}
