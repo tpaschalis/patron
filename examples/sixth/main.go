@@ -1,0 +1,73 @@
+package main
+
+import (
+	"context"
+	"fmt"
+	"net/http"
+	"os"
+
+	"github.com/beatlabs/patron"
+	"github.com/beatlabs/patron/log"
+	patronhttp "github.com/beatlabs/patron/sync/http"
+)
+
+func init() {
+	err := os.Setenv("PATRON_LOG_LEVEL", "debug")
+	if err != nil {
+		fmt.Printf("failed to set log level env var: %v", err)
+		os.Exit(1)
+	}
+	err = os.Setenv("PATRON_JAEGER_SAMPLER_PARAM", "1.0")
+	if err != nil {
+		fmt.Printf("failed to set sampler env vars: %v", err)
+		os.Exit(1)
+	}
+}
+
+func main() {
+	name := "sixth"
+	version := "1.0.0"
+
+	err := patron.Setup(name, version)
+	if err != nil {
+		fmt.Printf("failed to set up logging: %v", err)
+		os.Exit(1)
+	}
+
+	// Set up routes
+	routes := []patronhttp.Route{
+		patronhttp.NewPostRoute("/", first, true),
+	}
+
+	// Setup a simple CORS middleware
+	middlewareCors := func(h http.Handler) http.Handler {
+		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			w.Header().Add("Access-Control-Allow-Origin", "*")
+			w.Header().Add("Access-Control-Allow-Methods", "GET, POST")
+			w.Header().Add("Access-Control-Allow-Headers", "Origin, Authorization, Content-Type")
+			w.Header().Add("Access-Control-Allow-Credentials", "Allow")
+			h.ServeHTTP(w, r)
+		})
+	}
+	sig := patron.SIGHUP(func() {
+		fmt.Println("exit gracefully...")
+		os.Exit(0)
+	})
+
+	srv, err := patron.New(
+		name,
+		version,
+		patron.Routes(routes),
+		patron.Middlewares(middlewareCors),
+		sig,
+	)
+	if err != nil {
+		log.Fatalf("failed to create service %v", err)
+	}
+
+	ctx := context.Background()
+	err = srv.Run(ctx)
+	if err != nil {
+		log.Fatalf("failed to run service %v", err)
+	}
+}

@@ -51,7 +51,7 @@ func (c *Cache) Set(key string, value interface{}) error {
 
 // SetTTL registers a key-value pair to the cache. Once the provided duration expires,
 // the function will try to erase the key from the cache.
-func (c *Cache) SetTTL(key string, value interface{}, ttl time.Duration) errors {
+func (c *Cache) SetTTL(key string, value interface{}, ttl time.Duration) error {
 	c.lru.Add(key, value)
 	time.AfterFunc(ttl, func() {
 		c.Remove(key)

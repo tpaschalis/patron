@@ -1,6 +1,8 @@
 package cache
 
-import "time"
+import (
+	"time"
+)
 
 // Cache interface for handling common operations, to be carried out by different caching implementations.
 type Cache interface {
