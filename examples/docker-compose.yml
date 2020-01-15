@@ -114,6 +114,7 @@ services:
   redis:
     image: 'bitnami/redis'
     hostname: 'redis'
+    environment:
     - ALLOW_EMPTY_PASSWORD=yes
     - REDIS_DISABLE_COMMANDS=FLUSHDB,FLUSHALL
     networks:
