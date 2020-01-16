@@ -24,8 +24,8 @@ func Create(size int) (*Cache, error) {
 }
 
 // Contains returns whether the key exists in cache, without updating its recent-ness.
-func (c *Cache) Contains(key string) bool {
-	return c.lru.Contains(key)
+func (c *Cache) Contains(key string) (bool, error) {
+	return c.lru.Contains(key), nil
 }
 
 // Get executes a lookup and returns whether a key exists in the cache along with and its value.

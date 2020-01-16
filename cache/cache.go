@@ -6,7 +6,7 @@ import (
 
 // Cache interface for handling common operations, to be carried out by different caching implementations.
 type Cache interface {
-	Contains(key string) bool
+	Contains(key string) (bool, error)
 	Get(key string) (interface{}, bool, error)
 	Purge() error
 	Remove(key string) error
