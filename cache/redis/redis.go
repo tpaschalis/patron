@@ -13,15 +13,10 @@ type Cache struct {
 }
 
 // Create returns a new Redis client that will be used for the cache
-func Create() (*Cache, error) {
-	rdb := redis.NewClient(&redis.Options{
-		Addr:     "localhost:6379",
-		Password: "",
-		DB:       0,
-	})
+func Create(opt redis.Options) (*Cache, error) {
+	rdb := redis.NewClient(&opt)
 
 	return &Cache{rdb: rdb}, nil
-
 }
 
 // Contains returns whether the key exists in cache.

@@ -18,7 +18,7 @@ func TestCreate(t *testing.T) {
 	assert.NoError(t, err)
 }
 
-func TestCacheProperties(t *testing.T) {
+func TestCacheOperations(t *testing.T) {
 	c, err := Create(10)
 	assert.NotNil(t, c)
 	assert.NoError(t, err)
