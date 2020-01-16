@@ -56,7 +56,7 @@ func (c *Cache) Purge() error {
 
 // Remove evicts a specific key from the cache.
 func (c *Cache) Remove(key string) error {
-	err := c.rdb.Del("key").Err()
+	err := c.rdb.Del(key).Err()
 	if err != nil {
 		return err
 	}
