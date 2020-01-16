@@ -4,7 +4,6 @@ import (
 	"time"
 
 	"github.com/beatlabs/patron/log"
-
 	lru "github.com/hashicorp/golang-lru"
 )
 
