@@ -40,9 +40,13 @@ func TestCacheProperties(t *testing.T) {
 	assert.NoError(t, err)
 	assert.False(t, exists)
 
-	c.Set("key1", "val1")
-	c.Set("key2", "val2")
-	c.Set("key3", "val3")
+	err = c.Set("key1", "val1")
+	assert.NoError(t, err)
+	err = c.Set("key2", "val2")
+	assert.NoError(t, err)
+	err = c.Set("key3", "val3")
+	assert.NoError(t, err)
+
 	assert.Equal(t, c.lru.Len(), 3)
 	err = c.Purge()
 	assert.NoError(t, err)
