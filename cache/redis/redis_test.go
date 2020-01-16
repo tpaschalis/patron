@@ -23,7 +23,7 @@ func TestCreate(t *testing.T) {
 	assert.NoError(t, err)
 }
 
-func TestCacheOperations(t *testing.T) {
+func TestCacheOperationsMiniredis(t *testing.T) {
 	mr, err := miniredis.Run()
 	if err != nil {
 		log.Fatal(err)
@@ -77,4 +77,47 @@ func TestCacheOperations(t *testing.T) {
 	exists, err = c.Contains(k)
 	assert.False(t, exists)
 	assert.NoError(t, err)
+}
+
+func TestCacheOperationsMocked(t *testing.T) {
+	c := NewMockRedis()
+
+	k, v := "foo", "bar"
+	exists, err := c.Contains(k)
+	assert.NoError(t, err)
+	assert.False(t, exists)
+
+	err = c.Set(k, v)
+	assert.NoError(t, err)
+
+	res, exists, err := c.Get(k)
+	assert.Equal(t, res, v)
+	assert.True(t, exists)
+	assert.NoError(t, err)
+
+	err = c.Remove(k)
+	assert.NoError(t, err)
+	exists, err = c.Contains(k)
+	assert.NoError(t, err)
+	assert.False(t, exists)
+
+	err = c.Set("key1", "val1")
+	assert.NoError(t, err)
+	err = c.Set("key2", "val2")
+	assert.NoError(t, err)
+	err = c.Set("key3", "val3")
+	assert.NoError(t, err)
+
+	assert.Equal(t, len(c.data), 3)
+	err = c.Purge()
+	assert.NoError(t, err)
+	assert.Equal(t, len(c.data), 0)
+
+	ttl := 500 * time.Millisecond
+	err = c.SetTTL(k, v, ttl)
+	assert.NoError(t, err)
+	exists, err = c.Contains(k)
+	assert.NoError(t, err)
+	assert.True(t, exists)
+	assert.Equal(t, c.data[k].ttl, ttl)
 }
