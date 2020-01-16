@@ -24,7 +24,8 @@ func TestCacheProperties(t *testing.T) {
 	assert.NoError(t, err)
 
 	k, v := "foo", "bar"
-	exists := c.Contains(k)
+	exists, err := c.Contains(k)
+	assert.NoError(t, err)
 	assert.False(t, exists)
 
 	err = c.Set(k, v)
@@ -36,7 +37,8 @@ func TestCacheProperties(t *testing.T) {
 	assert.NoError(t, err)
 
 	err = c.Remove(k)
-	exists = c.Contains(k)
+	assert.NoError(t, err)
+	exists, err = c.Contains(k)
 	assert.NoError(t, err)
 	assert.False(t, exists)
 
@@ -54,9 +56,12 @@ func TestCacheProperties(t *testing.T) {
 
 	err = c.SetTTL(k, v, 500*time.Millisecond)
 	assert.NoError(t, err)
-	exists = c.Contains(k)
+	exists, err = c.Contains(k)
+	assert.NoError(t, err)
 	assert.True(t, exists)
-	time.Sleep(500 * time.Millisecond)
-	exists = c.Contains(k)
+
+	time.Sleep(600 * time.Millisecond)
+	exists, err = c.Contains(k)
 	assert.False(t, exists)
+	assert.NoError(t, err)
 }
