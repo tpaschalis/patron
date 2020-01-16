@@ -71,7 +71,7 @@ func TestCacheOperationsMiniredis(t *testing.T) {
 	assert.NoError(t, err)
 	assert.True(t, exists)
 
-	// miniredis doesn't decrease ttl automatically
+	// miniredis doesn't decrease ttl automatically.
 	mr.FastForward(500 * time.Millisecond)
 
 	exists, err = c.Contains(k)
