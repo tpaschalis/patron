@@ -3,6 +3,8 @@ package lru
 import (
 	"time"
 
+	"github.com/beatlabs/patron/log"
+
 	lru "github.com/hashicorp/golang-lru"
 )
 
@@ -58,7 +60,8 @@ func (c *Cache) Set(key string, value interface{}) error {
 func (c *Cache) SetTTL(key string, value interface{}, ttl time.Duration) error {
 	c.lru.Add(key, value)
 	time.AfterFunc(ttl, func() {
-		c.Remove(key)
+		err := c.Remove(key)
+		log.Fatalf("failed to remove key from golang-lru cache after its ttl has expired : %v", err)
 	})
 
 	return nil
