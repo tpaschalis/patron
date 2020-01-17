@@ -28,9 +28,9 @@ const (
 
 const fieldSetMsg = "Setting property '%v' for '%v'"
 
-// Builder gathers all required and optional properties, in order
+// AsyncBuilder gathers all required and optional properties, in order
 // to construct a Kafka AsyncProducer.
-type Builder struct {
+type AsyncBuilder struct {
 	brokers     []string
 	cfg         *sarama.Config
 	chErr       chan error
@@ -43,7 +43,7 @@ type Builder struct {
 // NewBuilder initiates the AsyncProducer builder chain.
 // The builder instantiates the component using default values for
 // EncodeFunc and Content-Type header.
-func NewBuilder(brokers []string) *Builder {
+func NewBuilder(brokers []string) *AsyncBuilder {
 	cfg := sarama.NewConfig()
 	cfg.Version = sarama.V0_11_0_0
 
@@ -52,7 +52,7 @@ func NewBuilder(brokers []string) *Builder {
 		errs = append(errs, errors.New("brokers list is empty"))
 	}
 
-	return &Builder{
+	return &AsyncBuilder{
 		brokers:     brokers,
 		cfg:         cfg,
 		chErr:       make(chan error),
@@ -64,19 +64,18 @@ func NewBuilder(brokers []string) *Builder {
 }
 
 // WithTimeout sets the dial timeout for the AsyncProducer.
-func (ab *Builder) WithTimeout(dial time.Duration) *Builder {
+func (ab *AsyncBuilder) WithTimeout(dial time.Duration) *AsyncBuilder {
 	if dial <= 0 {
 		ab.errors = append(ab.errors, errors.New("dial timeout has to be positive"))
-	} else {
-		ab.cfg.Net.DialTimeout = dial
-		log.Info(fieldSetMsg, "dial timeout", dial)
+		return ab
 	}
-
+	ab.cfg.Net.DialTimeout = dial
+	log.Info(fieldSetMsg, "dial timeout", dial)
 	return ab
 }
 
 // WithVersion sets the kafka versionfor the AsyncProducer.
-func (ab *Builder) WithVersion(version string) *Builder {
+func (ab *AsyncBuilder) WithVersion(version string) *AsyncBuilder {
 	if version == "" {
 		ab.errors = append(ab.errors, errors.New("version is required"))
 		return ab
@@ -94,20 +93,19 @@ func (ab *Builder) WithVersion(version string) *Builder {
 
 // WithRequiredAcksPolicy adjusts how many replica acknowledgements
 // broker must see before responding.
-func (ab *Builder) WithRequiredAcksPolicy(ack RequiredAcks) *Builder {
+func (ab *AsyncBuilder) WithRequiredAcksPolicy(ack RequiredAcks) *AsyncBuilder {
 	if !isValidRequiredAcks(ack) {
 		ab.errors = append(ab.errors, errors.New("invalid value for required acks policy provided"))
-	} else {
-		log.Info(fieldSetMsg, "required acks", ack)
-		ab.cfg.Producer.RequiredAcks = sarama.RequiredAcks(ack)
+		return ab
 	}
-
+	log.Info(fieldSetMsg, "required acks", ack)
+	ab.cfg.Producer.RequiredAcks = sarama.RequiredAcks(ack)
 	return ab
 }
 
 // WithEncoder sets a specific encoder implementation and Content-Type string header;
 // if no option is provided it defaults to json.
-func (ab *Builder) WithEncoder(enc encoding.EncodeFunc, contentType string) *Builder {
+func (ab *AsyncBuilder) WithEncoder(enc encoding.EncodeFunc, contentType string) *AsyncBuilder {
 	if enc == nil {
 		ab.errors = append(ab.errors, errors.New("encoder is nil"))
 	} else {
@@ -125,7 +123,7 @@ func (ab *Builder) WithEncoder(enc encoding.EncodeFunc, contentType string) *Bui
 }
 
 // Create constructs the AsyncProducer component by applying the gathered properties.
-func (ab *Builder) Create() (*AsyncProducer, error) {
+func (ab *AsyncBuilder) Create() (*AsyncProducer, error) {
 
 	if len(ab.errors) > 0 {
 		return nil, patronErrors.Aggregate(ab.errors...)
