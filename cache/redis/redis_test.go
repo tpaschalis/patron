@@ -4,8 +4,6 @@ import (
 	"testing"
 	"time"
 
-	"github.com/beatlabs/patron/log"
-
 	"github.com/alicebob/miniredis/v2"
 	"github.com/go-redis/redis/v7"
 	"github.com/stretchr/testify/assert"
@@ -14,9 +12,7 @@ import (
 
 func TestNew(t *testing.T) {
 	mr, err := miniredis.Run()
-	if err != nil {
-		log.Fatal(err)
-	}
+	require.NoError(t, err)
 	opt := redis.Options{Addr: mr.Addr()}
 
 	c, err := New(opt)
