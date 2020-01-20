@@ -52,6 +52,7 @@ func TestCacheOperationsMiniredis(t *testing.T) {
 	res, exists, err = c.Get(k)
 	assert.Nil(t, res)
 	assert.False(t, exists)
+	assert.Error(t, err)
 
 	err = c.Set("key1", "val1")
 	assert.NoError(t, err)
