@@ -24,23 +24,25 @@ func TestCacheOperations(t *testing.T) {
 	assert.NoError(t, err)
 
 	k, v := "foo", "bar"
-	exists, err := c.Contains(k)
-	assert.NoError(t, err)
+	res, exists, err := c.Get(k)
+	assert.Nil(t, res)
 	assert.False(t, exists)
+	assert.NoError(t, err)
 
 	err = c.Set(k, v)
 	assert.NoError(t, err)
 
-	res, exists, err := c.Get(k)
-	assert.Equal(t, res, v)
+	res, exists, err = c.Get(k)
+	assert.Equal(t, v, res)
 	assert.True(t, exists)
 	assert.NoError(t, err)
 
 	err = c.Remove(k)
 	assert.NoError(t, err)
-	exists, err = c.Contains(k)
-	assert.NoError(t, err)
+	res, exists, err = c.Get(k)
+	assert.Nil(t, res)
 	assert.False(t, exists)
+	assert.NoError(t, err)
 
 	err = c.Set("key1", "val1")
 	assert.NoError(t, err)
@@ -56,12 +58,14 @@ func TestCacheOperations(t *testing.T) {
 
 	err = c.SetTTL(k, v, 500*time.Millisecond)
 	assert.NoError(t, err)
-	exists, err = c.Contains(k)
-	assert.NoError(t, err)
+	res, exists, err = c.Get(k)
+	assert.Equal(t, v, res)
 	assert.True(t, exists)
+	assert.NoError(t, err)
 
 	time.Sleep(600 * time.Millisecond)
-	exists, err = c.Contains(k)
+	res, exists, err = c.Get(k)
+	assert.Nil(t, res)
 	assert.False(t, exists)
 	assert.NoError(t, err)
 }
