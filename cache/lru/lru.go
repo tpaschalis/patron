@@ -13,8 +13,8 @@ type Cache struct {
 	lru *lru.Cache
 }
 
-// Create returns a new LRU cache.
-func Create(size int) (*Cache, error) {
+// New returns a new LRU cache.
+func New(size int) (*Cache, error) {
 	lruCache, err := lru.New(size)
 	if err != nil {
 		return nil, err

@@ -13,7 +13,7 @@ func Example() {
 	// or provide your own. This example uses the `lru` implementation.
 	// All actions return an error for proper handling, which is out of the scope
 	// of this example. Let's create a cache that can hold 32 items.
-	c, err := lru.Create(32)
+	c, err := lru.New(32)
 	if err != nil {
 		log.Fatal(err)
 	}

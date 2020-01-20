@@ -12,8 +12,8 @@ type Cache struct {
 	rdb *redis.Client
 }
 
-// Create returns a new Redis client that will be used as the cache store.
-func Create(opt redis.Options) (*Cache, error) {
+// New returns a new Redis client that will be used as the cache store.
+func New(opt redis.Options) (*Cache, error) {
 	rdb := redis.NewClient(&opt)
 
 	return &Cache{rdb: rdb}, nil

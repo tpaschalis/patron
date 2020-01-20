@@ -11,14 +11,14 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestCreate(t *testing.T) {
+func TestNew(t *testing.T) {
 	mr, err := miniredis.Run()
 	if err != nil {
 		log.Fatal(err)
 	}
 	opt := redis.Options{Addr: mr.Addr()}
 
-	c, err := Create(opt)
+	c, err := New(opt)
 	assert.NotNil(t, c)
 	assert.NoError(t, err)
 }
@@ -30,7 +30,7 @@ func TestCacheOperationsMiniredis(t *testing.T) {
 	}
 	opt := redis.Options{Addr: mr.Addr()}
 
-	c, err := Create(opt)
+	c, err := New(opt)
 	assert.NotNil(t, c)
 	assert.NoError(t, err)
 

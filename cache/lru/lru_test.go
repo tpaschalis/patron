@@ -7,19 +7,19 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestCreate(t *testing.T) {
+func TestNew(t *testing.T) {
 
-	c, err := Create(-1)
+	c, err := New(-1)
 	assert.Nil(t, c)
 	assert.Error(t, err)
 
-	c, err = Create(512)
+	c, err = New(512)
 	assert.NotNil(t, c)
 	assert.NoError(t, err)
 }
 
 func TestCacheOperations(t *testing.T) {
-	c, err := Create(10)
+	c, err := New(10)
 	assert.NotNil(t, c)
 	assert.NoError(t, err)
 
