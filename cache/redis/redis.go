@@ -31,39 +31,21 @@ func (c *Cache) Get(key string) (interface{}, bool, error) {
 
 // Purge evicts all keys present in the cache.
 func (c *Cache) Purge() error {
-	err := c.rdb.FlushDBAsync().Err()
-	if err != nil {
-		return err
-	}
-
-	return nil
+	return c.rdb.FlushDBAsync().Err()
 }
 
 // Remove evicts a specific key from the cache.
 func (c *Cache) Remove(key string) error {
-	err := c.rdb.Del(key).Err()
-	if err != nil {
-		return err
-	}
-
-	return nil
+	return c.rdb.Del(key).Err()
 }
 
 // Set registers a key-value pair to the cache.
 func (c *Cache) Set(key string, value interface{}) error {
-	err := c.rdb.Set(key, value, 0).Err()
-	if err != nil {
-		return err
-	}
-	return nil
+	return c.rdb.Set(key, value, 0).Err()
 }
 
 // SetTTL registers a key-value pair to the cache. Once the provided duration expires,
 // the function will try to erase the key from the cache.
 func (c *Cache) SetTTL(key string, value interface{}, ttl time.Duration) error {
-	err := c.rdb.Set(key, value, ttl).Err()
-	if err != nil {
-		return err
-	}
-	return nil
+	return c.rdb.Set(key, value, ttl).Err()
 }
