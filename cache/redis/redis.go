@@ -15,22 +15,7 @@ type Cache struct {
 // New returns a new Redis client that will be used as the cache store.
 func New(opt redis.Options) (*Cache, error) {
 	rdb := redis.NewClient(&opt)
-
 	return &Cache{rdb: rdb}, nil
-}
-
-// Contains returns whether the key exists in cache.
-func (c *Cache) Contains(key string) (bool, error) {
-	_, err := c.rdb.Get(key).Result()
-
-	if err == redis.Nil {
-		return false, nil
-	}
-	if err != nil {
-		return false, err
-	}
-
-	return true, nil
 }
 
 // Get executes a lookup and returns whether a key exists in the cache along with and its value.
