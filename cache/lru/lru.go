@@ -36,21 +36,18 @@ func (c *Cache) Get(key string) (interface{}, bool, error) {
 // Purge evicts all keys present in the cache.
 func (c *Cache) Purge() error {
 	c.lru.Purge()
-
 	return nil
 }
 
 // Remove evicts a specific key from the cache.
 func (c *Cache) Remove(key string) error {
 	c.lru.Remove(key)
-
 	return nil
 }
 
 // Set registers a key-value pair to the cache.
 func (c *Cache) Set(key string, value interface{}) error {
 	c.lru.Add(key, value)
-
 	return nil
 }
 
@@ -62,6 +59,5 @@ func (c *Cache) SetTTL(key string, value interface{}, ttl time.Duration) error {
 		err := c.Remove(key)
 		log.Fatalf("failed to remove key from golang-lru cache after its ttl has expired : %v", err)
 	})
-
 	return nil
 }
