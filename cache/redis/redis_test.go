@@ -27,6 +27,7 @@ func TestCacheOperationsMiniredis(t *testing.T) {
 
 	opt := redis.Options{Addr: mr.Addr()}
 	c, err := New(opt)
+	assert.NoError(t, err)
 	k, v := "foo", "bar"
 
 	t.Run("testSet", func(t *testing.T) {
@@ -45,6 +46,7 @@ func TestCacheOperationsMiniredis(t *testing.T) {
 
 	t.Run("testRemove", func(t *testing.T) {
 		err := c.Remove(k)
+		assert.NoError(t, err)
 		res, ok, err := c.Get(k)
 		fmt.Println(res, ok, err)
 		assert.False(t, ok)
