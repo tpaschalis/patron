@@ -34,8 +34,12 @@ const (
 	SQSConsumerComponent = "sqs-consumer"
 	// SNSPublisherComponent definition.
 	SNSPublisherComponent = "sns-publisher"
-	versionTag            = "version"
-	hostsTag              = "hosts"
+	// RedisComponent Definition
+	RedisComponent = "redis"
+	// RedisDBType description
+	RedisDBType = "In-memory"
+	versionTag  = "version"
+	hostsTag    = "hosts"
 )
 
 var (
@@ -166,7 +170,7 @@ func SQLSpan(ctx context.Context, opName, cmp, sqlType, instance, user, stmt str
 	return sp, ctx
 }
 
-// EsSpan starts a new elasticsearch child span with specified tags
+// EsSpan starts a new elasticsearch child span with specified tags.
 func EsSpan(ctx context.Context, opName, cmp, user, uri, method, body string, hostPool []string) opentracing.Span {
 
 	sp, _ := opentracing.StartSpanFromContext(ctx, opName)
@@ -183,6 +187,22 @@ func EsSpan(ctx context.Context, opName, cmp, user, uri, method, body string, ho
 	sp.SetTag(versionTag, version)
 
 	return sp
+}
+
+// RedisSpan starts a new Redis child span with specified tags.
+func RedisSpan(ctx context.Context, opName, cmp, dbType, instance, stmt string,
+	tags ...opentracing.Tag) (opentracing.Span, context.Context) {
+
+	sp, ctx := opentracing.StartSpanFromContext(ctx, opName)
+	ext.Component.Set(sp, cmp)
+	ext.DBType.Set(sp, dbType)
+	ext.DBInstance.Set(sp, instance)
+	ext.DBStatement.Set(sp, stmt)
+	for _, t := range tags {
+		sp.SetTag(t.Key, t.Value)
+	}
+	sp.SetTag(versionTag, version)
+	return sp, ctx
 }
 
 // HTTPOpName return a string representation of the HTTP request operation.
