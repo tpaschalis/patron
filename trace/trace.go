@@ -34,12 +34,8 @@ const (
 	SQSConsumerComponent = "sqs-consumer"
 	// SNSPublisherComponent definition.
 	SNSPublisherComponent = "sns-publisher"
-	// RedisComponent Definition
-	RedisComponent = "redis"
-	// RedisDBType description
-	RedisDBType = "In-memory"
-	versionTag  = "version"
-	hostsTag    = "hosts"
+	versionTag            = "version"
+	hostsTag              = "hosts"
 )
 
 var (

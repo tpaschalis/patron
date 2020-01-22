@@ -10,11 +10,11 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestRedisSpan(t *testing.T) {
+func TestSpan(t *testing.T) {
 	mtr := mocktracer.New()
 	opentracing.SetGlobalTracer(mtr)
 	tag := opentracing.Tag{Key: "key", Value: "value"}
-	sp, req := RedisSpan(context.Background(), "name", trace.RedisComponent, trace.RedisDBType, "localhost", "flushdb", tag)
+	sp, req := Span(context.Background(), "name", RedisComponent, RedisDBType, "localhost", "flushdb", tag)
 	assert.NotNil(t, sp)
 	assert.NotNil(t, req)
 	assert.IsType(t, &mocktracer.MockSpan{}, sp)
@@ -23,11 +23,11 @@ func TestRedisSpan(t *testing.T) {
 	trace.SpanSuccess(sp)
 	rawSpan := mtr.FinishedSpans()[0]
 	assert.Equal(t, map[string]interface{}{
-		"component":    trace.RedisComponent,
+		"component":    RedisComponent,
 		"version":      "dev",
 		"db.instance":  "localhost",
 		"db.statement": "flushdb",
-		"db.type":      trace.RedisDBType,
+		"db.type":      RedisDBType,
 		"error":        false,
 		"key":          "value",
 	}, rawSpan.Tags())

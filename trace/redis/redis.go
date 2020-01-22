@@ -12,15 +12,19 @@ import (
 )
 
 const (
-	versionTag = "version"
+	// RedisComponent Definition
+	RedisComponent = "redis"
+	// RedisDBType description
+	RedisDBType = "In-memory"
+	versionTag  = "version"
 )
 
 var (
 	version = "dev"
 )
 
-// RedisSpan starts a new Redis child span with specified tags.
-func RedisSpan(ctx context.Context, opName, cmp, dbType, instance, stmt string,
+// Span starts a new Redis child span with specified tags.
+func Span(ctx context.Context, opName, cmp, dbType, instance, stmt string,
 	tags ...opentracing.Tag) (opentracing.Span, context.Context) {
 
 	sp, ctx := opentracing.StartSpanFromContext(ctx, opName)
@@ -47,7 +51,7 @@ type Client struct {
 }
 
 func (c *Client) startSpan(ctx context.Context, opName, stmt string) (opentracing.Span, context.Context) {
-	return RedisSpan(ctx, opName, trace.RedisComponent, trace.RedisDBType, stmt, c.Options().Addr)
+	return Span(ctx, opName, RedisComponent, RedisDBType, stmt, c.Options().Addr)
 }
 
 // New returns a new Redis client.
