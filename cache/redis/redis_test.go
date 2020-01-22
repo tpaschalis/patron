@@ -14,7 +14,7 @@ import (
 func TestNew(t *testing.T) {
 	mr, err := miniredis.Run()
 	require.NoError(t, err)
-	opt := redis.Options{Addr: mr.Addr()}
+	opt := Options{Addr: mr.Addr()}
 
 	c, err := New(opt)
 	assert.NotNil(t, c)
@@ -25,14 +25,13 @@ func TestCacheOperationsMiniredis(t *testing.T) {
 	mr, err := miniredis.Run()
 	require.NoError(t, err)
 
-	opt := redis.Options{Addr: mr.Addr()}
+	opt := Options{Addr: mr.Addr()}
 	c, err := New(opt)
 	assert.NoError(t, err)
 	k, v := "foo", "bar"
 
 	t.Run("testSet", func(t *testing.T) {
-		ok, err := c.Set(k, v)
-		assert.Equal(t, "OK", ok)
+		err := c.Set(k, v)
 		assert.NoError(t, err)
 	})
 
@@ -54,11 +53,11 @@ func TestCacheOperationsMiniredis(t *testing.T) {
 	})
 
 	t.Run("testPurge", func(t *testing.T) {
-		_, err := c.Set("key1", "val1")
+		err := c.Set("key1", "val1")
 		assert.NoError(t, err)
-		_, err = c.Set("key2", "val2")
+		err = c.Set("key2", "val2")
 		assert.NoError(t, err)
-		_, err = c.Set("key3", "val3")
+		err = c.Set("key3", "val3")
 		assert.NoError(t, err)
 		assert.Equal(t, int64(3), c.rdb.Client.DBSize().Val())
 
@@ -68,7 +67,7 @@ func TestCacheOperationsMiniredis(t *testing.T) {
 	})
 
 	t.Run("testSetTTL", func(t *testing.T) {
-		_, err := c.SetTTL(k, v, 500*time.Millisecond)
+		err := c.SetTTL(k, v, 500*time.Millisecond)
 		assert.NoError(t, err)
 
 		res, ok, err := c.Get(k)
