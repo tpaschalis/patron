@@ -10,7 +10,7 @@ type Cache struct {
 	lru *lru.Cache
 }
 
-// New returns a new LRU cache.
+// New returns a new LRU cache that can hold 'size' number of keys at a time.
 func New(size int) (*Cache, error) {
 	lruCache, err := lru.New(size)
 	if err != nil {

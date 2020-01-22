@@ -31,8 +31,7 @@ func (c *Cache) Get(key string) (interface{}, bool, error) {
 
 // Set registers a key-value pair to the cache.
 func (c *Cache) Set(key, value string) (interface{}, error) {
-	res, err := c.rdb.Do(c.ctx, "set", key, value)
-	return res, err
+	return c.rdb.Do(c.ctx, "set", key, value)
 }
 
 // Purge evicts all keys present in the cache.
@@ -50,7 +49,5 @@ func (c *Cache) Remove(key string) error {
 // SetTTL registers a key-value pair to the cache. Once the provided duration expires,
 // the function will try to erase the key from the cache.
 func (c *Cache) SetTTL(key string, value interface{}, ttl time.Duration) (interface{}, error) {
-	milis := int(ttl.Milliseconds())
-	res, err := c.rdb.Do(c.ctx, "set", key, value, "px", milis)
-	return res, err
+	return c.rdb.Do(c.ctx, "set", key, value, "px", int(ttl.Milliseconds()))
 }
