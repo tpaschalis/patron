@@ -10,7 +10,7 @@ import (
 // Cache encapsulates a Redis-based caching mechanism,
 // driven by go-redis/redis/v7.
 type Cache struct {
-	rdb *redis.Conn
+	rdb *redis.Client
 	ctx context.Context
 }
 

@@ -189,22 +189,6 @@ func EsSpan(ctx context.Context, opName, cmp, user, uri, method, body string, ho
 	return sp
 }
 
-// RedisSpan starts a new Redis child span with specified tags.
-func RedisSpan(ctx context.Context, opName, cmp, dbType, instance, stmt string,
-	tags ...opentracing.Tag) (opentracing.Span, context.Context) {
-
-	sp, ctx := opentracing.StartSpanFromContext(ctx, opName)
-	ext.Component.Set(sp, cmp)
-	ext.DBType.Set(sp, dbType)
-	ext.DBInstance.Set(sp, instance)
-	ext.DBStatement.Set(sp, stmt)
-	for _, t := range tags {
-		sp.SetTag(t.Key, t.Value)
-	}
-	sp.SetTag(versionTag, version)
-	return sp, ctx
-}
-
 // HTTPOpName return a string representation of the HTTP request operation.
 func HTTPOpName(method, path string) string {
 	return method + " " + path

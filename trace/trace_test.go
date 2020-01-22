@@ -153,29 +153,6 @@ func TestEsSpan(t *testing.T) {
 	}, rawspan.Tags())
 }
 
-func TestRedisSpan(t *testing.T) {
-	mtr := mocktracer.New()
-	opentracing.SetGlobalTracer(mtr)
-	tag := opentracing.Tag{Key: "key", Value: "value"}
-	sp, req := RedisSpan(context.Background(), "name", RedisComponent, RedisDBType, "localhost", "flushdb", tag)
-	assert.NotNil(t, sp)
-	assert.NotNil(t, req)
-	assert.IsType(t, &mocktracer.MockSpan{}, sp)
-	jsp := sp.(*mocktracer.MockSpan)
-	assert.NotNil(t, jsp)
-	SpanSuccess(sp)
-	rawSpan := mtr.FinishedSpans()[0]
-	assert.Equal(t, map[string]interface{}{
-		"component":    RedisComponent,
-		"version":      "dev",
-		"db.instance":  "localhost",
-		"db.statement": "flushdb",
-		"db.type":      RedisDBType,
-		"error":        false,
-		"key":          "value",
-	}, rawSpan.Tags())
-}
-
 func TestComponentOpName(t *testing.T) {
 	assert.Equal(t, "cmp target", ComponentOpName("cmp", "target"))
 }
