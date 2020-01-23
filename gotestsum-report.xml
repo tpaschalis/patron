@@ -1,617 +1,703 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <testsuites>
-	<testsuite tests="34" failures="2" time="4.990s" name="github.com/beatlabs/patron">
+	<testsuite tests="34" failures="0" time="5.050000" name="github.com/beatlabs/patron">
 		<properties>
-			<property name="go.version" value="go1.11.4"></property>
+			<property name="go.version" value="go1.13.4 darwin/amd64"></property>
 		</properties>
-		<testcase classname="patron" name="TestRoutes/failure_due_to_empty_routes" time="0.110s">
-			<failure message="Failed" type="">=== RUN   TestRoutes/failure_due_to_empty_routes&#xA;{&#34;lvl&#34;:&#34;info&#34;,&#34;host&#34;:&#34;prometheus&#34;,&#34;srv&#34;:&#34;test&#34;,&#34;ver&#34;:&#34;1.0.0&#34;,&#34;time&#34;:&#34;2019-11-17T19:23:19.62851982+02:00&#34;,&#34;src&#34;:&#34;patron/service.go:62&#34;,&#34;msg&#34;:&#34;setting up default tracing 0.0.0.0:6831, probabilistic with param 0.0&#34;}&#xA;{&#34;lvl&#34;:&#34;info&#34;,&#34;host&#34;:&#34;prometheus&#34;,&#34;srv&#34;:&#34;test&#34;,&#34;ver&#34;:&#34;1.0.0&#34;,&#34;time&#34;:&#34;2019-11-17T19:23:19.732575648+02:00&#34;,&#34;src&#34;:&#34;patron/service.go:74&#34;,&#34;msg&#34;:&#34;creating default HTTP component at port 50000&#34;}&#xA;    --- FAIL: TestRoutes/failure_due_to_empty_routes (0.11s)&#xA;        option_test.go:39: &#xA;            &#x9;Error Trace:&#x9;option_test.go:39&#xA;            &#x9;Error:      &#x9;Received unexpected error:&#xA;            &#x9;            &#x9;routes are required&#xA;            &#x9;            &#x9;github.com/beatlabs/patron/errors.New&#xA;            &#x9;            &#x9;&#x9;/home/mantzas/src/go/beat/patron/errors/errors.go:9&#xA;            &#x9;            &#x9;github.com/beatlabs/patron.Routes.func1&#xA;            &#x9;            &#x9;&#x9;/home/mantzas/src/go/beat/patron/option.go:16&#xA;            &#x9;            &#x9;github.com/beatlabs/patron.TestRoutes.func1&#xA;            &#x9;            &#x9;&#x9;/home/mantzas/src/go/beat/patron/option_test.go:35&#xA;            &#x9;            &#x9;testing.tRunner&#xA;            &#x9;            &#x9;&#x9;/usr/local/go/src/testing/testing.go:909&#xA;            &#x9;            &#x9;runtime.goexit&#xA;            &#x9;            &#x9;&#x9;/usr/local/go/src/runtime/asm_amd64.s:1357&#xA;            &#x9;Test:       &#x9;TestRoutes/failure_due_to_empty_routes&#xA;</failure>
-		</testcase>
-		<testcase classname="patron" name="TestRoutes" time="0.310s">
-			<failure message="Failed" type="">=== RUN   TestRoutes&#xA;--- FAIL: TestRoutes (0.31s)&#xA;</failure>
-		</testcase>
-		<testcase classname="patron" name="TestRoutes/failure_due_to_nil_routes" time="0.100s"></testcase>
-		<testcase classname="patron" name="TestRoutes/success" time="0.100s"></testcase>
-		<testcase classname="patron" name="TestMiddlewares/success" time="0.110s"></testcase>
-		<testcase classname="patron" name="TestMiddlewares/failure_because_empty" time="0.100s"></testcase>
-		<testcase classname="patron" name="TestMiddlewares/failure_because_nil" time="0.100s"></testcase>
-		<testcase classname="patron" name="TestMiddlewares" time="0.320s"></testcase>
-		<testcase classname="patron" name="TestAliveCheck/failure_due_to_nil_liveness_check" time="0.100s"></testcase>
-		<testcase classname="patron" name="TestAliveCheck/success" time="0.100s"></testcase>
-		<testcase classname="patron" name="TestAliveCheck" time="0.210s"></testcase>
-		<testcase classname="patron" name="TestReadyCheck/failure_due_to_nil_liveness_check" time="0.100s"></testcase>
-		<testcase classname="patron" name="TestReadyCheck/success" time="0.100s"></testcase>
-		<testcase classname="patron" name="TestReadyCheck" time="0.210s"></testcase>
-		<testcase classname="patron" name="TestComponents/failure_due_to_empty_components" time="0.110s"></testcase>
-		<testcase classname="patron" name="TestComponents/failure_due_to_nil_components" time="0.110s"></testcase>
-		<testcase classname="patron" name="TestComponents/success" time="0.110s"></testcase>
-		<testcase classname="patron" name="TestComponents" time="0.320s"></testcase>
-		<testcase classname="patron" name="TestSIGHUP/nil_handler" time="0.100s"></testcase>
-		<testcase classname="patron" name="TestSIGHUP/success" time="0.110s"></testcase>
-		<testcase classname="patron" name="TestSIGHUP" time="0.210s"></testcase>
-		<testcase classname="patron" name="TestNewServer/success" time="0.100s"></testcase>
-		<testcase classname="patron" name="TestNewServer/failed_empty_middlewares" time="0.100s"></testcase>
-		<testcase classname="patron" name="TestNewServer/failed_missing_name" time="0.000s"></testcase>
-		<testcase classname="patron" name="TestNewServer/failed_missing_routes" time="0.100s"></testcase>
-		<testcase classname="patron" name="TestNewServer" time="0.310s"></testcase>
-		<testcase classname="patron" name="TestServer_Run_Shutdown/success" time="0.100s"></testcase>
-		<testcase classname="patron" name="TestServer_Run_Shutdown/failed_to_run" time="0.100s"></testcase>
-		<testcase classname="patron" name="TestServer_Run_Shutdown" time="0.210s"></testcase>
-		<testcase classname="patron" name="TestServer_SetupTracing/success_w/_empty_tracing_vars" time="0.100s"></testcase>
-		<testcase classname="patron" name="TestServer_SetupTracing/success_w/_empty_tracing_host" time="0.110s"></testcase>
-		<testcase classname="patron" name="TestServer_SetupTracing/success_w/_empty_tracing_port" time="0.100s"></testcase>
-		<testcase classname="patron" name="TestServer_SetupTracing/success" time="0.100s"></testcase>
-		<testcase classname="patron" name="TestServer_SetupTracing" time="0.420s"></testcase>
+		<testcase classname="github.com/beatlabs/patron" name="TestRoutes/failure_due_to_empty_routes" time="0.110000"></testcase>
+		<testcase classname="github.com/beatlabs/patron" name="TestRoutes/failure_due_to_nil_routes" time="0.100000"></testcase>
+		<testcase classname="github.com/beatlabs/patron" name="TestRoutes/success" time="0.110000"></testcase>
+		<testcase classname="github.com/beatlabs/patron" name="TestRoutes" time="0.320000"></testcase>
+		<testcase classname="github.com/beatlabs/patron" name="TestMiddlewares/success" time="0.110000"></testcase>
+		<testcase classname="github.com/beatlabs/patron" name="TestMiddlewares/failure_because_empty" time="0.110000"></testcase>
+		<testcase classname="github.com/beatlabs/patron" name="TestMiddlewares/failure_because_nil" time="0.110000"></testcase>
+		<testcase classname="github.com/beatlabs/patron" name="TestMiddlewares" time="0.320000"></testcase>
+		<testcase classname="github.com/beatlabs/patron" name="TestAliveCheck/failure_due_to_nil_liveness_check" time="0.110000"></testcase>
+		<testcase classname="github.com/beatlabs/patron" name="TestAliveCheck/success" time="0.100000"></testcase>
+		<testcase classname="github.com/beatlabs/patron" name="TestAliveCheck" time="0.210000"></testcase>
+		<testcase classname="github.com/beatlabs/patron" name="TestReadyCheck/failure_due_to_nil_liveness_check" time="0.100000"></testcase>
+		<testcase classname="github.com/beatlabs/patron" name="TestReadyCheck/success" time="0.110000"></testcase>
+		<testcase classname="github.com/beatlabs/patron" name="TestReadyCheck" time="0.210000"></testcase>
+		<testcase classname="github.com/beatlabs/patron" name="TestComponents/failure_due_to_empty_components" time="0.100000"></testcase>
+		<testcase classname="github.com/beatlabs/patron" name="TestComponents/failure_due_to_nil_components" time="0.110000"></testcase>
+		<testcase classname="github.com/beatlabs/patron" name="TestComponents/success" time="0.100000"></testcase>
+		<testcase classname="github.com/beatlabs/patron" name="TestComponents" time="0.310000"></testcase>
+		<testcase classname="github.com/beatlabs/patron" name="TestSIGHUP/nil_handler" time="0.100000"></testcase>
+		<testcase classname="github.com/beatlabs/patron" name="TestSIGHUP/success" time="0.110000"></testcase>
+		<testcase classname="github.com/beatlabs/patron" name="TestSIGHUP" time="0.210000"></testcase>
+		<testcase classname="github.com/beatlabs/patron" name="TestNewServer/success" time="0.100000"></testcase>
+		<testcase classname="github.com/beatlabs/patron" name="TestNewServer/failed_empty_middlewares" time="0.100000"></testcase>
+		<testcase classname="github.com/beatlabs/patron" name="TestNewServer/failed_missing_name" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron" name="TestNewServer/failed_missing_routes" time="0.110000"></testcase>
+		<testcase classname="github.com/beatlabs/patron" name="TestNewServer" time="0.310000"></testcase>
+		<testcase classname="github.com/beatlabs/patron" name="TestServer_Run_Shutdown/success" time="0.110000"></testcase>
+		<testcase classname="github.com/beatlabs/patron" name="TestServer_Run_Shutdown/failed_to_run" time="0.100000"></testcase>
+		<testcase classname="github.com/beatlabs/patron" name="TestServer_Run_Shutdown" time="0.210000"></testcase>
+		<testcase classname="github.com/beatlabs/patron" name="TestServer_SetupTracing/success_w/_empty_tracing_vars" time="0.110000"></testcase>
+		<testcase classname="github.com/beatlabs/patron" name="TestServer_SetupTracing/success_w/_empty_tracing_host" time="0.100000"></testcase>
+		<testcase classname="github.com/beatlabs/patron" name="TestServer_SetupTracing/success_w/_empty_tracing_port" time="0.100000"></testcase>
+		<testcase classname="github.com/beatlabs/patron" name="TestServer_SetupTracing/success" time="0.110000"></testcase>
+		<testcase classname="github.com/beatlabs/patron" name="TestServer_SetupTracing" time="0.420000"></testcase>
 	</testsuite>
-	<testsuite tests="31" failures="0" time="0.040s" name="github.com/beatlabs/patron/async">
+	<testsuite tests="24" failures="0" time="0.040000" name="github.com/beatlabs/patron/async">
 		<properties>
-			<property name="go.version" value="go1.11.4"></property>
+			<property name="go.version" value="go1.13.4 darwin/amd64"></property>
 		</properties>
-		<testcase classname="async" name="TestDetermineDecoder/success_json" time="0.000s"></testcase>
-		<testcase classname="async" name="TestDetermineDecoder/success_protobuf" time="0.000s"></testcase>
-		<testcase classname="async" name="TestDetermineDecoder/failure" time="0.000s"></testcase>
-		<testcase classname="async" name="TestDetermineDecoder" time="0.000s"></testcase>
-		<testcase classname="async" name="TestNew/success" time="0.000s"></testcase>
-		<testcase classname="async" name="TestNew/failed,_missing_name" time="0.000s"></testcase>
-		<testcase classname="async" name="TestNew/failed,_missing_processor_func" time="0.000s"></testcase>
-		<testcase classname="async" name="TestNew/failed,_missing_consumer" time="0.000s"></testcase>
-		<testcase classname="async" name="TestNew/failed,_invalid_fail_strategy" time="0.000s"></testcase>
-		<testcase classname="async" name="TestNew" time="0.000s"></testcase>
-		<testcase classname="async" name="TestRun_ReturnsError" time="0.000s"></testcase>
-		<testcase classname="async" name="TestRun_Process_Error_NackExitStrategy" time="0.000s"></testcase>
-		<testcase classname="async" name="TestRun_Process_Error_NackStrategy" time="0.010s"></testcase>
-		<testcase classname="async" name="TestRun_Process_Error_AckStrategy" time="0.010s"></testcase>
-		<testcase classname="async" name="TestRun_Process_Error_InvalidStrategy" time="0.000s"></testcase>
-		<testcase classname="async" name="TestRun_ConsumeError" time="0.000s"></testcase>
-		<testcase classname="async" name="TestRun_ConsumeError_WithRetry" time="0.010s"></testcase>
-		<testcase classname="async" name="TestRun_Process_Shutdown" time="0.010s"></testcase>
-		<testcase classname="async" name="TestFailStrategy_String/NackExitStrategy" time="0.000s"></testcase>
-		<testcase classname="async" name="TestFailStrategy_String/NackStrategy" time="0.000s"></testcase>
-		<testcase classname="async" name="TestFailStrategy_String/AckStrategy" time="0.000s"></testcase>
-		<testcase classname="async" name="TestFailStrategy_String/Not_mapped" time="0.000s"></testcase>
-		<testcase classname="async" name="TestFailStrategy_String" time="0.000s"></testcase>
-		<testcase classname="async" name="TestFailureStrategy/success" time="0.000s"></testcase>
-		<testcase classname="async" name="TestFailureStrategy/invalid_strategy_(lower)" time="0.000s"></testcase>
-		<testcase classname="async" name="TestFailureStrategy/invalid_strategy_(higher)" time="0.000s"></testcase>
-		<testcase classname="async" name="TestFailureStrategy" time="0.000s"></testcase>
-		<testcase classname="async" name="TestConsumerRetry/success" time="0.000s"></testcase>
-		<testcase classname="async" name="TestConsumerRetry/invalid_retries" time="0.000s"></testcase>
-		<testcase classname="async" name="TestConsumerRetry/invalid_retry_wait" time="0.000s"></testcase>
-		<testcase classname="async" name="TestConsumerRetry" time="0.000s"></testcase>
+		<testcase classname="github.com/beatlabs/patron/async" name="TestDetermineDecoder/success_json" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/async" name="TestDetermineDecoder/success_protobuf" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/async" name="TestDetermineDecoder/failure" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/async" name="TestDetermineDecoder" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/async" name="TestNew/success" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/async" name="TestNew/failed,_missing_name" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/async" name="TestNew/failed,_missing_processor_func" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/async" name="TestNew/failed,_missing_consumer" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/async" name="TestNew/failed,_invalid_fail_strategy" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/async" name="TestNew/failed,_invalid_retry_retry_timeout" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/async" name="TestNew" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/async" name="TestRun_ReturnsError" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/async" name="TestRun_WithCancel_CloseError" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/async" name="TestRun_Process_Error_NackExitStrategy" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/async" name="TestRun_Process_Error_NackStrategy" time="0.010000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/async" name="TestRun_ProcessError_WithNackError" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/async" name="TestRun_Process_Error_AckStrategy" time="0.010000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/async" name="TestRun_ProcessError_WithAckError" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/async" name="TestRun_MessageAckError" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/async" name="TestRun_ConsumeError" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/async" name="TestRun_ConsumeError_WithRetry" time="0.010000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/async" name="TestRun_ConsumeError_WithRetry_AndContextCancel" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/async" name="TestRun_Process_Shutdown" time="0.010000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/async" name="TestRun_Process_Error_InvalidStrategy" time="0.000000"></testcase>
 	</testsuite>
-	<testsuite tests="25" failures="0" time="0.000s" name="github.com/beatlabs/patron/async/amqp">
+	<testsuite tests="29" failures="0" time="0.000000" name="github.com/beatlabs/patron/async/amqp">
 		<properties>
-			<property name="go.version" value="go1.11.4"></property>
+			<property name="go.version" value="go1.13.4 darwin/amd64"></property>
 		</properties>
-		<testcase classname="amqp" name="Test_message" time="0.000s"></testcase>
-		<testcase classname="amqp" name="TestNewExchange/success,_kind_fanout" time="0.000s"></testcase>
-		<testcase classname="amqp" name="TestNewExchange/success,_kind_headers" time="0.000s"></testcase>
-		<testcase classname="amqp" name="TestNewExchange/success,_kind_topic" time="0.000s"></testcase>
-		<testcase classname="amqp" name="TestNewExchange/success,_kind_direct" time="0.000s"></testcase>
-		<testcase classname="amqp" name="TestNewExchange/fail,_empty_name" time="0.000s"></testcase>
-		<testcase classname="amqp" name="TestNewExchange/fail,_empty_kind" time="0.000s"></testcase>
-		<testcase classname="amqp" name="TestNewExchange/fail,_invalid_kind" time="0.000s"></testcase>
-		<testcase classname="amqp" name="TestNewExchange" time="0.000s"></testcase>
-		<testcase classname="amqp" name="TestNew/success" time="0.000s"></testcase>
-		<testcase classname="amqp" name="TestNew/fail,_invalid_url" time="0.000s"></testcase>
-		<testcase classname="amqp" name="TestNew/fail,_invalid_queue_name" time="0.000s"></testcase>
-		<testcase classname="amqp" name="TestNew" time="0.000s"></testcase>
-		<testcase classname="amqp" name="TestFactory_Create/success" time="0.000s"></testcase>
-		<testcase classname="amqp" name="TestFactory_Create/invalid_option" time="0.000s"></testcase>
-		<testcase classname="amqp" name="TestFactory_Create" time="0.000s"></testcase>
-		<testcase classname="amqp" name="Test_mapHeader" time="0.000s"></testcase>
-		<testcase classname="amqp" name="TestBuffer/success" time="0.000s"></testcase>
-		<testcase classname="amqp" name="TestBuffer/invalid_buffer" time="0.000s"></testcase>
-		<testcase classname="amqp" name="TestBuffer" time="0.000s"></testcase>
-		<testcase classname="amqp" name="TestRequeue" time="0.000s"></testcase>
-		<testcase classname="amqp" name="TestTimeout" time="0.000s"></testcase>
-		<testcase classname="amqp" name="TestBindings/multiple_bindings" time="0.000s"></testcase>
-		<testcase classname="amqp" name="TestBindings/no_bindings" time="0.000s"></testcase>
-		<testcase classname="amqp" name="TestBindings" time="0.000s"></testcase>
+		<testcase classname="github.com/beatlabs/patron/async/amqp" name="Test_message" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/async/amqp" name="TestNewExchange/success,_kind_fanout" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/async/amqp" name="TestNewExchange/success,_kind_headers" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/async/amqp" name="TestNewExchange/success,_kind_topic" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/async/amqp" name="TestNewExchange/success,_kind_direct" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/async/amqp" name="TestNewExchange/fail,_empty_name" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/async/amqp" name="TestNewExchange/fail,_empty_kind" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/async/amqp" name="TestNewExchange/fail,_invalid_kind" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/async/amqp" name="TestNewExchange" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/async/amqp" name="TestNew/success" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/async/amqp" name="TestNew/fail,_invalid_url" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/async/amqp" name="TestNew/fail,_invalid_queue_name" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/async/amqp" name="TestNew" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/async/amqp" name="TestFactory_Create/success" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/async/amqp" name="TestFactory_Create/invalid_option" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/async/amqp" name="TestFactory_Create" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/async/amqp" name="Test_mapHeader" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/async/amqp" name="Test_getCorrelationID/with_id" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/async/amqp" name="Test_getCorrelationID/without_id" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/async/amqp" name="Test_getCorrelationID/missing_header" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/async/amqp" name="Test_getCorrelationID" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/async/amqp" name="TestBuffer/success" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/async/amqp" name="TestBuffer/invalid_buffer" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/async/amqp" name="TestBuffer" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/async/amqp" name="TestRequeue" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/async/amqp" name="TestTimeout" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/async/amqp" name="TestBindings/multiple_bindings" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/async/amqp" name="TestBindings/no_bindings" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/async/amqp" name="TestBindings" time="0.000000"></testcase>
 	</testsuite>
-	<testsuite tests="42" failures="0" time="151.520s" name="github.com/beatlabs/patron/async/kafka">
+	<testsuite tests="35" failures="0" time="0.000000" name="github.com/beatlabs/patron/async/kafka">
 		<properties>
-			<property name="go.version" value="go1.11.4"></property>
+			<property name="go.version" value="go1.13.4 darwin/amd64"></property>
 		</properties>
-		<testcase classname="kafka" name="TestNew/fails_with_missing_name" time="0.000s"></testcase>
-		<testcase classname="kafka" name="TestNew/fails_with_missing_brokers" time="0.000s"></testcase>
-		<testcase classname="kafka" name="TestNew/fails_with_missing_topics" time="0.000s"></testcase>
-		<testcase classname="kafka" name="TestNew/does_not_fail_with_missing_group" time="0.000s"></testcase>
-		<testcase classname="kafka" name="TestNew/success" time="0.000s"></testcase>
-		<testcase classname="kafka" name="TestNew" time="0.000s"></testcase>
-		<testcase classname="kafka" name="TestFactory_Create/success" time="0.000s"></testcase>
-		<testcase classname="kafka" name="TestFactory_Create/failed_with_invalid_option" time="0.000s"></testcase>
-		<testcase classname="kafka" name="TestFactory_Create" time="0.000s"></testcase>
-		<testcase classname="kafka" name="Test_determineContentType/failure" time="0.000s"></testcase>
-		<testcase classname="kafka" name="Test_determineContentType/success" time="0.000s"></testcase>
-		<testcase classname="kafka" name="Test_determineContentType" time="0.000s"></testcase>
-		<testcase classname="kafka" name="Test_message" time="0.000s"></testcase>
-		<testcase classname="kafka" name="TestMapHeader" time="0.000s"></testcase>
-		<testcase classname="kafka" name="TestHandler_ConsumeClaim/success" time="0.000s"></testcase>
-		<testcase classname="kafka" name="TestHandler_ConsumeClaim/failure_decoding" time="0.000s"></testcase>
-		<testcase classname="kafka" name="TestHandler_ConsumeClaim/failure_content" time="0.000s"></testcase>
-		<testcase classname="kafka" name="TestHandler_ConsumeClaim" time="0.000s"></testcase>
-		<testcase classname="kafka" name="TestConsumer_ConsumeFailedBroker" time="0.750s"></testcase>
-		<testcase classname="kafka" name="TestConsumer_ConsumeWithGroup" time="150.760s"></testcase>
-		<testcase classname="kafka" name="TestConsumer_ConsumeWithoutGroup" time="0.010s"></testcase>
-		<testcase classname="kafka" name="TestNilDecoderError" time="0.000s"></testcase>
-		<testcase classname="kafka" name="TestDecodingError" time="0.000s"></testcase>
-		<testcase classname="kafka" name="TestIncompatibleDecoder" time="0.000s"></testcase>
-		<testcase classname="kafka" name="TestJsonDecoder" time="0.000s"></testcase>
-		<testcase classname="kafka" name="TestNoDecoderNoContentType" time="0.000s"></testcase>
-		<testcase classname="kafka" name="TestMultipleMessagesJsonDecoder" time="0.000s"></testcase>
-		<testcase classname="kafka" name="TestDefaultDecoder" time="0.000s"></testcase>
-		<testcase classname="kafka" name="TestStringDecoder" time="0.000s"></testcase>
-		<testcase classname="kafka" name="TestExoticDecoder" time="0.000s"></testcase>
-		<testcase classname="kafka" name="TestBuffer/success" time="0.000s"></testcase>
-		<testcase classname="kafka" name="TestBuffer/invalid_buffer" time="0.000s"></testcase>
-		<testcase classname="kafka" name="TestBuffer" time="0.000s"></testcase>
-		<testcase classname="kafka" name="TestTimeout" time="0.000s"></testcase>
-		<testcase classname="kafka" name="TestVersion/success" time="0.000s"></testcase>
-		<testcase classname="kafka" name="TestVersion/failed_due_to_empty" time="0.000s"></testcase>
-		<testcase classname="kafka" name="TestVersion/failed_due_to_invalid" time="0.000s"></testcase>
-		<testcase classname="kafka" name="TestVersion" time="0.000s"></testcase>
-		<testcase classname="kafka" name="TestStart" time="0.000s"></testcase>
-		<testcase classname="kafka" name="TestDecoder1/test_simple_decoder" time="0.000s"></testcase>
-		<testcase classname="kafka" name="TestDecoder1/test_nil_decoder" time="0.000s"></testcase>
-		<testcase classname="kafka" name="TestDecoder1" time="0.000s"></testcase>
+		<testcase classname="github.com/beatlabs/patron/async/kafka" name="TestDefaultSaramaConfig" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/async/kafka" name="Test_determineContentType/failure" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/async/kafka" name="Test_determineContentType/success" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/async/kafka" name="Test_determineContentType" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/async/kafka" name="Test_message" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/async/kafka" name="TestMapHeader" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/async/kafka" name="Test_getCorrelationID/missing_header" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/async/kafka" name="Test_getCorrelationID/with_id" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/async/kafka" name="Test_getCorrelationID/without_id" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/async/kafka" name="Test_getCorrelationID" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/async/kafka" name="TestWrongContentTypeError" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/async/kafka" name="TestDecodingError" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/async/kafka" name="TestIncompatibleDecoder" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/async/kafka" name="TestJsonDecoder" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/async/kafka" name="TestNoDecoderNoContentType" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/async/kafka" name="TestMultipleMessagesJsonDecoder" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/async/kafka" name="TestDefaultDecoder" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/async/kafka" name="TestStringDecoder" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/async/kafka" name="TestExoticDecoder" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/async/kafka" name="TestBuffer/success" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/async/kafka" name="TestBuffer/invalid_buffer" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/async/kafka" name="TestBuffer" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/async/kafka" name="TestTimeout" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/async/kafka" name="TestVersion/success" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/async/kafka" name="TestVersion/failed_due_to_empty" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/async/kafka" name="TestVersion/failed_due_to_invalid" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/async/kafka" name="TestVersion" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/async/kafka" name="TestStart/StartFromOldest" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/async/kafka" name="TestStart/Start" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/async/kafka" name="TestStart/StartFromNewest" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/async/kafka" name="TestStart" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/async/kafka" name="TestDecoder1/test_simple_decoder" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/async/kafka" name="TestDecoder1/test_nil_decoder" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/async/kafka" name="TestDecoder1" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/async/kafka" name="TestDecoderJSON" time="0.000000"></testcase>
 	</testsuite>
-	<testsuite tests="29" failures="0" time="0.020s" name="github.com/beatlabs/patron/async/sqs">
+	<testsuite tests="15" failures="0" time="0.770000" name="github.com/beatlabs/patron/async/kafka/group">
 		<properties>
-			<property name="go.version" value="go1.11.4"></property>
+			<property name="go.version" value="go1.13.4 darwin/amd64"></property>
 		</properties>
-		<testcase classname="sqs" name="TestMaxMessages/success" time="0.000s"></testcase>
-		<testcase classname="sqs" name="TestMaxMessages/zero_message_size" time="0.000s"></testcase>
-		<testcase classname="sqs" name="TestMaxMessages/over_max_message_size" time="0.000s"></testcase>
-		<testcase classname="sqs" name="TestMaxMessages" time="0.000s"></testcase>
-		<testcase classname="sqs" name="TestPollWaitSeconds/success" time="0.000s"></testcase>
-		<testcase classname="sqs" name="TestPollWaitSeconds/negative_message_size" time="0.000s"></testcase>
-		<testcase classname="sqs" name="TestPollWaitSeconds/over_max_wait_seconds" time="0.000s"></testcase>
-		<testcase classname="sqs" name="TestPollWaitSeconds" time="0.000s"></testcase>
-		<testcase classname="sqs" name="TestVisibilityTimeout/negative_message_size" time="0.000s"></testcase>
-		<testcase classname="sqs" name="TestVisibilityTimeout/over_max_wait_seconds" time="0.000s"></testcase>
-		<testcase classname="sqs" name="TestVisibilityTimeout/success" time="0.000s"></testcase>
-		<testcase classname="sqs" name="TestVisibilityTimeout" time="0.000s"></testcase>
-		<testcase classname="sqs" name="TestBuffer/negative_message_size" time="0.000s"></testcase>
-		<testcase classname="sqs" name="TestBuffer/success" time="0.000s"></testcase>
-		<testcase classname="sqs" name="TestBuffer" time="0.000s"></testcase>
-		<testcase classname="sqs" name="TestQueueStatsInterval/success" time="0.000s"></testcase>
-		<testcase classname="sqs" name="TestQueueStatsInterval/zero_interval_duration" time="0.000s"></testcase>
-		<testcase classname="sqs" name="TestQueueStatsInterval" time="0.000s"></testcase>
-		<testcase classname="sqs" name="TestNewFactory/invalid_option" time="0.000s"></testcase>
-		<testcase classname="sqs" name="TestNewFactory/success" time="0.000s"></testcase>
-		<testcase classname="sqs" name="TestNewFactory/missing_queue" time="0.000s"></testcase>
-		<testcase classname="sqs" name="TestNewFactory/missing_queue_name" time="0.000s"></testcase>
-		<testcase classname="sqs" name="TestNewFactory/failed_to_get_queue_URL" time="0.000s"></testcase>
-		<testcase classname="sqs" name="TestNewFactory" time="0.000s"></testcase>
-		<testcase classname="sqs" name="TestFactory_Create" time="0.000s"></testcase>
-		<testcase classname="sqs" name="Test_consumer_Consume" time="0.020s"></testcase>
-		<testcase classname="sqs" name="Test_message/success,_with_delete" time="0.000s"></testcase>
-		<testcase classname="sqs" name="Test_message/success,_with_failed_delete" time="0.000s"></testcase>
-		<testcase classname="sqs" name="Test_message" time="0.000s"></testcase>
+		<testcase classname="github.com/beatlabs/patron/async/kafka/group" name="TestNew/fails_with_missing_name" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/async/kafka/group" name="TestNew/fails_with_missing_brokers" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/async/kafka/group" name="TestNew/fails_with_missing_topics" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/async/kafka/group" name="TestNew/fails_with_missing_group" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/async/kafka/group" name="TestNew/success" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/async/kafka/group" name="TestNew" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/async/kafka/group" name="TestFactory_Create/success" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/async/kafka/group" name="TestFactory_Create/failed_with_invalid_option" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/async/kafka/group" name="TestFactory_Create" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/async/kafka/group" name="TestHandler_ConsumeClaim/success" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/async/kafka/group" name="TestHandler_ConsumeClaim/failure_decoding" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/async/kafka/group" name="TestHandler_ConsumeClaim/failure_content" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/async/kafka/group" name="TestHandler_ConsumeClaim" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/async/kafka/group" name="TestConsumer_ConsumeFailedBroker" time="0.760000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/async/kafka/group" name="TestConsumer_ConsumeWithGroup" time="0.010000"></testcase>
 	</testsuite>
-	<testsuite tests="0" failures="0" time="0.000s" name="github.com/beatlabs/patron/cmd/patron">
+	<testsuite tests="13" failures="0" time="0.010000" name="github.com/beatlabs/patron/async/kafka/simple">
 		<properties>
-			<property name="go.version" value="go1.11.4"></property>
+			<property name="go.version" value="go1.13.4 darwin/amd64"></property>
 		</properties>
+		<testcase classname="github.com/beatlabs/patron/async/kafka/simple" name="TestNew/fails_with_missing_name" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/async/kafka/simple" name="TestNew/fails_with_missing_brokers" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/async/kafka/simple" name="TestNew/fails_with_missing_topics" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/async/kafka/simple" name="TestNew/success" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/async/kafka/simple" name="TestNew" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/async/kafka/simple" name="TestFactory_Create/success" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/async/kafka/simple" name="TestFactory_Create/failed_with_invalid_option" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/async/kafka/simple" name="TestFactory_Create" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/async/kafka/simple" name="TestConsumer_ConsumeFromOldest" time="0.010000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/async/kafka/simple" name="TestConsumer_ClaimMessageError" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/async/kafka/simple" name="TestConsumer_ConsumerError" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/async/kafka/simple" name="TestConsumer_LeaderNotAvailableError" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/async/kafka/simple" name="TestConsumer_NoLeaderError" time="0.000000"></testcase>
 	</testsuite>
-	<testsuite tests="0" failures="0" time="0.000s" name="github.com/beatlabs/patron/encoding">
+	<testsuite tests="33" failures="0" time="0.020000" name="github.com/beatlabs/patron/async/sqs">
 		<properties>
-			<property name="go.version" value="go1.11.4"></property>
+			<property name="go.version" value="go1.13.4 darwin/amd64"></property>
 		</properties>
+		<testcase classname="github.com/beatlabs/patron/async/sqs" name="TestMaxMessages/success" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/async/sqs" name="TestMaxMessages/zero_message_size" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/async/sqs" name="TestMaxMessages/over_max_message_size" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/async/sqs" name="TestMaxMessages" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/async/sqs" name="TestPollWaitSeconds/success" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/async/sqs" name="TestPollWaitSeconds/negative_message_size" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/async/sqs" name="TestPollWaitSeconds/over_max_wait_seconds" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/async/sqs" name="TestPollWaitSeconds" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/async/sqs" name="TestVisibilityTimeout/success" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/async/sqs" name="TestVisibilityTimeout/negative_message_size" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/async/sqs" name="TestVisibilityTimeout/over_max_wait_seconds" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/async/sqs" name="TestVisibilityTimeout" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/async/sqs" name="TestBuffer/negative_message_size" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/async/sqs" name="TestBuffer/success" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/async/sqs" name="TestBuffer" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/async/sqs" name="TestQueueStatsInterval/success" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/async/sqs" name="TestQueueStatsInterval/zero_interval_duration" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/async/sqs" name="TestQueueStatsInterval" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/async/sqs" name="TestNewFactory/success" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/async/sqs" name="TestNewFactory/missing_queue" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/async/sqs" name="TestNewFactory/missing_queue_name" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/async/sqs" name="TestNewFactory/failed_to_get_queue_URL" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/async/sqs" name="TestNewFactory/invalid_option" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/async/sqs" name="TestNewFactory" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/async/sqs" name="TestFactory_Create" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/async/sqs" name="Test_consumer_Consume" time="0.020000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/async/sqs" name="Test_message/success,_with_delete" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/async/sqs" name="Test_message/success,_with_failed_delete" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/async/sqs" name="Test_message" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/async/sqs" name="Test_getCorrelationID/with_id" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/async/sqs" name="Test_getCorrelationID/without_id" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/async/sqs" name="Test_getCorrelationID/missing_header" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/async/sqs" name="Test_getCorrelationID" time="0.000000"></testcase>
 	</testsuite>
-	<testsuite tests="1" failures="0" time="0.000s" name="github.com/beatlabs/patron/encoding/json">
+	<testsuite tests="0" failures="0" time="0.000000" name="github.com/beatlabs/patron/cache">
 		<properties>
-			<property name="go.version" value="go1.11.4"></property>
-		</properties>
-		<testcase classname="json" name="TestEncodeDecode" time="0.000s"></testcase>
-	</testsuite>
-	<testsuite tests="3" failures="0" time="0.000s" name="github.com/beatlabs/patron/encoding/protobuf">
-		<properties>
-			<property name="go.version" value="go1.11.4"></property>
-		</properties>
-		<testcase classname="protobuf" name="TestEncodeDecode" time="0.000s"></testcase>
-		<testcase classname="protobuf" name="TestDecodeError" time="0.000s"></testcase>
-		<testcase classname="protobuf" name="TestProtobuf" time="0.000s"></testcase>
-	</testsuite>
-	<testsuite tests="6" failures="0" time="0.000s" name="github.com/beatlabs/patron/errors">
-		<properties>
-			<property name="go.version" value="go1.11.4"></property>
-		</properties>
-		<testcase classname="errors" name="TestAggregate" time="0.000s"></testcase>
-		<testcase classname="errors" name="TestAggregate_ReturnsNil" time="0.000s"></testcase>
-		<testcase classname="errors" name="TestNew" time="0.000s"></testcase>
-		<testcase classname="errors" name="TestErrorf" time="0.000s"></testcase>
-		<testcase classname="errors" name="TestWrap" time="0.000s"></testcase>
-		<testcase classname="errors" name="TestWrapf" time="0.000s"></testcase>
-	</testsuite>
-	<testsuite tests="0" failures="0" time="0.000s" name="github.com/beatlabs/patron/examples">
-		<properties>
-			<property name="go.version" value="go1.11.4"></property>
+			<property name="go.version" value="go1.13.4 darwin/amd64"></property>
 		</properties>
 	</testsuite>
-	<testsuite tests="0" failures="0" time="0.000s" name="github.com/beatlabs/patron/examples/fifth">
+	<testsuite tests="6" failures="0" time="0.000000" name="github.com/beatlabs/patron/cache/lru">
 		<properties>
-			<property name="go.version" value="go1.11.4"></property>
+			<property name="go.version" value="go1.13.4 darwin/amd64"></property>
+		</properties>
+		<testcase classname="github.com/beatlabs/patron/cache/lru" name="TestNew" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/cache/lru" name="TestCacheOperations/testGetEmpty" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/cache/lru" name="TestCacheOperations/testSetGet" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/cache/lru" name="TestCacheOperations/testRemove" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/cache/lru" name="TestCacheOperations/testPurge" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/cache/lru" name="TestCacheOperations" time="0.000000"></testcase>
+	</testsuite>
+	<testsuite tests="0" failures="0" time="0.000000" name="github.com/beatlabs/patron/cache/redis">
+		<properties>
+			<property name="go.version" value="go1.13.4 darwin/amd64"></property>
 		</properties>
 	</testsuite>
-	<testsuite tests="0" failures="0" time="0.000s" name="github.com/beatlabs/patron/examples/first">
+	<testsuite tests="0" failures="0" time="0.000000" name="github.com/beatlabs/patron/cmd/patron">
 		<properties>
-			<property name="go.version" value="go1.11.4"></property>
+			<property name="go.version" value="go1.13.4 darwin/amd64"></property>
 		</properties>
 	</testsuite>
-	<testsuite tests="0" failures="0" time="0.000s" name="github.com/beatlabs/patron/examples/fourth">
+	<testsuite tests="4" failures="0" time="0.000000" name="github.com/beatlabs/patron/correlation">
 		<properties>
-			<property name="go.version" value="go1.11.4"></property>
+			<property name="go.version" value="go1.13.4 darwin/amd64"></property>
+		</properties>
+		<testcase classname="github.com/beatlabs/patron/correlation" name="TestIDFromContext/without_existing_id" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/correlation" name="TestIDFromContext/with_existing_id" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/correlation" name="TestIDFromContext" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/correlation" name="TestContextWithID" time="0.000000"></testcase>
+	</testsuite>
+	<testsuite tests="0" failures="0" time="0.000000" name="github.com/beatlabs/patron/encoding">
+		<properties>
+			<property name="go.version" value="go1.13.4 darwin/amd64"></property>
 		</properties>
 	</testsuite>
-	<testsuite tests="0" failures="0" time="0.000s" name="github.com/beatlabs/patron/examples/second">
+	<testsuite tests="1" failures="0" time="0.000000" name="github.com/beatlabs/patron/encoding/json">
 		<properties>
-			<property name="go.version" value="go1.11.4"></property>
+			<property name="go.version" value="go1.13.4 darwin/amd64"></property>
+		</properties>
+		<testcase classname="github.com/beatlabs/patron/encoding/json" name="TestEncodeDecode" time="0.000000"></testcase>
+	</testsuite>
+	<testsuite tests="3" failures="0" time="0.000000" name="github.com/beatlabs/patron/encoding/protobuf">
+		<properties>
+			<property name="go.version" value="go1.13.4 darwin/amd64"></property>
+		</properties>
+		<testcase classname="github.com/beatlabs/patron/encoding/protobuf" name="TestEncodeDecode" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/encoding/protobuf" name="TestDecodeError" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/encoding/protobuf" name="TestProtobuf" time="0.000000"></testcase>
+	</testsuite>
+	<testsuite tests="2" failures="0" time="0.000000" name="github.com/beatlabs/patron/errors">
+		<properties>
+			<property name="go.version" value="go1.13.4 darwin/amd64"></property>
+		</properties>
+		<testcase classname="github.com/beatlabs/patron/errors" name="TestAggregate" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/errors" name="TestAggregate_ReturnsNil" time="0.000000"></testcase>
+	</testsuite>
+	<testsuite tests="0" failures="0" time="0.000000" name="github.com/beatlabs/patron/examples">
+		<properties>
+			<property name="go.version" value="go1.13.4 darwin/amd64"></property>
 		</properties>
 	</testsuite>
-	<testsuite tests="0" failures="0" time="0.000s" name="github.com/beatlabs/patron/examples/third">
+	<testsuite tests="0" failures="0" time="0.000000" name="github.com/beatlabs/patron/examples/fifth">
 		<properties>
-			<property name="go.version" value="go1.11.4"></property>
+			<property name="go.version" value="go1.13.4 darwin/amd64"></property>
 		</properties>
 	</testsuite>
-	<testsuite tests="18" failures="0" time="0.000s" name="github.com/beatlabs/patron/log">
+	<testsuite tests="0" failures="0" time="0.000000" name="github.com/beatlabs/patron/examples/first">
 		<properties>
-			<property name="go.version" value="go1.11.4"></property>
-		</properties>
-		<testcase classname="log" name="TestSetup/failure_with_nil_factory" time="0.000s"></testcase>
-		<testcase classname="log" name="TestSetup/success" time="0.000s"></testcase>
-		<testcase classname="log" name="TestSetup" time="0.000s"></testcase>
-		<testcase classname="log" name="TestLog_Context_NilLogger" time="0.000s"></testcase>
-		<testcase classname="log" name="TestLog_Context" time="0.000s"></testcase>
-		<testcase classname="log" name="TestLog_Sub" time="0.000s"></testcase>
-		<testcase classname="log" name="TestLog_Panic" time="0.000s"></testcase>
-		<testcase classname="log" name="TestLog_Panicf" time="0.000s"></testcase>
-		<testcase classname="log" name="TestLog_Fatal" time="0.000s"></testcase>
-		<testcase classname="log" name="TestLog_Fatalf" time="0.000s"></testcase>
-		<testcase classname="log" name="TestLog_Error" time="0.000s"></testcase>
-		<testcase classname="log" name="TestLog_Errorf" time="0.000s"></testcase>
-		<testcase classname="log" name="TestLog_Warn" time="0.000s"></testcase>
-		<testcase classname="log" name="TestLog_Warnf" time="0.000s"></testcase>
-		<testcase classname="log" name="TestLog_Info" time="0.000s"></testcase>
-		<testcase classname="log" name="TestLog_Infof" time="0.000s"></testcase>
-		<testcase classname="log" name="TestLog_Debug" time="0.000s"></testcase>
-		<testcase classname="log" name="TestLog_Debugf" time="0.000s"></testcase>
-	</testsuite>
-	<testsuite tests="18" failures="0" time="0.000s" name="github.com/beatlabs/patron/log/zerolog">
-		<properties>
-			<property name="go.version" value="go1.11.4"></property>
-		</properties>
-		<testcase classname="zerolog" name="TestDefaultFactory" time="0.000s"></testcase>
-		<testcase classname="zerolog" name="Test_getSource" time="0.000s"></testcase>
-		<testcase classname="zerolog" name="Test_sourceFields" time="0.000s"></testcase>
-		<testcase classname="zerolog" name="TestNewLogger/without_fields" time="0.000s"></testcase>
-		<testcase classname="zerolog" name="TestNewLogger/with_fields" time="0.000s"></testcase>
-		<testcase classname="zerolog" name="TestNewLogger" time="0.000s"></testcase>
-		<testcase classname="zerolog" name="TestLogger_Sub" time="0.000s"></testcase>
-		<testcase classname="zerolog" name="TestLogger_Sub_NoFields" time="0.000s"></testcase>
-		<testcase classname="zerolog" name="TestLogger_Panic" time="0.000s"></testcase>
-		<testcase classname="zerolog" name="TestLogger_Panicf" time="0.000s"></testcase>
-		<testcase classname="zerolog" name="TestLogger_Error" time="0.000s"></testcase>
-		<testcase classname="zerolog" name="TestLogger_Errorf" time="0.000s"></testcase>
-		<testcase classname="zerolog" name="TestLogger_Warn" time="0.000s"></testcase>
-		<testcase classname="zerolog" name="TestLogger_Warnf" time="0.000s"></testcase>
-		<testcase classname="zerolog" name="TestLogger_Info" time="0.000s"></testcase>
-		<testcase classname="zerolog" name="TestLogger_Infof" time="0.000s"></testcase>
-		<testcase classname="zerolog" name="TestLogger_Debug" time="0.000s"></testcase>
-		<testcase classname="zerolog" name="TestLogger_Debugf" time="0.000s"></testcase>
-	</testsuite>
-	<testsuite tests="17" failures="0" time="0.010s" name="github.com/beatlabs/patron/reliability/circuitbreaker">
-		<properties>
-			<property name="go.version" value="go1.11.4"></property>
-		</properties>
-		<testcase classname="circuitbreaker" name="TestNew/success" time="0.000s"></testcase>
-		<testcase classname="circuitbreaker" name="TestNew/missing_name" time="0.000s"></testcase>
-		<testcase classname="circuitbreaker" name="TestNew/invalid_settings" time="0.000s"></testcase>
-		<testcase classname="circuitbreaker" name="TestNew" time="0.000s"></testcase>
-		<testcase classname="circuitbreaker" name="TestCircuitBreaker_isHalfOpen/closed" time="0.000s"></testcase>
-		<testcase classname="circuitbreaker" name="TestCircuitBreaker_isHalfOpen/open" time="0.000s"></testcase>
-		<testcase classname="circuitbreaker" name="TestCircuitBreaker_isHalfOpen/half_open" time="0.000s"></testcase>
-		<testcase classname="circuitbreaker" name="TestCircuitBreaker_isHalfOpen" time="0.000s"></testcase>
-		<testcase classname="circuitbreaker" name="TestCircuitBreaker_isOpen/closed" time="0.000s"></testcase>
-		<testcase classname="circuitbreaker" name="TestCircuitBreaker_isOpen/half_open" time="0.000s"></testcase>
-		<testcase classname="circuitbreaker" name="TestCircuitBreaker_isOpen/open" time="0.000s"></testcase>
-		<testcase classname="circuitbreaker" name="TestCircuitBreaker_isOpen" time="0.000s"></testcase>
-		<testcase classname="circuitbreaker" name="TestCircuitBreaker_isClose/closed" time="0.000s"></testcase>
-		<testcase classname="circuitbreaker" name="TestCircuitBreaker_isClose/half_open" time="0.000s"></testcase>
-		<testcase classname="circuitbreaker" name="TestCircuitBreaker_isClose/open" time="0.000s"></testcase>
-		<testcase classname="circuitbreaker" name="TestCircuitBreaker_isClose" time="0.000s"></testcase>
-		<testcase classname="circuitbreaker" name="TestCircuitBreaker_Close_Open_HalfOpen_Open_HalfOpen_Close" time="0.010s"></testcase>
-	</testsuite>
-	<testsuite tests="5" failures="0" time="0.000s" name="github.com/beatlabs/patron/reliability/retry">
-		<properties>
-			<property name="go.version" value="go1.11.4"></property>
-		</properties>
-		<testcase classname="retry" name="TestNew/success" time="0.000s"></testcase>
-		<testcase classname="retry" name="TestNew/invalid_retries" time="0.000s"></testcase>
-		<testcase classname="retry" name="TestNew" time="0.000s"></testcase>
-		<testcase classname="retry" name="TestRetry_Execute_Success" time="0.000s"></testcase>
-		<testcase classname="retry" name="TestRetry_Execute_Failed" time="0.000s"></testcase>
-	</testsuite>
-	<testsuite tests="3" failures="0" time="0.000s" name="github.com/beatlabs/patron/sync">
-		<properties>
-			<property name="go.version" value="go1.11.4"></property>
-		</properties>
-		<testcase classname="sync" name="TestNewRequest" time="0.000s"></testcase>
-		<testcase classname="sync" name="TestRequest_Decode" time="0.000s"></testcase>
-		<testcase classname="sync" name="TestNewResponse" time="0.000s"></testcase>
-	</testsuite>
-	<testsuite tests="128" failures="0" time="2.740s" name="github.com/beatlabs/patron/sync/http">
-		<properties>
-			<property name="go.version" value="go1.11.4"></property>
-		</properties>
-		<testcase classname="http" name="Test_aliveCheckRoute/alive" time="0.000s"></testcase>
-		<testcase classname="http" name="Test_aliveCheckRoute/unresponsive" time="0.000s"></testcase>
-		<testcase classname="http" name="Test_aliveCheckRoute/default" time="0.000s"></testcase>
-		<testcase classname="http" name="Test_aliveCheckRoute" time="0.000s"></testcase>
-		<testcase classname="http" name="TestNew/success_with_no_options" time="0.000s"></testcase>
-		<testcase classname="http" name="TestNew/success_with_options" time="0.000s"></testcase>
-		<testcase classname="http" name="TestNew/failed_with_error_option" time="0.000s"></testcase>
-		<testcase classname="http" name="TestNew" time="0.000s"></testcase>
-		<testcase classname="http" name="TestComponent_ListenAndServe_DefaultRoutes_Shutdown" time="0.100s"></testcase>
-		<testcase classname="http" name="TestComponent_ListenAndServeTLS_DefaultRoutes_Shutdown" time="0.100s"></testcase>
-		<testcase classname="http" name="TestComponent_ListenAndServeTLS_FailsInvalidCerts" time="0.000s"></testcase>
-		<testcase classname="http" name="Test_createHTTPServer" time="0.000s"></testcase>
-		<testcase classname="http" name="TestValidationError" time="0.000s"></testcase>
-		<testcase classname="http" name="TestValidationErrorWithPayload" time="0.000s"></testcase>
-		<testcase classname="http" name="TestUnauthorizedError" time="0.000s"></testcase>
-		<testcase classname="http" name="TestUnauthorizedErrorWithPayload" time="0.000s"></testcase>
-		<testcase classname="http" name="TestForbiddenError" time="0.000s"></testcase>
-		<testcase classname="http" name="TestForbiddenErrorWithPayload" time="0.000s"></testcase>
-		<testcase classname="http" name="TestNotFoundError" time="0.000s"></testcase>
-		<testcase classname="http" name="TestNotFoundErrorWithPayload" time="0.000s"></testcase>
-		<testcase classname="http" name="TestServiceUnavailableError" time="0.000s"></testcase>
-		<testcase classname="http" name="TestServiceUnavailableErrorWithPayload" time="0.000s"></testcase>
-		<testcase classname="http" name="TestNewError" time="0.000s"></testcase>
-		<testcase classname="http" name="TestNewErrorWithCodeAndPayload" time="0.000s"></testcase>
-		<testcase classname="http" name="TestNewErrorWithCodeAndNoPayload" time="0.000s"></testcase>
-		<testcase classname="http" name="Test_extractFields" time="0.000s"></testcase>
-		<testcase classname="http" name="Test_extractHeaders" time="0.000s"></testcase>
-		<testcase classname="http" name="Test_determineEncoding/success_json" time="0.000s"></testcase>
-		<testcase classname="http" name="Test_determineEncoding/success_json,_missing_accept" time="0.000s"></testcase>
-		<testcase classname="http" name="Test_determineEncoding/success_json,_missing_content_type" time="0.000s"></testcase>
-		<testcase classname="http" name="Test_determineEncoding/success_protobuf" time="0.000s"></testcase>
-		<testcase classname="http" name="Test_determineEncoding/success_protobuf,_missing_accept" time="0.000s"></testcase>
-		<testcase classname="http" name="Test_determineEncoding/success_protobuf,_missing_content_type" time="0.000s"></testcase>
-		<testcase classname="http" name="Test_determineEncoding/wrong_accept" time="0.000s"></testcase>
-		<testcase classname="http" name="Test_determineEncoding/missing_content_header,_defaults_json" time="0.000s"></testcase>
-		<testcase classname="http" name="Test_determineEncoding/missing_headers,_defaults_json" time="0.000s"></testcase>
-		<testcase classname="http" name="Test_determineEncoding/accept_*/*,_defaults_to_json" time="0.000s"></testcase>
-		<testcase classname="http" name="Test_determineEncoding/wrong_content" time="0.000s"></testcase>
-		<testcase classname="http" name="Test_determineEncoding" time="0.000s"></testcase>
-		<testcase classname="http" name="Test_handleSuccess/GET_No_Content_success" time="0.000s"></testcase>
-		<testcase classname="http" name="Test_handleSuccess/GET_OK_success" time="0.000s"></testcase>
-		<testcase classname="http" name="Test_handleSuccess/POST_Created_success" time="0.000s"></testcase>
-		<testcase classname="http" name="Test_handleSuccess/Encode_failure" time="0.000s"></testcase>
-		<testcase classname="http" name="Test_handleSuccess" time="0.000s"></testcase>
-		<testcase classname="http" name="Test_handleError/bad_request" time="0.000s"></testcase>
-		<testcase classname="http" name="Test_handleError/unauthorized_request" time="0.000s"></testcase>
-		<testcase classname="http" name="Test_handleError/forbidden_request" time="0.000s"></testcase>
-		<testcase classname="http" name="Test_handleError/not_found_error" time="0.000s"></testcase>
-		<testcase classname="http" name="Test_handleError/service_unavailable_error" time="0.000s"></testcase>
-		<testcase classname="http" name="Test_handleError/internal_server_error" time="0.000s"></testcase>
-		<testcase classname="http" name="Test_handleError/default_error" time="0.000s"></testcase>
-		<testcase classname="http" name="Test_handleError/payload_encoding_error" time="0.000s"></testcase>
-		<testcase classname="http" name="Test_handleError" time="0.000s"></testcase>
-		<testcase classname="http" name="Test_handler/unsupported_content_type" time="0.000s"></testcase>
-		<testcase classname="http" name="Test_handler/success_handling" time="0.000s"></testcase>
-		<testcase classname="http" name="Test_handler/error_handling" time="0.000s"></testcase>
-		<testcase classname="http" name="Test_handler/success_handling_failed_due_to_encoding" time="0.000s"></testcase>
-		<testcase classname="http" name="Test_handler" time="0.000s"></testcase>
-		<testcase classname="http" name="Test_prepareResponse" time="0.000s"></testcase>
-		<testcase classname="http" name="Test_extractParams" time="0.000s"></testcase>
-		<testcase classname="http" name="Test_metricRoute" time="0.000s"></testcase>
-		<testcase classname="http" name="TestMiddlewareChain/middleware_1,2,3_and_finish" time="0.000s"></testcase>
-		<testcase classname="http" name="TestMiddlewareChain/middleware_1,2_and_finish" time="0.000s"></testcase>
-		<testcase classname="http" name="TestMiddlewareChain/no_middleware_and_finish" time="0.000s"></testcase>
-		<testcase classname="http" name="TestMiddlewareChain" time="0.000s"></testcase>
-		<testcase classname="http" name="TestMiddlewares/auth_middleware_success" time="0.000s"></testcase>
-		<testcase classname="http" name="TestMiddlewares/auth_middleware_false" time="0.000s"></testcase>
-		<testcase classname="http" name="TestMiddlewares/auth_middleware_error" time="0.000s"></testcase>
-		<testcase classname="http" name="TestMiddlewares/tracing_middleware" time="0.000s"></testcase>
-		<testcase classname="http" name="TestMiddlewares/recovery_middleware_from_panic_1" time="0.000s"></testcase>
-		<testcase classname="http" name="TestMiddlewares/recovery_middleware_from_panic_2" time="0.000s"></testcase>
-		<testcase classname="http" name="TestMiddlewares/recovery_middleware_from_panic_3" time="0.000s"></testcase>
-		<testcase classname="http" name="TestMiddlewares" time="0.000s"></testcase>
-		<testcase classname="http" name="TestResponseWriter" time="0.000s"></testcase>
-		<testcase classname="http" name="TestPort/success" time="0.000s"></testcase>
-		<testcase classname="http" name="TestPort/error_for_port_number_out_of_range" time="0.000s"></testcase>
-		<testcase classname="http" name="TestPort" time="0.000s"></testcase>
-		<testcase classname="http" name="TestSetRoutes/success" time="0.000s"></testcase>
-		<testcase classname="http" name="TestSetRoutes/error_for_no_routes" time="0.000s"></testcase>
-		<testcase classname="http" name="TestSetRoutes" time="0.000s"></testcase>
-		<testcase classname="http" name="TestSetMiddlewares/success" time="0.000s"></testcase>
-		<testcase classname="http" name="TestSetMiddlewares/error_for_empty_middlewares" time="0.000s"></testcase>
-		<testcase classname="http" name="TestSetMiddlewares/error_for_nil_middlewares" time="0.000s"></testcase>
-		<testcase classname="http" name="TestSetMiddlewares" time="0.000s"></testcase>
-		<testcase classname="http" name="TestSetLivenessCheck/success" time="0.000s"></testcase>
-		<testcase classname="http" name="TestSetLivenessCheck/error_for_no_routes" time="0.000s"></testcase>
-		<testcase classname="http" name="TestSetLivenessCheck" time="0.000s"></testcase>
-		<testcase classname="http" name="TestSetReadinessCheck/success" time="0.000s"></testcase>
-		<testcase classname="http" name="TestSetReadinessCheck/error_for_no_routes" time="0.000s"></testcase>
-		<testcase classname="http" name="TestSetReadinessCheck" time="0.000s"></testcase>
-		<testcase classname="http" name="TestSetSecure/success" time="0.000s"></testcase>
-		<testcase classname="http" name="TestSetSecure/failed_missing_cert_file" time="0.000s"></testcase>
-		<testcase classname="http" name="TestSetSecure/failed_missing_key_file" time="0.000s"></testcase>
-		<testcase classname="http" name="TestSetSecure" time="0.000s"></testcase>
-		<testcase classname="http" name="TestTimeouts" time="0.000s"></testcase>
-		<testcase classname="http" name="Test_PprofHandlers/index" time="0.000s"></testcase>
-		<testcase classname="http" name="Test_PprofHandlers/cmdline" time="0.010s"></testcase>
-		<testcase classname="http" name="Test_PprofHandlers/cmdline#01" time="0.000s"></testcase>
-		<testcase classname="http" name="Test_PprofHandlers/profile" time="1.010s"></testcase>
-		<testcase classname="http" name="Test_PprofHandlers/symbol" time="0.000s"></testcase>
-		<testcase classname="http" name="Test_PprofHandlers/trace" time="0.100s"></testcase>
-		<testcase classname="http" name="Test_PprofHandlers/heap" time="0.010s"></testcase>
-		<testcase classname="http" name="Test_PprofHandlers/goroutine" time="0.010s"></testcase>
-		<testcase classname="http" name="Test_PprofHandlers/block" time="0.110s"></testcase>
-		<testcase classname="http" name="Test_PprofHandlers/threadcreate" time="0.010s"></testcase>
-		<testcase classname="http" name="Test_PprofHandlers/mutex" time="0.010s"></testcase>
-		<testcase classname="http" name="Test_PprofHandlers" time="1.270s"></testcase>
-		<testcase classname="http" name="Test_readyCheckRoute/ready" time="0.000s"></testcase>
-		<testcase classname="http" name="Test_readyCheckRoute/notReady" time="0.000s"></testcase>
-		<testcase classname="http" name="Test_readyCheckRoute/default" time="0.000s"></testcase>
-		<testcase classname="http" name="Test_readyCheckRoute" time="0.000s"></testcase>
-		<testcase classname="http" name="TestNewRoute" time="0.000s"></testcase>
-		<testcase classname="http" name="TestNewGetRoute" time="0.000s"></testcase>
-		<testcase classname="http" name="TestNewPostRoute" time="0.000s"></testcase>
-		<testcase classname="http" name="TestNewPutRoute" time="0.000s"></testcase>
-		<testcase classname="http" name="TestNewDeleteRoute" time="0.000s"></testcase>
-		<testcase classname="http" name="TestNewPatchRoute" time="0.000s"></testcase>
-		<testcase classname="http" name="TestNewHeadRoute" time="0.000s"></testcase>
-		<testcase classname="http" name="TestNewOptionsRoute" time="0.000s"></testcase>
-		<testcase classname="http" name="TestNewRouteRaw" time="0.000s"></testcase>
-		<testcase classname="http" name="TestNewAuthGetRoute" time="0.000s"></testcase>
-		<testcase classname="http" name="TestNewAuthPostRoute" time="0.000s"></testcase>
-		<testcase classname="http" name="TestNewAuthPutRoute" time="0.000s"></testcase>
-		<testcase classname="http" name="TestNewAuthDeleteRoute" time="0.000s"></testcase>
-		<testcase classname="http" name="TestNewAuthPatchRoute" time="0.000s"></testcase>
-		<testcase classname="http" name="TestNewAuthHeadRoute" time="0.000s"></testcase>
-		<testcase classname="http" name="TestNewAuthOptionsRoute" time="0.000s"></testcase>
-		<testcase classname="http" name="TestNewAuthRouteRaw" time="0.000s"></testcase>
-	</testsuite>
-	<testsuite tests="0" failures="0" time="0.000s" name="github.com/beatlabs/patron/sync/http/auth">
-		<properties>
-			<property name="go.version" value="go1.11.4"></property>
+			<property name="go.version" value="go1.13.4 darwin/amd64"></property>
 		</properties>
 	</testsuite>
-	<testsuite tests="10" failures="0" time="0.000s" name="github.com/beatlabs/patron/sync/http/auth/apikey">
+	<testsuite tests="0" failures="0" time="0.000000" name="github.com/beatlabs/patron/examples/fourth">
 		<properties>
-			<property name="go.version" value="go1.11.4"></property>
+			<property name="go.version" value="go1.13.4 darwin/amd64"></property>
 		</properties>
-		<testcase classname="apikey" name="TestNew/success" time="0.000s"></testcase>
-		<testcase classname="apikey" name="TestNew/failed_due_to_nil_validator" time="0.000s"></testcase>
-		<testcase classname="apikey" name="TestNew" time="0.000s"></testcase>
-		<testcase classname="apikey" name="TestAuthenticator_Authenticate/authenticated" time="0.000s"></testcase>
-		<testcase classname="apikey" name="TestAuthenticator_Authenticate/not_authenticated,_validation_failed" time="0.000s"></testcase>
-		<testcase classname="apikey" name="TestAuthenticator_Authenticate/failed,_validation_returned_err" time="0.000s"></testcase>
-		<testcase classname="apikey" name="TestAuthenticator_Authenticate/not_authenticated,_header_missing" time="0.000s"></testcase>
-		<testcase classname="apikey" name="TestAuthenticator_Authenticate/not_authenticated,_missing_key" time="0.000s"></testcase>
-		<testcase classname="apikey" name="TestAuthenticator_Authenticate/not_authenticated,_invalid_auth_method" time="0.000s"></testcase>
-		<testcase classname="apikey" name="TestAuthenticator_Authenticate" time="0.000s"></testcase>
 	</testsuite>
-	<testsuite tests="7" failures="0" time="0.100s" name="github.com/beatlabs/patron/trace">
+	<testsuite tests="0" failures="0" time="0.000000" name="github.com/beatlabs/patron/examples/second">
 		<properties>
-			<property name="go.version" value="go1.11.4"></property>
+			<property name="go.version" value="go1.13.4 darwin/amd64"></property>
 		</properties>
-		<testcase classname="trace" name="TestSetup_Tracer_Close" time="0.100s"></testcase>
-		<testcase classname="trace" name="TestStartFinishConsumerSpan" time="0.000s"></testcase>
-		<testcase classname="trace" name="TestStartFinishChildSpan" time="0.000s"></testcase>
-		<testcase classname="trace" name="TestHTTPStartFinishSpan" time="0.000s"></testcase>
-		<testcase classname="trace" name="TestSQLStartFinishSpan" time="0.000s"></testcase>
-		<testcase classname="trace" name="TestEsSpan" time="0.000s"></testcase>
-		<testcase classname="trace" name="TestComponentOpName" time="0.000s"></testcase>
 	</testsuite>
-	<testsuite tests="10" failures="0" time="0.000s" name="github.com/beatlabs/patron/trace/amqp">
+	<testsuite tests="0" failures="0" time="0.000000" name="github.com/beatlabs/patron/examples/third">
 		<properties>
-			<property name="go.version" value="go1.11.4"></property>
+			<property name="go.version" value="go1.13.4 darwin/amd64"></property>
 		</properties>
-		<testcase classname="amqp" name="TestNewMessage" time="0.000s"></testcase>
-		<testcase classname="amqp" name="TestNewJSONMessage" time="0.000s"></testcase>
-		<testcase classname="amqp" name="TestNewProtobufMessage" time="0.000s"></testcase>
-		<testcase classname="amqp" name="TestNewPublisher/fail,_missing_url" time="0.000s"></testcase>
-		<testcase classname="amqp" name="TestNewPublisher/fail,_missing_exchange" time="0.000s"></testcase>
-		<testcase classname="amqp" name="TestNewPublisher/fail,_missing_exchange#01" time="0.000s"></testcase>
-		<testcase classname="amqp" name="TestNewPublisher" time="0.000s"></testcase>
-		<testcase classname="amqp" name="TestTimeout/success" time="0.000s"></testcase>
-		<testcase classname="amqp" name="TestTimeout/failure,_invalid_timeout" time="0.000s"></testcase>
-		<testcase classname="amqp" name="TestTimeout" time="0.000s"></testcase>
 	</testsuite>
-	<testsuite tests="5" failures="0" time="0.000s" name="github.com/beatlabs/patron/trace/es">
+	<testsuite tests="27" failures="0" time="0.000000" name="github.com/beatlabs/patron/log">
 		<properties>
-			<property name="go.version" value="go1.11.4"></property>
+			<property name="go.version" value="go1.13.4 darwin/amd64"></property>
 		</properties>
-		<testcase classname="es" name="TestStartEndSpan" time="0.000s"></testcase>
-		<testcase classname="es" name="TestNewDefaultClient" time="0.000s"></testcase>
-		<testcase classname="es" name="TestNewClient" time="0.000s"></testcase>
-		<testcase classname="es" name="TestEsQuery" time="0.000s"></testcase>
-		<testcase classname="es" name="TestGetAddrFromEnv" time="0.000s"></testcase>
+		<testcase classname="github.com/beatlabs/patron/log" name="TestSetup/failure_with_nil_factory" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/log" name="TestSetup/success" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/log" name="TestSetup" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/log" name="TestFromContext/with_context_logger" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/log" name="TestFromContext/without_context_logger" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/log" name="TestFromContext/with_context_nil_logger" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/log" name="TestFromContext" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/log" name="TestLog_Sub" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/log" name="TestLog_Panic" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/log" name="TestLog_Panicf" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/log" name="TestLog_Fatal" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/log" name="TestLog_Fatalf" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/log" name="TestLog_Error" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/log" name="TestLog_Errorf" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/log" name="TestLog_Warn" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/log" name="TestLog_Warnf" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/log" name="TestLog_Info" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/log" name="TestLog_Infof" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/log" name="TestLog_Debug" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/log" name="TestLog_Debugf" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/log" name="TestLog_Level/debug_against_debug" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/log" name="TestLog_Level/debug_against_info" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/log" name="TestLog_Level/info_against_debug" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/log" name="TestLog_Level/info_against_info" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/log" name="TestLog_Level/info_against_warn" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/log" name="TestLog_Level/warn_against_info" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/log" name="TestLog_Level" time="0.000000"></testcase>
 	</testsuite>
-	<testsuite tests="9" failures="0" time="0.010s" name="github.com/beatlabs/patron/trace/http">
+	<testsuite tests="22" failures="0" time="0.000000" name="github.com/beatlabs/patron/log/zerolog">
 		<properties>
-			<property name="go.version" value="go1.11.4"></property>
+			<property name="go.version" value="go1.13.4 darwin/amd64"></property>
 		</properties>
-		<testcase classname="http" name="TestTracedClient_Do/respose" time="0.000s"></testcase>
-		<testcase classname="http" name="TestTracedClient_Do/response_with_circuit_breaker" time="0.000s"></testcase>
-		<testcase classname="http" name="TestTracedClient_Do/error" time="0.000s"></testcase>
-		<testcase classname="http" name="TestTracedClient_Do/error_with_circuit_breaker" time="0.000s"></testcase>
-		<testcase classname="http" name="TestTracedClient_Do" time="0.010s"></testcase>
-		<testcase classname="http" name="TestNew/success" time="0.000s"></testcase>
-		<testcase classname="http" name="TestNew/failure,_invalid_timeout" time="0.000s"></testcase>
-		<testcase classname="http" name="TestNew/failure,_invalid_circuit_breaker" time="0.000s"></testcase>
-		<testcase classname="http" name="TestNew" time="0.000s"></testcase>
+		<testcase classname="github.com/beatlabs/patron/log/zerolog" name="TestDefaultFactory" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/log/zerolog" name="Test_getSource" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/log/zerolog" name="Test_sourceFields" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/log/zerolog" name="TestNewLogger/without_fields" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/log/zerolog" name="TestNewLogger/with_fields" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/log/zerolog" name="TestNewLogger" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/log/zerolog" name="TestLogger_Sub" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/log/zerolog" name="TestLogger_Sub_NoFields" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/log/zerolog" name="TestLogger_Panic" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/log/zerolog" name="TestLogger_Panicf" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/log/zerolog" name="TestLogger_Error" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/log/zerolog" name="TestLogger_Errorf" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/log/zerolog" name="TestLogger_Warn" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/log/zerolog" name="TestLogger_Warnf" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/log/zerolog" name="TestLogger_Info" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/log/zerolog" name="TestLogger_Infof" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/log/zerolog" name="TestLogger_Debug" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/log/zerolog" name="TestLogger_Debugf" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/log/zerolog" name="TestLog_Level/debug" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/log/zerolog" name="TestLog_Level/info" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/log/zerolog" name="TestLog_Level/warn" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/log/zerolog" name="TestLog_Level" time="0.000000"></testcase>
 	</testsuite>
-	<testsuite tests="27" failures="0" time="0.220s" name="github.com/beatlabs/patron/trace/kafka">
+	<testsuite tests="17" failures="0" time="0.020000" name="github.com/beatlabs/patron/reliability/circuitbreaker">
 		<properties>
-			<property name="go.version" value="go1.11.4"></property>
+			<property name="go.version" value="go1.13.4 darwin/amd64"></property>
 		</properties>
-		<testcase classname="kafka" name="TestNewMessage" time="0.000s"></testcase>
-		<testcase classname="kafka" name="TestNewMessageWithKey/success" time="0.000s"></testcase>
-		<testcase classname="kafka" name="TestNewMessageWithKey/failure_due_to_empty_message_key" time="0.000s"></testcase>
-		<testcase classname="kafka" name="TestNewMessageWithKey" time="0.000s"></testcase>
-		<testcase classname="kafka" name="TestNewJSONMessage/failure_due_to_invalid_data" time="0.000s"></testcase>
-		<testcase classname="kafka" name="TestNewJSONMessage/success" time="0.000s"></testcase>
-		<testcase classname="kafka" name="TestNewJSONMessage" time="0.000s"></testcase>
-		<testcase classname="kafka" name="TestNewJSONMessageWithKey/failure_due_to_invalid_data" time="0.000s"></testcase>
-		<testcase classname="kafka" name="TestNewJSONMessageWithKey/success" time="0.000s"></testcase>
-		<testcase classname="kafka" name="TestNewJSONMessageWithKey/failure_due_to_empty_message_key" time="0.000s"></testcase>
-		<testcase classname="kafka" name="TestNewJSONMessageWithKey" time="0.000s"></testcase>
-		<testcase classname="kafka" name="TestNewSyncProducer_Failure" time="0.000s"></testcase>
-		<testcase classname="kafka" name="TestNewSyncProducer_Option_Failure" time="0.000s"></testcase>
-		<testcase classname="kafka" name="TestNewSyncProducer_Success" time="0.000s"></testcase>
-		<testcase classname="kafka" name="TestAsyncProducer_SendMessage_Close" time="0.110s"></testcase>
-		<testcase classname="kafka" name="TestAsyncProducer_SendMessage_WithKey" time="0.110s"></testcase>
-		<testcase classname="kafka" name="TestVersion/success" time="0.000s"></testcase>
-		<testcase classname="kafka" name="TestVersion/failure,_missing_version" time="0.000s"></testcase>
-		<testcase classname="kafka" name="TestVersion/failure,_invalid_version" time="0.000s"></testcase>
-		<testcase classname="kafka" name="TestVersion" time="0.000s"></testcase>
-		<testcase classname="kafka" name="TestTimeouts/success" time="0.000s"></testcase>
-		<testcase classname="kafka" name="TestTimeouts/fail,_zero_timeout" time="0.000s"></testcase>
-		<testcase classname="kafka" name="TestTimeouts" time="0.000s"></testcase>
-		<testcase classname="kafka" name="TestRequiredAcksPolicy/success" time="0.000s"></testcase>
-		<testcase classname="kafka" name="TestRequiredAcksPolicy/success#01" time="0.000s"></testcase>
-		<testcase classname="kafka" name="TestRequiredAcksPolicy/success#02" time="0.000s"></testcase>
-		<testcase classname="kafka" name="TestRequiredAcksPolicy" time="0.000s"></testcase>
+		<testcase classname="github.com/beatlabs/patron/reliability/circuitbreaker" name="TestNew/success" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/reliability/circuitbreaker" name="TestNew/missing_name" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/reliability/circuitbreaker" name="TestNew/invalid_settings" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/reliability/circuitbreaker" name="TestNew" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/reliability/circuitbreaker" name="TestCircuitBreaker_isHalfOpen/closed" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/reliability/circuitbreaker" name="TestCircuitBreaker_isHalfOpen/open" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/reliability/circuitbreaker" name="TestCircuitBreaker_isHalfOpen/half_open" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/reliability/circuitbreaker" name="TestCircuitBreaker_isHalfOpen" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/reliability/circuitbreaker" name="TestCircuitBreaker_isOpen/closed" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/reliability/circuitbreaker" name="TestCircuitBreaker_isOpen/half_open" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/reliability/circuitbreaker" name="TestCircuitBreaker_isOpen/open" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/reliability/circuitbreaker" name="TestCircuitBreaker_isOpen" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/reliability/circuitbreaker" name="TestCircuitBreaker_isClose/closed" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/reliability/circuitbreaker" name="TestCircuitBreaker_isClose/half_open" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/reliability/circuitbreaker" name="TestCircuitBreaker_isClose/open" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/reliability/circuitbreaker" name="TestCircuitBreaker_isClose" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/reliability/circuitbreaker" name="TestCircuitBreaker_Close_Open_HalfOpen_Open_HalfOpen_Close" time="0.020000"></testcase>
 	</testsuite>
-	<testsuite tests="27" failures="0" time="0.000s" name="github.com/beatlabs/patron/trace/sns">
+	<testsuite tests="5" failures="0" time="0.000000" name="github.com/beatlabs/patron/reliability/retry">
 		<properties>
-			<property name="go.version" value="go1.11.4"></property>
+			<property name="go.version" value="go1.13.4 darwin/amd64"></property>
 		</properties>
-		<testcase classname="sns" name="Test_MessageBuilder_Build" time="0.000s"></testcase>
-		<testcase classname="sns" name="Test_MessageBuilder_InvalidStringArrayAttribute" time="0.000s"></testcase>
-		<testcase classname="sns" name="Test_MessageBuilder_Build_With_Error" time="0.000s"></testcase>
-		<testcase classname="sns" name="Test_MessageBuilder_Build_With_Invalid_attribute" time="0.000s"></testcase>
-		<testcase classname="sns" name="Test_MessageBuilder_formatStringArrayAttributeValues/Valid_data_types_-_(u)ints" time="0.000s"></testcase>
-		<testcase classname="sns" name="Test_MessageBuilder_formatStringArrayAttributeValues/Valid_data_types_-_floats" time="0.000s"></testcase>
-		<testcase classname="sns" name="Test_MessageBuilder_formatStringArrayAttributeValues/Valid_data_types_-_rest" time="0.000s"></testcase>
-		<testcase classname="sns" name="Test_MessageBuilder_formatStringArrayAttributeValues/Invalid_-_struct" time="0.000s"></testcase>
-		<testcase classname="sns" name="Test_MessageBuilder_formatStringArrayAttributeValues/Invalid_-_slice" time="0.000s"></testcase>
-		<testcase classname="sns" name="Test_MessageBuilder_formatStringArrayAttributeValues/Invalid_-_func" time="0.000s"></testcase>
-		<testcase classname="sns" name="Test_MessageBuilder_formatStringArrayAttributeValues/Invalid_-_chan" time="0.000s"></testcase>
-		<testcase classname="sns" name="Test_MessageBuilder_formatStringArrayAttributeValues" time="0.000s"></testcase>
-		<testcase classname="sns" name="Test_Message_tracingTarget/Topic_ARN" time="0.000s"></testcase>
-		<testcase classname="sns" name="Test_Message_tracingTarget/Target_ARN" time="0.000s"></testcase>
-		<testcase classname="sns" name="Test_Message_tracingTarget/Phone_number" time="0.000s"></testcase>
-		<testcase classname="sns" name="Test_Message_tracingTarget/Unknown" time="0.000s"></testcase>
-		<testcase classname="sns" name="Test_Message_tracingTarget" time="0.000s"></testcase>
-		<testcase classname="sns" name="TestMessage_injectHeaders" time="0.000s"></testcase>
-		<testcase classname="sns" name="Test_NewPublisher/Missing_API" time="0.000s"></testcase>
-		<testcase classname="sns" name="Test_NewPublisher/Success" time="0.000s"></testcase>
-		<testcase classname="sns" name="Test_NewPublisher" time="0.000s"></testcase>
-		<testcase classname="sns" name="Test_Publisher_Publish/Publish_error" time="0.000s"></testcase>
-		<testcase classname="sns" name="Test_Publisher_Publish/No_message_ID_returned" time="0.000s"></testcase>
-		<testcase classname="sns" name="Test_Publisher_Publish/Success" time="0.000s"></testcase>
-		<testcase classname="sns" name="Test_Publisher_Publish" time="0.000s"></testcase>
-		<testcase classname="sns" name="Test_Publisher_publishOpName" time="0.000s"></testcase>
-		<testcase classname="sns" name="Test_snsHeadersCarrier_Set" time="0.000s"></testcase>
+		<testcase classname="github.com/beatlabs/patron/reliability/retry" name="TestNew/success" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/reliability/retry" name="TestNew/invalid_retries" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/reliability/retry" name="TestNew" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/reliability/retry" name="TestRetry_Execute_Success" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/reliability/retry" name="TestRetry_Execute_Failed" time="0.000000"></testcase>
 	</testsuite>
-	<testsuite tests="0" failures="0" time="0.000s" name="github.com/beatlabs/patron/trace/sql">
+	<testsuite tests="3" failures="0" time="0.000000" name="github.com/beatlabs/patron/sync">
 		<properties>
-			<property name="go.version" value="go1.11.4"></property>
+			<property name="go.version" value="go1.13.4 darwin/amd64"></property>
 		</properties>
+		<testcase classname="github.com/beatlabs/patron/sync" name="TestNewRequest" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/sync" name="TestRequest_Decode" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/sync" name="TestNewResponse" time="0.000000"></testcase>
+	</testsuite>
+	<testsuite tests="112" failures="0" time="2.760000" name="github.com/beatlabs/patron/sync/http">
+		<properties>
+			<property name="go.version" value="go1.13.4 darwin/amd64"></property>
+		</properties>
+		<testcase classname="github.com/beatlabs/patron/sync/http" name="Test_aliveCheckRoute/alive" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/sync/http" name="Test_aliveCheckRoute/unresponsive" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/sync/http" name="Test_aliveCheckRoute/default" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/sync/http" name="Test_aliveCheckRoute" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/sync/http" name="TestBuilderWithoutOptions" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/sync/http" name="TestComponent_ListenAndServe_DefaultRoutes_Shutdown" time="0.100000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/sync/http" name="TestComponent_ListenAndServeTLS_DefaultRoutes_Shutdown" time="0.100000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/sync/http" name="TestComponent_ListenAndServeTLS_FailsInvalidCerts" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/sync/http" name="Test_createHTTPServer" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/sync/http" name="Test_createHTTPServerUsingBuilder/success" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/sync/http" name="Test_createHTTPServerUsingBuilder/error_in_all_builder_steps" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/sync/http" name="Test_createHTTPServerUsingBuilder" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/sync/http" name="TestValidationError" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/sync/http" name="TestValidationErrorWithPayload" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/sync/http" name="TestUnauthorizedError" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/sync/http" name="TestUnauthorizedErrorWithPayload" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/sync/http" name="TestForbiddenError" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/sync/http" name="TestForbiddenErrorWithPayload" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/sync/http" name="TestNotFoundError" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/sync/http" name="TestNotFoundErrorWithPayload" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/sync/http" name="TestServiceUnavailableError" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/sync/http" name="TestServiceUnavailableErrorWithPayload" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/sync/http" name="TestNewError" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/sync/http" name="TestNewErrorWithCodeAndPayload" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/sync/http" name="TestNewErrorWithCodeAndNoPayload" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/sync/http" name="Test_extractFields" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/sync/http" name="Test_extractHeaders" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/sync/http" name="Test_determineEncoding/success_json" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/sync/http" name="Test_determineEncoding/success_json,_missing_accept" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/sync/http" name="Test_determineEncoding/success_json,_missing_content_type" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/sync/http" name="Test_determineEncoding/success_protobuf" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/sync/http" name="Test_determineEncoding/success_protobuf,_missing_accept" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/sync/http" name="Test_determineEncoding/success_protobuf,_missing_content_type" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/sync/http" name="Test_determineEncoding/wrong_accept" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/sync/http" name="Test_determineEncoding/missing_content_header,_defaults_json" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/sync/http" name="Test_determineEncoding/missing_headers,_defaults_json" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/sync/http" name="Test_determineEncoding/accept_*/*,_defaults_to_json" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/sync/http" name="Test_determineEncoding/wrong_content" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/sync/http" name="Test_determineEncoding" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/sync/http" name="Test_getOrSetCorrelationID/with_id" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/sync/http" name="Test_getOrSetCorrelationID/without_id" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/sync/http" name="Test_getOrSetCorrelationID/with_empty_id" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/sync/http" name="Test_getOrSetCorrelationID/missing_header" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/sync/http" name="Test_getOrSetCorrelationID" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/sync/http" name="Test_handleSuccess/GET_No_Content_success" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/sync/http" name="Test_handleSuccess/GET_OK_success" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/sync/http" name="Test_handleSuccess/POST_Created_success" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/sync/http" name="Test_handleSuccess/Encode_failure" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/sync/http" name="Test_handleSuccess" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/sync/http" name="Test_handleError/bad_request" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/sync/http" name="Test_handleError/unauthorized_request" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/sync/http" name="Test_handleError/forbidden_request" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/sync/http" name="Test_handleError/not_found_error" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/sync/http" name="Test_handleError/service_unavailable_error" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/sync/http" name="Test_handleError/internal_server_error" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/sync/http" name="Test_handleError/default_error" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/sync/http" name="Test_handleError/payload_encoding_error" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/sync/http" name="Test_handleError" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/sync/http" name="Test_handler/unsupported_content_type" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/sync/http" name="Test_handler/success_handling" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/sync/http" name="Test_handler/error_handling" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/sync/http" name="Test_handler/success_handling_failed_due_to_encoding" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/sync/http" name="Test_handler" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/sync/http" name="Test_prepareResponse" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/sync/http" name="Test_extractParams" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/sync/http" name="Test_metricRoute" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/sync/http" name="TestMiddlewareChain/middleware_1,2,3_and_finish" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/sync/http" name="TestMiddlewareChain/middleware_1,2_and_finish" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/sync/http" name="TestMiddlewareChain/no_middleware_and_finish" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/sync/http" name="TestMiddlewareChain" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/sync/http" name="TestMiddlewares/auth_middleware_success" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/sync/http" name="TestMiddlewares/auth_middleware_false" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/sync/http" name="TestMiddlewares/auth_middleware_error" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/sync/http" name="TestMiddlewares/tracing_middleware" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/sync/http" name="TestMiddlewares/recovery_middleware_from_panic_1" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/sync/http" name="TestMiddlewares/recovery_middleware_from_panic_2" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/sync/http" name="TestMiddlewares/recovery_middleware_from_panic_3" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/sync/http" name="TestMiddlewares" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/sync/http" name="TestResponseWriter" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/sync/http" name="Test_PprofHandlers/index" time="0.010000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/sync/http" name="Test_PprofHandlers/cmdline" time="0.010000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/sync/http" name="Test_PprofHandlers/cmdline#01" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/sync/http" name="Test_PprofHandlers/profile" time="1.010000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/sync/http" name="Test_PprofHandlers/symbol" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/sync/http" name="Test_PprofHandlers/trace" time="0.100000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/sync/http" name="Test_PprofHandlers/heap" time="0.010000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/sync/http" name="Test_PprofHandlers/goroutine" time="0.010000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/sync/http" name="Test_PprofHandlers/block" time="0.110000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/sync/http" name="Test_PprofHandlers/threadcreate" time="0.010000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/sync/http" name="Test_PprofHandlers/mutex" time="0.010000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/sync/http" name="Test_PprofHandlers" time="1.280000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/sync/http" name="Test_readyCheckRoute/ready" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/sync/http" name="Test_readyCheckRoute/notReady" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/sync/http" name="Test_readyCheckRoute/default" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/sync/http" name="Test_readyCheckRoute" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/sync/http" name="TestNewRoute" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/sync/http" name="TestNewGetRoute" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/sync/http" name="TestNewPostRoute" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/sync/http" name="TestNewPutRoute" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/sync/http" name="TestNewDeleteRoute" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/sync/http" name="TestNewPatchRoute" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/sync/http" name="TestNewHeadRoute" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/sync/http" name="TestNewOptionsRoute" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/sync/http" name="TestNewRouteRaw" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/sync/http" name="TestNewAuthGetRoute" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/sync/http" name="TestNewAuthPostRoute" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/sync/http" name="TestNewAuthPutRoute" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/sync/http" name="TestNewAuthDeleteRoute" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/sync/http" name="TestNewAuthPatchRoute" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/sync/http" name="TestNewAuthHeadRoute" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/sync/http" name="TestNewAuthOptionsRoute" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/sync/http" name="TestNewAuthRouteRaw" time="0.000000"></testcase>
+	</testsuite>
+	<testsuite tests="0" failures="0" time="0.000000" name="github.com/beatlabs/patron/sync/http/auth">
+		<properties>
+			<property name="go.version" value="go1.13.4 darwin/amd64"></property>
+		</properties>
+	</testsuite>
+	<testsuite tests="10" failures="0" time="0.000000" name="github.com/beatlabs/patron/sync/http/auth/apikey">
+		<properties>
+			<property name="go.version" value="go1.13.4 darwin/amd64"></property>
+		</properties>
+		<testcase classname="github.com/beatlabs/patron/sync/http/auth/apikey" name="TestNew/success" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/sync/http/auth/apikey" name="TestNew/failed_due_to_nil_validator" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/sync/http/auth/apikey" name="TestNew" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/sync/http/auth/apikey" name="TestAuthenticator_Authenticate/authenticated" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/sync/http/auth/apikey" name="TestAuthenticator_Authenticate/not_authenticated,_validation_failed" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/sync/http/auth/apikey" name="TestAuthenticator_Authenticate/failed,_validation_returned_err" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/sync/http/auth/apikey" name="TestAuthenticator_Authenticate/not_authenticated,_header_missing" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/sync/http/auth/apikey" name="TestAuthenticator_Authenticate/not_authenticated,_missing_key" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/sync/http/auth/apikey" name="TestAuthenticator_Authenticate/not_authenticated,_invalid_auth_method" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/sync/http/auth/apikey" name="TestAuthenticator_Authenticate" time="0.000000"></testcase>
+	</testsuite>
+	<testsuite tests="7" failures="0" time="0.100000" name="github.com/beatlabs/patron/trace">
+		<properties>
+			<property name="go.version" value="go1.13.4 darwin/amd64"></property>
+		</properties>
+		<testcase classname="github.com/beatlabs/patron/trace" name="TestSetup_Tracer_Close" time="0.100000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/trace" name="TestStartFinishConsumerSpan" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/trace" name="TestStartFinishChildSpan" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/trace" name="TestHTTPStartFinishSpan" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/trace" name="TestSQLStartFinishSpan" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/trace" name="TestEsSpan" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/trace" name="TestComponentOpName" time="0.000000"></testcase>
+	</testsuite>
+	<testsuite tests="10" failures="0" time="0.000000" name="github.com/beatlabs/patron/trace/amqp">
+		<properties>
+			<property name="go.version" value="go1.13.4 darwin/amd64"></property>
+		</properties>
+		<testcase classname="github.com/beatlabs/patron/trace/amqp" name="TestNewMessage" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/trace/amqp" name="TestNewJSONMessage" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/trace/amqp" name="TestNewProtobufMessage" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/trace/amqp" name="TestNewPublisher/fail,_missing_url" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/trace/amqp" name="TestNewPublisher/fail,_missing_exchange" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/trace/amqp" name="TestNewPublisher/fail,_missing_exchange#01" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/trace/amqp" name="TestNewPublisher" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/trace/amqp" name="TestTimeout/success" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/trace/amqp" name="TestTimeout/failure,_invalid_timeout" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/trace/amqp" name="TestTimeout" time="0.000000"></testcase>
+	</testsuite>
+	<testsuite tests="5" failures="0" time="0.000000" name="github.com/beatlabs/patron/trace/es">
+		<properties>
+			<property name="go.version" value="go1.13.4 darwin/amd64"></property>
+		</properties>
+		<testcase classname="github.com/beatlabs/patron/trace/es" name="TestStartEndSpan" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/trace/es" name="TestNewDefaultClient" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/trace/es" name="TestNewClient" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/trace/es" name="TestEsQuery" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/trace/es" name="TestGetAddrFromEnv" time="0.000000"></testcase>
+	</testsuite>
+	<testsuite tests="9" failures="0" time="0.010000" name="github.com/beatlabs/patron/trace/http">
+		<properties>
+			<property name="go.version" value="go1.13.4 darwin/amd64"></property>
+		</properties>
+		<testcase classname="github.com/beatlabs/patron/trace/http" name="TestTracedClient_Do/respose" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/trace/http" name="TestTracedClient_Do/response_with_circuit_breaker" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/trace/http" name="TestTracedClient_Do/error" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/trace/http" name="TestTracedClient_Do/error_with_circuit_breaker" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/trace/http" name="TestTracedClient_Do" time="0.010000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/trace/http" name="TestNew/success" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/trace/http" name="TestNew/failure,_invalid_timeout" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/trace/http" name="TestNew/failure,_invalid_circuit_breaker" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/trace/http" name="TestNew" time="0.000000"></testcase>
+	</testsuite>
+	<testsuite tests="41" failures="0" time="1.780000" name="github.com/beatlabs/patron/trace/kafka">
+		<properties>
+			<property name="go.version" value="go1.13.4 darwin/amd64"></property>
+		</properties>
+		<testcase classname="github.com/beatlabs/patron/trace/kafka" name="TestNewMessage" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/trace/kafka" name="TestNewMessageWithKey/success" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/trace/kafka" name="TestNewMessageWithKey/failure_due_to_empty_message_key" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/trace/kafka" name="TestNewMessageWithKey" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/trace/kafka" name="TestNewJSONMessage/failure_due_to_invalid_data" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/trace/kafka" name="TestNewJSONMessage/success" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/trace/kafka" name="TestNewJSONMessage" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/trace/kafka" name="TestNewJSONMessageWithKey/failure_due_to_invalid_data" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/trace/kafka" name="TestNewJSONMessageWithKey/success" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/trace/kafka" name="TestNewJSONMessageWithKey/failure_due_to_empty_message_key" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/trace/kafka" name="TestNewJSONMessageWithKey" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/trace/kafka" name="TestNewSyncProducer_Failure" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/trace/kafka" name="TestNewSyncProducer_Option_Failure" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/trace/kafka" name="TestNewSyncProducer_Success" time="0.010000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/trace/kafka" name="TestAsyncProducer_SendMessage_Close" time="0.110000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/trace/kafka" name="TestAsyncProducer_SendMessage_WithKey" time="0.110000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/trace/kafka" name="TestSendWithCustomEncoder/json_success" time="0.110000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/trace/kafka" name="TestSendWithCustomEncoder/protobuf_success" time="0.110000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/trace/kafka" name="TestSendWithCustomEncoder/failure_due_to_invalid_data" time="0.110000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/trace/kafka" name="TestSendWithCustomEncoder/nil_message_data" time="0.110000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/trace/kafka" name="TestSendWithCustomEncoder/nil_encoder" time="0.110000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/trace/kafka" name="TestSendWithCustomEncoder/empty_data" time="0.110000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/trace/kafka" name="TestSendWithCustomEncoder/empty_data_two" time="0.110000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/trace/kafka" name="TestSendWithCustomEncoder" time="0.780000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/trace/kafka" name="TestVersion/success" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/trace/kafka" name="TestVersion/failure,_missing_version" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/trace/kafka" name="TestVersion/failure,_invalid_version" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/trace/kafka" name="TestVersion" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/trace/kafka" name="TestTimeouts/success" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/trace/kafka" name="TestTimeouts/fail,_zero_timeout" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/trace/kafka" name="TestTimeouts" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/trace/kafka" name="TestRequiredAcksPolicy/success" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/trace/kafka" name="TestRequiredAcksPolicy/success#01" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/trace/kafka" name="TestRequiredAcksPolicy/success#02" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/trace/kafka" name="TestRequiredAcksPolicy" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/trace/kafka" name="TestEncoder/json_EncodeFunc" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/trace/kafka" name="TestEncoder/protobuf_EncodeFunc" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/trace/kafka" name="TestEncoder/empty_content_type" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/trace/kafka" name="TestEncoder/nil_EncodeFunc" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/trace/kafka" name="TestEncoder/nil_EncodeFunc_w/_ct" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/trace/kafka" name="TestEncoder" time="0.000000"></testcase>
+	</testsuite>
+	<testsuite tests="1" failures="0" time="0.000000" name="github.com/beatlabs/patron/trace/redis">
+		<properties>
+			<property name="go.version" value="go1.13.4 darwin/amd64"></property>
+		</properties>
+		<testcase classname="github.com/beatlabs/patron/trace/redis" name="TestSpan" time="0.000000"></testcase>
+	</testsuite>
+	<testsuite tests="27" failures="0" time="0.000000" name="github.com/beatlabs/patron/trace/sns">
+		<properties>
+			<property name="go.version" value="go1.13.4 darwin/amd64"></property>
+		</properties>
+		<testcase classname="github.com/beatlabs/patron/trace/sns" name="Test_MessageBuilder_Build" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/trace/sns" name="Test_MessageBuilder_InvalidStringArrayAttribute" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/trace/sns" name="Test_MessageBuilder_Build_With_Error" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/trace/sns" name="Test_MessageBuilder_Build_With_Invalid_attribute" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/trace/sns" name="Test_MessageBuilder_formatStringArrayAttributeValues/Valid_data_types_-_(u)ints" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/trace/sns" name="Test_MessageBuilder_formatStringArrayAttributeValues/Valid_data_types_-_floats" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/trace/sns" name="Test_MessageBuilder_formatStringArrayAttributeValues/Valid_data_types_-_rest" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/trace/sns" name="Test_MessageBuilder_formatStringArrayAttributeValues/Invalid_-_struct" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/trace/sns" name="Test_MessageBuilder_formatStringArrayAttributeValues/Invalid_-_slice" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/trace/sns" name="Test_MessageBuilder_formatStringArrayAttributeValues/Invalid_-_func" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/trace/sns" name="Test_MessageBuilder_formatStringArrayAttributeValues/Invalid_-_chan" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/trace/sns" name="Test_MessageBuilder_formatStringArrayAttributeValues" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/trace/sns" name="Test_Message_tracingTarget/Topic_ARN" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/trace/sns" name="Test_Message_tracingTarget/Target_ARN" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/trace/sns" name="Test_Message_tracingTarget/Phone_number" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/trace/sns" name="Test_Message_tracingTarget/Unknown" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/trace/sns" name="Test_Message_tracingTarget" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/trace/sns" name="TestMessage_injectHeaders" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/trace/sns" name="Test_NewPublisher/Missing_API" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/trace/sns" name="Test_NewPublisher/Success" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/trace/sns" name="Test_NewPublisher" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/trace/sns" name="Test_Publisher_Publish/Publish_error" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/trace/sns" name="Test_Publisher_Publish/No_message_ID_returned" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/trace/sns" name="Test_Publisher_Publish/Success" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/trace/sns" name="Test_Publisher_Publish" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/trace/sns" name="Test_Publisher_publishOpName" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/trace/sns" name="Test_snsHeadersCarrier_Set" time="0.000000"></testcase>
+	</testsuite>
+	<testsuite tests="15" failures="0" time="0.010000" name="github.com/beatlabs/patron/trace/sql">
+		<properties>
+			<property name="go.version" value="go1.13.4 darwin/amd64"></property>
+		</properties>
+		<testcase classname="github.com/beatlabs/patron/trace/sql" name="TestParseDSN/IPv6_provided" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/trace/sql" name="TestParseDSN/non-matching_string" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/trace/sql" name="TestParseDSN/dbname_only" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/trace/sql" name="TestParseDSN/multiple_@" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/trace/sql" name="TestParseDSN/unix_socket" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/trace/sql" name="TestParseDSN/IP_as_address" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/trace/sql" name="TestParseDSN/port_in_address" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/trace/sql" name="TestParseDSN/generic_case" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/trace/sql" name="TestParseDSN/empty_DSN" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/trace/sql" name="TestParseDSN/empty_string" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/trace/sql" name="TestParseDSN/params_added" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/trace/sql" name="TestParseDSN/multiple_&#39;:&#39;" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/trace/sql" name="TestParseDSN/driver_and_multiple_@" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/trace/sql" name="TestParseDSN/@_in_path_to_socker" time="0.000000"></testcase>
+		<testcase classname="github.com/beatlabs/patron/trace/sql" name="TestParseDSN" time="0.010000"></testcase>
 	</testsuite>
 </testsuites>
