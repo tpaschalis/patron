@@ -55,7 +55,7 @@ func (c *Client) startSpan(ctx context.Context, opName, stmt string) (opentracin
 }
 
 // New returns a new Redis client.
-func New(ctx context.Context, opt Options) *Client {
+func New(opt Options) *Client {
 	clientOptions := redis.Options(opt)
 	return &Client{redis.NewClient(&clientOptions)}
 }

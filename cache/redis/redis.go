@@ -18,9 +18,9 @@ type Cache struct {
 type Options redis.Options
 
 // New returns a new Redis client that will be used as the cache store.
-func New(opt Options) (*Cache, error) {
-	redisDB := redis.New(context.Background(), redis.Options(opt))
-	return &Cache{rdb: redisDB, ctx: context.Background()}, nil
+func New(ctx context.Context, opt Options) (*Cache, error) {
+	redisDB := redis.New(redis.Options(opt))
+	return &Cache{rdb: redisDB, ctx: ctx}, nil
 }
 
 // Get executes a lookup and returns whether a key exists in the cache along with and its value.
