@@ -14,6 +14,13 @@ import (
 	"github.com/opentracing/opentracing-go/ext"
 )
 
+const (
+	// SQSConsumerComponent definition.
+	SQSConsumerComponent = "sqs-consumer"
+	// SNSPublisherComponent definition.
+	SNSPublisherComponent = "sns-publisher"
+)
+
 // Publisher is the interface defining an SNS publisher, used to publish messages to SNS.
 type Publisher interface {
 	Publish(ctx context.Context, msg Message) (messageID string, err error)
@@ -37,7 +44,7 @@ func NewPublisher(api snsiface.SNSAPI) (*TracedPublisher, error) {
 
 	return &TracedPublisher{
 		api:       api,
-		component: trace.SNSPublisherComponent,
+		component: SNSPublisherComponent,
 		tag:       ext.SpanKindProducer,
 	}, nil
 }

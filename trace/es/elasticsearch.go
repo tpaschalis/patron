@@ -2,6 +2,7 @@ package es
 
 import (
 	"bytes"
+	"context"
 	"fmt"
 	"io/ioutil"
 	"net/http"
@@ -10,10 +11,12 @@ import (
 	"strings"
 
 	"github.com/beatlabs/patron/trace"
+	traceHTTP "github.com/beatlabs/patron/trace/http"
 	"github.com/elastic/go-elasticsearch/v8"
 	"github.com/elastic/go-elasticsearch/v8/esapi"
 	"github.com/elastic/go-elasticsearch/v8/estransport"
 	"github.com/opentracing/opentracing-go"
+	"github.com/opentracing/opentracing-go/ext"
 )
 
 const (
@@ -27,6 +30,13 @@ const (
 
 	opName  = "Elasticsearch Call"
 	cmpName = "go-elasticsearch"
+
+	versionTag = "version"
+	hostsTag   = "hosts"
+)
+
+var (
+	version = "dev"
 )
 
 type tracingInfo struct {
@@ -51,14 +61,14 @@ func (t *tracingInfo) startSpan(req *http.Request) (opentracing.Span, error) {
 		}
 	}
 
-	return trace.EsSpan(req.Context(), opName, cmpName, t.user, uri, method, bodyFmt, t.hosts), nil
+	return Span(req.Context(), opName, cmpName, t.user, uri, method, bodyFmt, t.hosts), nil
 }
 
 func endSpan(sp opentracing.Span, rsp *http.Response) {
 	// In cases where more than one host is given, the selected one is only known at this time
 	sp.SetTag(respondentTag, rsp.Request.URL.Host)
 
-	trace.FinishHTTPSpan(sp, rsp.StatusCode)
+	traceHTTP.FinishHTTPSpan(sp, rsp.StatusCode)
 }
 
 type transportClient struct {
@@ -137,6 +147,25 @@ func NewClient(cfg Config) (*Client, error) {
 			API:       esapi.New(tp),
 		},
 	}, nil
+}
+
+// Span starts a new elasticsearch child span with specified tags
+func Span(ctx context.Context, opName, cmp, user, uri, method, body string, hostPool []string) opentracing.Span {
+
+	sp, _ := opentracing.StartSpanFromContext(ctx, opName)
+	ext.Component.Set(sp, cmp)
+	ext.DBType.Set(sp, "elasticsearch")
+	ext.DBUser.Set(sp, user)
+
+	ext.HTTPUrl.Set(sp, uri)
+	ext.HTTPMethod.Set(sp, method)
+	ext.DBStatement.Set(sp, body)
+
+	hostsFmt := "[" + strings.Join(hostPool, ", ") + "]"
+	sp.SetTag(hostsTag, hostsFmt)
+	sp.SetTag(versionTag, version)
+
+	return sp
 }
 
 func addrsToURLs(addrs []string) ([]*url.URL, error) {

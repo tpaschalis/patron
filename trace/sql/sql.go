@@ -9,6 +9,16 @@ import (
 
 	"github.com/beatlabs/patron/trace"
 	"github.com/opentracing/opentracing-go"
+	"github.com/opentracing/opentracing-go/ext"
+)
+
+const (
+	versionTag = "version"
+	hostsTag   = "hosts"
+)
+
+var (
+	version = "dev"
 )
 
 type connInfo struct {
@@ -16,7 +26,7 @@ type connInfo struct {
 }
 
 func (c *connInfo) startSpan(ctx context.Context, opName, stmt string) (opentracing.Span, context.Context) {
-	return trace.SQLSpan(ctx, opName, "sql", "RDBMS", c.instance, c.user, stmt)
+	return Span(ctx, opName, "sql", "RDBMS", c.instance, c.user, stmt)
 }
 
 // Conn represents a single database connection.
@@ -350,6 +360,23 @@ func (tx *Tx) Stmt(ctx context.Context, stmt *Stmt) *Stmt {
 	sp, _ := tx.startSpan(ctx, "tx.Stmt", "")
 	defer trace.SpanComplete(sp, nil)
 	return &Stmt{stmt: tx.tx.StmtContext(ctx, stmt.stmt)}
+}
+
+// Span starts a new SQL child span with specified tags.
+func Span(ctx context.Context, opName, cmp, sqlType, instance, user, stmt string,
+	tags ...opentracing.Tag) (opentracing.Span, context.Context) {
+
+	sp, ctx := opentracing.StartSpanFromContext(ctx, opName)
+	ext.Component.Set(sp, cmp)
+	ext.DBType.Set(sp, sqlType)
+	ext.DBInstance.Set(sp, instance)
+	ext.DBUser.Set(sp, user)
+	ext.DBStatement.Set(sp, stmt)
+	for _, t := range tags {
+		sp.SetTag(t.Key, t.Value)
+	}
+	sp.SetTag(versionTag, version)
+	return sp, ctx
 }
 
 func parseDSN(dsn string) DSNInfo {

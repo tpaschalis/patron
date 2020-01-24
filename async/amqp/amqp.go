@@ -13,6 +13,7 @@ import (
 	patronErrors "github.com/beatlabs/patron/errors"
 	"github.com/beatlabs/patron/log"
 	"github.com/beatlabs/patron/trace"
+	traceAMQP "github.com/beatlabs/patron/trace/amqp"
 	"github.com/google/uuid"
 	opentracing "github.com/opentracing/opentracing-go"
 	"github.com/streadway/amqp"
@@ -165,8 +166,8 @@ func (c *consumer) Consume(ctx context.Context) (<-chan async.Message, <-chan er
 				log.Debugf("processing message %d", d.DeliveryTag)
 				corID := getCorrelationID(d.Headers)
 
-				sp, ctxCh := trace.ConsumerSpan(ctx, trace.ComponentOpName(trace.AMQPConsumerComponent, c.queue),
-					trace.AMQPConsumerComponent, corID, mapHeader(d.Headers), c.traceTag)
+				sp, ctxCh := trace.ConsumerSpan(ctx, trace.ComponentOpName(traceAMQP.AMQPConsumerComponent, c.queue),
+					traceAMQP.AMQPConsumerComponent, corID, mapHeader(d.Headers), c.traceTag)
 
 				dec, err := async.DetermineDecoder(d.ContentType)
 				if err != nil {

@@ -16,6 +16,7 @@ import (
 	"github.com/beatlabs/patron/encoding/json"
 	"github.com/beatlabs/patron/log"
 	"github.com/beatlabs/patron/trace"
+	traceSNS "github.com/beatlabs/patron/trace/sns"
 	"github.com/google/uuid"
 	opentracing "github.com/opentracing/opentracing-go"
 	"github.com/prometheus/client_golang/prometheus"
@@ -39,6 +40,9 @@ const (
 var messageAge *prometheus.GaugeVec
 var messageCounter *prometheus.CounterVec
 var queueSize *prometheus.GaugeVec
+var (
+	version = "dev"
+)
 
 func init() {
 	messageAge = prometheus.NewGaugeVec(
@@ -233,8 +237,8 @@ func (c *consumer) Consume(ctx context.Context) (<-chan async.Message, <-chan er
 
 				corID := getCorrelationID(msg.MessageAttributes)
 
-				sp, ctxCh := trace.ConsumerSpan(sqsCtx, trace.ComponentOpName(trace.SQSConsumerComponent, c.queueName),
-					trace.SQSConsumerComponent, corID, mapHeader(msg.MessageAttributes))
+				sp, ctxCh := trace.ConsumerSpan(sqsCtx, trace.ComponentOpName(traceSNS.SQSConsumerComponent, c.queueName),
+					traceSNS.SQSConsumerComponent, corID, mapHeader(msg.MessageAttributes))
 
 				ctxCh = correlation.ContextWithID(ctxCh, corID)
 				logger := log.Sub(map[string]interface{}{"correlationID": corID})

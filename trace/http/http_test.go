@@ -9,7 +9,6 @@ import (
 	"time"
 
 	"github.com/beatlabs/patron/reliability/circuitbreaker"
-	"github.com/beatlabs/patron/trace"
 	opentracing "github.com/opentracing/opentracing-go"
 	"github.com/opentracing/opentracing-go/mocktracer"
 	"github.com/stretchr/testify/assert"
@@ -33,7 +32,7 @@ func TestTracedClient_Do(t *testing.T) {
 	assert.NoError(t, err)
 	reqErr, err := http.NewRequest("GET", "", nil)
 	assert.NoError(t, err)
-	opName := trace.HTTPOpName("GET", ts.URL)
+	opName := OpName("GET", ts.URL)
 	opNameError := "HTTP GET"
 
 	type args struct {

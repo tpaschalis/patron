@@ -13,6 +13,7 @@ import (
 	"github.com/beatlabs/patron/encoding"
 	"github.com/beatlabs/patron/log"
 	"github.com/beatlabs/patron/trace"
+	traceKafka "github.com/beatlabs/patron/trace/kafka"
 	"github.com/google/uuid"
 	"github.com/opentracing/opentracing-go"
 	"github.com/prometheus/client_golang/prometheus"
@@ -101,8 +102,8 @@ func ClaimMessage(ctx context.Context, msg *sarama.ConsumerMessage, d encoding.D
 
 	corID := getCorrelationID(msg.Headers)
 
-	sp, ctxCh := trace.ConsumerSpan(ctx, trace.ComponentOpName(trace.KafkaConsumerComponent, msg.Topic),
-		trace.KafkaConsumerComponent, corID, mapHeader(msg.Headers))
+	sp, ctxCh := trace.ConsumerSpan(ctx, trace.ComponentOpName(traceKafka.KafkaConsumerComponent, msg.Topic),
+		traceKafka.KafkaConsumerComponent, corID, mapHeader(msg.Headers))
 	ctxCh = correlation.ContextWithID(ctxCh, corID)
 	ctxCh = log.WithContext(ctxCh, log.Sub(map[string]interface{}{"correlationID": corID}))
 
