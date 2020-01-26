@@ -71,7 +71,7 @@ func (c *Client) Do(ctx context.Context, args ...interface{}) Cmd {
 func (c *Client) Close(ctx context.Context, args ...interface{}) error {
 	sp, _ := c.startSpan(ctx, "redis.Close", "")
 	cmd := c.Client.Close()
-	trace.SpanComplete(sp, cmd)
+	trace.SpanComplete(sp, fmt.Errorf(cmd.Error()))
 	return errors.New(cmd.Error())
 }
 
