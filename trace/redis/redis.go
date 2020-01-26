@@ -16,11 +16,6 @@ const (
 	RedisComponent = "redis"
 	// RedisDBType description
 	RedisDBType = "In-memory"
-	versionTag  = "version"
-)
-
-var (
-	version = "dev"
 )
 
 // Span starts a new Redis child span with specified tags.
@@ -35,7 +30,6 @@ func Span(ctx context.Context, opName, cmp, dbType, instance, stmt string,
 	for _, t := range tags {
 		sp.SetTag(t.Key, t.Value)
 	}
-	sp.SetTag(versionTag, version)
 	return sp, ctx
 }
 

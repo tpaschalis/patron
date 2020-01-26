@@ -24,7 +24,6 @@ func TestSpan(t *testing.T) {
 	rawSpan := mtr.FinishedSpans()[0]
 	assert.Equal(t, map[string]interface{}{
 		"component":    RedisComponent,
-		"version":      "dev",
 		"db.instance":  "localhost",
 		"db.statement": "flushdb",
 		"db.type":      RedisDBType,
