@@ -14,8 +14,6 @@ type Cache interface {
 
 // TTLCache interface for handling common operations, to be carried out by different caching implementations.
 type TTLCache interface {
-	Get(key string) (interface{}, bool, error)
-	Purge() error
-	Remove(key string) error
+	Cache
 	SetTTL(key string, value interface{}, ttl time.Duration) error
 }

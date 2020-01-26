@@ -42,12 +42,17 @@ func Span(ctx context.Context, opName, cmp, dbType, instance, stmt string,
 // Options wraps redis.Options for easier usage.
 type Options redis.Options
 
-// Empty represents the error which is returned in case a key is not found.
-const Empty = redis.Nil
+// Nil represents the error which is returned in case a key is not found.
+const Nil = redis.Nil
 
 // Client represents a connection with a Redis client.
 type Client struct {
 	*redis.Client
+}
+
+// Cmd wraps a custom go-redis command
+type Cmd struct {
+	*redis.Cmd
 }
 
 func (c *Client) startSpan(ctx context.Context, opName, stmt string) (opentracing.Span, context.Context) {
@@ -61,11 +66,11 @@ func New(opt Options) *Client {
 }
 
 // Do creates and processes a custom Cmd on the underlying Redis client.
-func (c *Client) Do(ctx context.Context, args ...interface{}) (interface{}, error) {
+func (c *Client) Do(ctx context.Context, args ...interface{}) Cmd {
 	sp, _ := c.startSpan(ctx, "redis.Do", fmt.Sprintf("%v", args))
 	cmd := c.Client.Do(args...)
 	trace.SpanComplete(sp, cmd.Err())
-	return cmd.Result()
+	return Cmd{cmd}
 }
 
 // Close closes the connection to the underlying Redis client.
