@@ -70,9 +70,9 @@ func (c *Client) Close(ctx context.Context, args ...interface{}) error {
 }
 
 // Ping can be used to test whether a connection is still alive, or measure latency.
-func (c *Client) Ping(ctx context.Context) (string, error) {
+func (c *Client) Ping(ctx context.Context) *redis.StatusCmd {
 	sp, _ := c.startSpan(ctx, "redis.Ping", "")
 	cmd := c.Client.Ping()
 	trace.SpanComplete(sp, cmd.Err())
-	return cmd.Result()
+	return cmd
 }

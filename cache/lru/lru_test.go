@@ -8,13 +8,29 @@ import (
 
 func TestNew(t *testing.T) {
 
-	c, err := New(-1)
-	assert.Nil(t, c)
-	assert.Error(t, err)
+	tests := []struct {
+		name    string
+		size    int
+		wantErr bool
+		err     string
+	}{
+		{name: "negative size", size: -1, wantErr: true, err: "Must provide a positive size"},
+		{name: "zero size", size: 0, wantErr: true, err: "Must provide a positive size"},
+		{name: "positive size", size: 1024, wantErr: false, err: ""},
+	}
 
-	c, err = New(512)
-	assert.NotNil(t, c)
-	assert.NoError(t, err)
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			c, err := New(tt.size)
+			if tt.wantErr {
+				assert.Nil(t, c)
+				assert.EqualError(t, err, tt.err)
+			} else {
+				assert.NotNil(t, c)
+				assert.NoError(t, err)
+			}
+		})
+	}
 }
 
 func TestCacheOperations(t *testing.T) {
