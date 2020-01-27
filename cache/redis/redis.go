@@ -14,7 +14,7 @@ type Cache struct {
 	ctx context.Context
 }
 
-// Options exposes the options struct from go-redis package
+// Options exposes the options struct from go-redis package.
 type Options redis.Options
 
 // New returns a new Redis client that will be used as the cache store.
@@ -26,7 +26,6 @@ func New(ctx context.Context, opt Options) (*Cache, error) {
 // Get executes a lookup and returns whether a key exists in the cache along with and its value.
 func (c *Cache) Get(key string) (interface{}, bool, error) {
 	res, err := c.rdb.Do(c.ctx, "get", key).Result()
-	// res, err := c.rdb.Do(c.ctx, "get", key)
 	if err == redis.Nil || err != nil {
 		return nil, false, err
 	}
