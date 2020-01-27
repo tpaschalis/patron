@@ -2,7 +2,6 @@ package redis
 
 import (
 	"context"
-	"errors"
 	"fmt"
 
 	"github.com/beatlabs/patron/trace"
@@ -44,11 +43,6 @@ type Client struct {
 	*redis.Client
 }
 
-// Cmd wraps a custom go-redis command
-type Cmd struct {
-	*redis.Cmd
-}
-
 func (c *Client) startSpan(ctx context.Context, opName, stmt string) (opentracing.Span, context.Context) {
 	return Span(ctx, opName, RedisComponent, RedisDBType, stmt, c.Options().Addr)
 }
@@ -60,19 +54,19 @@ func New(opt Options) *Client {
 }
 
 // Do creates and processes a custom Cmd on the underlying Redis client.
-func (c *Client) Do(ctx context.Context, args ...interface{}) Cmd {
+func (c *Client) Do(ctx context.Context, args ...interface{}) *redis.Cmd {
 	sp, _ := c.startSpan(ctx, "redis.Do", fmt.Sprintf("%v", args))
 	cmd := c.Client.Do(args...)
 	trace.SpanComplete(sp, cmd.Err())
-	return Cmd{cmd}
+	return cmd
 }
 
 // Close closes the connection to the underlying Redis client.
 func (c *Client) Close(ctx context.Context, args ...interface{}) error {
 	sp, _ := c.startSpan(ctx, "redis.Close", "")
-	cmd := c.Client.Close()
-	trace.SpanComplete(sp, fmt.Errorf(cmd.Error()))
-	return errors.New(cmd.Error())
+	err := c.Client.Close()
+	trace.SpanComplete(sp, err)
+	return err
 }
 
 // Ping can be used to test whether a connection is still alive, or measure latency.
