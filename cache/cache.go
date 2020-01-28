@@ -4,7 +4,7 @@ import (
 	"time"
 )
 
-// Cache interface for handling common operations, to be carried out by different caching implementations.
+// Cache interface.
 type Cache interface {
 	Get(key string) (interface{}, bool, error)
 	Purge() error
@@ -12,7 +12,7 @@ type Cache interface {
 	Set(key string, value interface{}) error
 }
 
-// TTLCache interface for handling common operations, to be carried out by different caching implementations.
+// TTLCache interface adds support for expiring key-value pairs.
 type TTLCache interface {
 	Cache
 	SetTTL(key string, value interface{}, ttl time.Duration) error

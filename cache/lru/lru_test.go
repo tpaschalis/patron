@@ -16,7 +16,7 @@ func TestNew(t *testing.T) {
 	}{
 		{name: "negative size", size: -1, wantErr: true, err: "Must provide a positive size"},
 		{name: "zero size", size: 0, wantErr: true, err: "Must provide a positive size"},
-		{name: "positive size", size: 1024, wantErr: false, err: ""},
+		{name: "positive size", size: 1024, wantErr: false},
 	}
 
 	for _, tt := range tests {

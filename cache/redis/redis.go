@@ -23,7 +23,7 @@ func New(ctx context.Context, opt Options) (*Cache, error) {
 	return &Cache{rdb: redisDB, ctx: ctx}, nil
 }
 
-// Get executes a lookup and returns whether a key exists in the cache along with and its value.
+// Get executes a lookup and returns whether a key exists in the cache along with its value.
 func (c *Cache) Get(key string) (interface{}, bool, error) {
 	res, err := c.rdb.Do(c.ctx, "get", key).Result()
 	if err == redis.Nil || err != nil {
@@ -47,8 +47,7 @@ func (c *Cache) Remove(key string) error {
 	return c.rdb.Do(c.ctx, "del", key).Err()
 }
 
-// SetTTL registers a key-value pair to the cache. Once the provided duration expires,
-// the function will try to erase the key from the cache.
+// SetTTL registers a key-value pair to the cache, specifying an expiry time.
 func (c *Cache) SetTTL(key string, value interface{}, ttl time.Duration) error {
 	return c.rdb.Do(c.ctx, "set", key, value, "px", int(ttl.Milliseconds())).Err()
 }

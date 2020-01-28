@@ -11,7 +11,7 @@ import (
 )
 
 const (
-	// RedisComponent Definition
+	// RedisComponent definition
 	RedisComponent = "redis"
 	// RedisDBType description
 	RedisDBType = "In-memory"
@@ -69,7 +69,8 @@ func (c *Client) Close(ctx context.Context, args ...interface{}) error {
 	return err
 }
 
-// Ping can be used to test whether a connection is still alive, or measure latency.
+// Ping contacts the redis client, and returns 'PONG' if the client is reachable.
+// It can be used to test whether a connection is still alive, or measure latency.
 func (c *Client) Ping(ctx context.Context) *redis.StatusCmd {
 	sp, _ := c.startSpan(ctx, "redis.Ping", "")
 	cmd := c.Client.Ping()

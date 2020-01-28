@@ -19,7 +19,7 @@ func New(size int) (*Cache, error) {
 	return &Cache{lru: lruCache}, nil
 }
 
-// Get executes a lookup and returns whether a key exists in the cache along with and its value.
+// Get executes a lookup and returns whether a key exists in the cache along with its value.
 func (c *Cache) Get(key string) (interface{}, bool, error) {
 	value, ok := c.lru.Get(key)
 	return value, ok, nil
