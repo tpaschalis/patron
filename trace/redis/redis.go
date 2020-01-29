@@ -17,21 +17,6 @@ const (
 	RedisDBType = "In-memory"
 )
 
-// Span starts a new Redis child span with specified tags.
-func Span(ctx context.Context, opName, cmp, dbType, instance, stmt string,
-	tags ...opentracing.Tag) (opentracing.Span, context.Context) {
-
-	sp, ctx := opentracing.StartSpanFromContext(ctx, opName)
-	ext.Component.Set(sp, cmp)
-	ext.DBType.Set(sp, dbType)
-	ext.DBInstance.Set(sp, instance)
-	ext.DBStatement.Set(sp, stmt)
-	for _, t := range tags {
-		sp.SetTag(t.Key, t.Value)
-	}
-	return sp, ctx
-}
-
 // Options wraps redis.Options for easier usage.
 type Options redis.Options
 
@@ -43,8 +28,16 @@ type Client struct {
 	*redis.Client
 }
 
-func (c *Client) startSpan(ctx context.Context, opName, stmt string) (opentracing.Span, context.Context) {
-	return Span(ctx, opName, RedisComponent, RedisDBType, stmt, c.Options().Addr)
+func (c *Client) startSpan(ctx context.Context, opName, stmt string, tags ...opentracing.Tag) (opentracing.Span, context.Context) {
+	sp, ctx := opentracing.StartSpanFromContext(ctx, opName)
+	ext.Component.Set(sp, RedisComponent)
+	ext.DBType.Set(sp, RedisDBType)
+	ext.DBInstance.Set(sp, c.Options().Addr)
+	ext.DBStatement.Set(sp, stmt)
+	for _, t := range tags {
+		sp.SetTag(t.Key, t.Value)
+	}
+	return sp, ctx
 }
 
 // New returns a new Redis client.

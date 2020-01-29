@@ -73,9 +73,9 @@ func TestCacheOperations(t *testing.T) {
 		err = c.Set("key3", "val3")
 		assert.NoError(t, err)
 
-		assert.Equal(t, c.lru.Len(), 3)
+		assert.Equal(t, c.cache.Len(), 3)
 		err = c.Purge()
 		assert.NoError(t, err)
-		assert.Equal(t, c.lru.Len(), 0)
+		assert.Equal(t, c.cache.Len(), 0)
 	})
 }

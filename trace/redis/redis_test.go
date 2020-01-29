@@ -11,10 +11,12 @@ import (
 )
 
 func TestSpan(t *testing.T) {
+	opts := Options{Addr: "localhost"}
+	c := New(opts)
 	mtr := mocktracer.New()
 	opentracing.SetGlobalTracer(mtr)
 	tag := opentracing.Tag{Key: "key", Value: "value"}
-	sp, req := Span(context.Background(), "name", RedisComponent, RedisDBType, "localhost", "flushdb", tag)
+	sp, req := c.startSpan(context.Background(), "localhost", "flushdb", tag)
 	assert.NotNil(t, sp)
 	assert.NotNil(t, req)
 	assert.IsType(t, &mocktracer.MockSpan{}, sp)
