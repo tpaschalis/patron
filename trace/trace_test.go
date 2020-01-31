@@ -2,7 +2,6 @@ package trace
 
 import (
 	"context"
-	"net/http"
 	"testing"
 
 	opentracing "github.com/opentracing/opentracing-go"
@@ -75,33 +74,6 @@ func TestStartFinishChildSpan(t *testing.T) {
 		"key":           "value",
 		"span.kind":     ext.SpanKindConsumerEnum,
 		"correlationID": "corID",
-	}, rawSpan.Tags())
-}
-
-func TestHTTPStartFinishSpan(t *testing.T) {
-	mtr := mocktracer.New()
-	opentracing.SetGlobalTracer(mtr)
-	req, err := http.NewRequest("GET", "/", nil)
-	assert.NoError(t, err)
-	sp, req := HTTPSpan("/", "corID", req)
-	assert.NotNil(t, sp)
-	assert.NotNil(t, req)
-	assert.IsType(t, &mocktracer.MockSpan{}, sp)
-	jsp := sp.(*mocktracer.MockSpan)
-	assert.NotNil(t, jsp)
-	assert.Equal(t, "GET /", jsp.OperationName)
-	FinishHTTPSpan(jsp, 200)
-	assert.NotNil(t, jsp)
-	rawSpan := mtr.FinishedSpans()[0]
-	assert.Equal(t, map[string]interface{}{
-		"span.kind":        ext.SpanKindRPCServerEnum,
-		"component":        "http",
-		"error":            false,
-		"http.method":      "GET",
-		"http.status_code": uint16(200),
-		"http.url":         "/",
-		"version":          "dev",
-		"correlationID":    "corID",
 	}, rawSpan.Tags())
 }
 

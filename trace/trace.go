@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"io"
-	"net/http"
 	"strings"
 	"time"
 
@@ -18,17 +17,13 @@ import (
 )
 
 const (
-	// HTTPComponent definition.
-	HTTPComponent = "http"
-	// HTTPClientComponent definition.
-	HTTPClientComponent = "http-client"
-	hostsTag            = "hosts"
+	hostsTag = "hosts"
+	// VersionTag is used to tag the components's version.
+	VersionTag = "version"
 )
 
 var (
 	cls io.Closer
-	// VersionTag is used to tag the components's version.
-	VersionTag = "version"
 	// Version will be used to tag all traced components.
 	// It can be used to distinguish between dev, stage, and prod environments.
 	Version = "dev"
@@ -69,28 +64,6 @@ func Setup(name, ver, agent, typ string, prm float64) error {
 func Close() error {
 	log.Debug("closing tracer")
 	return cls.Close()
-}
-
-// HTTPSpan starts a new HTTP span.
-func HTTPSpan(path, corID string, r *http.Request) (opentracing.Span, *http.Request) {
-	ctx, err := opentracing.GlobalTracer().Extract(opentracing.HTTPHeaders, opentracing.HTTPHeadersCarrier(r.Header))
-	if err != nil && err != opentracing.ErrSpanContextNotFound {
-		log.Errorf("failed to extract HTTP span: %v", err)
-	}
-	sp := opentracing.StartSpan(HTTPOpName(r.Method, path), ext.RPCServerOption(ctx))
-	ext.HTTPMethod.Set(sp, r.Method)
-	ext.HTTPUrl.Set(sp, r.URL.String())
-	ext.Component.Set(sp, "http")
-	sp.SetTag(VersionTag, Version)
-	sp.SetTag(correlation.ID, corID)
-	return sp, r.WithContext(opentracing.ContextWithSpan(r.Context(), sp))
-}
-
-// FinishHTTPSpan finishes a HTTP span by providing a HTTP status code.
-func FinishHTTPSpan(sp opentracing.Span, code int) {
-	ext.HTTPStatusCode.Set(sp, uint16(code))
-	ext.Error.Set(sp, code >= http.StatusInternalServerError)
-	sp.Finish()
 }
 
 // ConsumerSpan starts a new consumer span.
@@ -156,11 +129,6 @@ func EsSpan(ctx context.Context, opName, cmp, user, uri, method, body string, ho
 	sp.SetTag(VersionTag, Version)
 
 	return sp
-}
-
-// HTTPOpName return a string representation of the HTTP request operation.
-func HTTPOpName(method, path string) string {
-	return method + " " + path
 }
 
 type jaegerLoggerAdapter struct {
