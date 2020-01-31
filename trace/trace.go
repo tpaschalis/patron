@@ -34,19 +34,22 @@ const (
 	SQSConsumerComponent = "sqs-consumer"
 	// SNSPublisherComponent definition.
 	SNSPublisherComponent = "sns-publisher"
-	versionTag            = "version"
 	hostsTag              = "hosts"
 )
 
 var (
-	cls     io.Closer
-	version = "dev"
+	cls io.Closer
+	// VersionTag is used to tag the components's version.
+	VersionTag = "version"
+	// Version will be used to tag all traced components.
+	// It can be used to distinguish between dev, stage, and prod environments.
+	Version = "dev"
 )
 
 // Setup tracing by providing all necessary parameters.
 func Setup(name, ver, agent, typ string, prm float64) error {
 	if ver != "" {
-		version = ver
+		Version = ver
 	}
 	cfg := config.Configuration{
 		ServiceName: name,
@@ -71,7 +74,6 @@ func Setup(name, ver, agent, typ string, prm float64) error {
 	}
 	cls = clsTemp
 	opentracing.SetGlobalTracer(tr)
-	version = ver
 	return nil
 }
 
@@ -91,7 +93,7 @@ func HTTPSpan(path, corID string, r *http.Request) (opentracing.Span, *http.Requ
 	ext.HTTPMethod.Set(sp, r.Method)
 	ext.HTTPUrl.Set(sp, r.URL.String())
 	ext.Component.Set(sp, "http")
-	sp.SetTag(versionTag, version)
+	sp.SetTag(VersionTag, Version)
 	sp.SetTag(correlation.ID, corID)
 	return sp, r.WithContext(opentracing.ContextWithSpan(r.Context(), sp))
 }
@@ -113,7 +115,7 @@ func ConsumerSpan(ctx context.Context, opName, cmp, corID string, hdr map[string
 	sp := opentracing.StartSpan(opName, consumerOption{ctx: spCtx})
 	ext.Component.Set(sp, cmp)
 	sp.SetTag(correlation.ID, corID)
-	sp.SetTag(versionTag, version)
+	sp.SetTag(VersionTag, Version)
 	for _, t := range tags {
 		sp.SetTag(t.Key, t.Value)
 	}
@@ -145,24 +147,7 @@ func ChildSpan(ctx context.Context, opName, cmp string, tags ...opentracing.Tag)
 	for _, t := range tags {
 		sp.SetTag(t.Key, t.Value)
 	}
-	sp.SetTag(versionTag, version)
-	return sp, ctx
-}
-
-// SQLSpan starts a new SQL child span with specified tags.
-func SQLSpan(ctx context.Context, opName, cmp, sqlType, instance, user, stmt string,
-	tags ...opentracing.Tag) (opentracing.Span, context.Context) {
-
-	sp, ctx := opentracing.StartSpanFromContext(ctx, opName)
-	ext.Component.Set(sp, cmp)
-	ext.DBType.Set(sp, sqlType)
-	ext.DBInstance.Set(sp, instance)
-	ext.DBUser.Set(sp, user)
-	ext.DBStatement.Set(sp, stmt)
-	for _, t := range tags {
-		sp.SetTag(t.Key, t.Value)
-	}
-	sp.SetTag(versionTag, version)
+	sp.SetTag(VersionTag, Version)
 	return sp, ctx
 }
 
@@ -180,7 +165,7 @@ func EsSpan(ctx context.Context, opName, cmp, user, uri, method, body string, ho
 
 	hostsFmt := "[" + strings.Join(hostPool, ", ") + "]"
 	sp.SetTag(hostsTag, hostsFmt)
-	sp.SetTag(versionTag, version)
+	sp.SetTag(VersionTag, Version)
 
 	return sp
 }
