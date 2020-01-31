@@ -18,6 +18,11 @@ import (
 	"github.com/prometheus/client_golang/prometheus"
 )
 
+const (
+	// KafkaConsumerComponent definition.
+	KafkaConsumerComponent = "kafka-consumer"
+)
+
 var topicPartitionOffsetDiff *prometheus.GaugeVec
 
 // TopicPartitionOffsetDiffGaugeSet creates a new Gauge that measures partition offsets.
@@ -106,8 +111,8 @@ func ClaimMessage(ctx context.Context, msg *sarama.ConsumerMessage, d encoding.D
 
 	corID := getCorrelationID(msg.Headers)
 
-	sp, ctxCh := trace.ConsumerSpan(ctx, trace.ComponentOpName(trace.KafkaConsumerComponent, msg.Topic),
-		trace.KafkaConsumerComponent, corID, mapHeader(msg.Headers))
+	sp, ctxCh := trace.ConsumerSpan(ctx, trace.ComponentOpName(KafkaConsumerComponent, msg.Topic),
+		KafkaConsumerComponent, corID, mapHeader(msg.Headers))
 	ctxCh = correlation.ContextWithID(ctxCh, corID)
 	ctxCh = log.WithContext(ctxCh, log.Sub(map[string]interface{}{"correlationID": corID}))
 

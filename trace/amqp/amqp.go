@@ -17,6 +17,11 @@ import (
 	"github.com/streadway/amqp"
 )
 
+const (
+	// AMQPPublisherComponent definition.
+	AMQPPublisherComponent = "amqp-publisher"
+)
+
 // Message abstraction for publishing.
 type Message struct {
 	contentType string
@@ -117,8 +122,8 @@ func NewPublisher(url, exc string, oo ...OptionFunc) (*TracedPublisher, error) {
 
 // Publish a message to a exchange.
 func (tc *TracedPublisher) Publish(ctx context.Context, msg *Message) error {
-	sp, _ := trace.ChildSpan(ctx, trace.ComponentOpName(trace.AMQPPublisherComponent, tc.exc),
-		trace.AMQPPublisherComponent, ext.SpanKindProducer, tc.tag)
+	sp, _ := trace.ChildSpan(ctx, trace.ComponentOpName(AMQPPublisherComponent, tc.exc),
+		AMQPPublisherComponent, ext.SpanKindProducer, tc.tag)
 
 	p := amqp.Publishing{
 		Headers:     amqp.Table{},

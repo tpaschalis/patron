@@ -23,7 +23,7 @@ func TestStartFinishConsumerSpan(t *testing.T) {
 	mtr := mocktracer.New()
 	opentracing.SetGlobalTracer(mtr)
 	hdr := map[string]string{"key": "val"}
-	sp, ctx := ConsumerSpan(context.Background(), "123", AMQPConsumerComponent, "corID", hdr)
+	sp, ctx := ConsumerSpan(context.Background(), "123", "custom-consumer", "corID", hdr)
 	assert.NotNil(t, sp)
 	assert.NotNil(t, ctx)
 	assert.IsType(t, &mocktracer.MockSpan{}, sp)
@@ -35,7 +35,7 @@ func TestStartFinishConsumerSpan(t *testing.T) {
 	rawSpan := mtr.FinishedSpans()[0]
 	assert.Equal(t, map[string]interface{}{
 		"span.kind":     ext.SpanKindConsumerEnum,
-		"component":     "amqp-consumer",
+		"component":     "custom-consumer",
 		"error":         true,
 		"version":       "dev",
 		"correlationID": "corID",
@@ -46,7 +46,7 @@ func TestStartFinishChildSpan(t *testing.T) {
 	mtr := mocktracer.New()
 	opentracing.SetGlobalTracer(mtr)
 	tag := opentracing.Tag{Key: "key", Value: "value"}
-	sp, ctx := ConsumerSpan(context.Background(), "123", AMQPConsumerComponent, "corID", nil, tag)
+	sp, ctx := ConsumerSpan(context.Background(), "123", "custom-consumer", "corID", nil, tag)
 	assert.NotNil(t, sp)
 	assert.NotNil(t, ctx)
 	childSp, childCtx := ChildSpan(ctx, "123", "cmp", tag)
@@ -69,7 +69,7 @@ func TestStartFinishChildSpan(t *testing.T) {
 	SpanSuccess(sp)
 	rawSpan = mtr.FinishedSpans()[1]
 	assert.Equal(t, map[string]interface{}{
-		"component":     "amqp-consumer",
+		"component":     "custom-consumer",
 		"error":         false,
 		"version":       "dev",
 		"key":           "value",

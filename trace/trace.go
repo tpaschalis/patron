@@ -18,23 +18,11 @@ import (
 )
 
 const (
-	// KafkaConsumerComponent definition.
-	KafkaConsumerComponent = "kafka-consumer"
-	// KafkaAsyncProducerComponent definition.
-	KafkaAsyncProducerComponent = "kafka-async-producer"
-	// AMQPConsumerComponent definition.
-	AMQPConsumerComponent = "amqp-consumer"
-	// AMQPPublisherComponent definition.
-	AMQPPublisherComponent = "amqp-publisher"
 	// HTTPComponent definition.
 	HTTPComponent = "http"
 	// HTTPClientComponent definition.
 	HTTPClientComponent = "http-client"
-	// SQSConsumerComponent definition.
-	SQSConsumerComponent = "sqs-consumer"
-	// SNSPublisherComponent definition.
-	SNSPublisherComponent = "sns-publisher"
-	hostsTag              = "hosts"
+	hostsTag            = "hosts"
 )
 
 var (
