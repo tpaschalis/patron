@@ -15,6 +15,7 @@ import (
 	"github.com/elastic/go-elasticsearch/v8/esapi"
 	"github.com/elastic/go-elasticsearch/v8/estransport"
 	"github.com/opentracing/opentracing-go"
+	"github.com/opentracing/opentracing-go/ext"
 )
 
 const (
@@ -52,7 +53,20 @@ func (t *tracingInfo) startSpan(req *http.Request) (opentracing.Span, error) {
 		}
 	}
 
-	return trace.EsSpan(req.Context(), opName, cmpName, t.user, uri, method, bodyFmt, t.hosts), nil
+	sp, _ := opentracing.StartSpanFromContext(req.Context(), opName)
+	ext.Component.Set(sp, cmpName)
+	ext.DBType.Set(sp, "elasticsearch")
+	ext.DBUser.Set(sp, t.user)
+
+	ext.HTTPUrl.Set(sp, uri)
+	ext.HTTPMethod.Set(sp, method)
+	ext.DBStatement.Set(sp, bodyFmt)
+
+	hostsFmt := "[" + strings.Join(t.hosts, ", ") + "]"
+	sp.SetTag(trace.HostsTag, hostsFmt)
+	sp.SetTag(trace.VersionTag, trace.Version)
+
+	return sp, nil
 }
 
 func endSpan(sp opentracing.Span, rsp *http.Response) {

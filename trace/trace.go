@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"io"
-	"strings"
 	"time"
 
 	"github.com/beatlabs/patron/correlation"
@@ -17,7 +16,8 @@ import (
 )
 
 const (
-	hostsTag = "hosts"
+	// HostsTag is used to tag the components's hosts.
+	HostsTag = "hosts"
 	// VersionTag is used to tag the components's version.
 	VersionTag = "version"
 )
@@ -110,25 +110,6 @@ func ChildSpan(ctx context.Context, opName, cmp string, tags ...opentracing.Tag)
 	}
 	sp.SetTag(VersionTag, Version)
 	return sp, ctx
-}
-
-// EsSpan starts a new elasticsearch child span with specified tags.
-func EsSpan(ctx context.Context, opName, cmp, user, uri, method, body string, hostPool []string) opentracing.Span {
-
-	sp, _ := opentracing.StartSpanFromContext(ctx, opName)
-	ext.Component.Set(sp, cmp)
-	ext.DBType.Set(sp, "elasticsearch")
-	ext.DBUser.Set(sp, user)
-
-	ext.HTTPUrl.Set(sp, uri)
-	ext.HTTPMethod.Set(sp, method)
-	ext.DBStatement.Set(sp, body)
-
-	hostsFmt := "[" + strings.Join(hostPool, ", ") + "]"
-	sp.SetTag(hostsTag, hostsFmt)
-	sp.SetTag(VersionTag, Version)
-
-	return sp
 }
 
 type jaegerLoggerAdapter struct {
