@@ -56,7 +56,7 @@ func New(oo ...OptionFunc) (*TracedClient, error) {
 func (tc *TracedClient) Do(ctx context.Context, req *http.Request) (*http.Response, error) {
 	req = req.WithContext(ctx)
 	req, ht := nethttp.TraceRequest(opentracing.GlobalTracer(), req,
-		nethttp.OperationName(OpName(req.Method, req.URL.String())),
+		nethttp.OperationName(opName(req.Method, req.URL.String())),
 		nethttp.ComponentName(HTTPClientComponent))
 	defer ht.Finish()
 
@@ -95,7 +95,7 @@ func Span(path, corID string, r *http.Request) (opentracing.Span, *http.Request)
 	if err != nil && err != opentracing.ErrSpanContextNotFound {
 		log.Errorf("failed to extract HTTP span: %v", err)
 	}
-	sp := opentracing.StartSpan(OpName(r.Method, path), ext.RPCServerOption(ctx))
+	sp := opentracing.StartSpan(opName(r.Method, path), ext.RPCServerOption(ctx))
 	ext.HTTPMethod.Set(sp, r.Method)
 	ext.HTTPUrl.Set(sp, r.URL.String())
 	ext.Component.Set(sp, "http")
@@ -111,7 +111,6 @@ func FinishSpan(sp opentracing.Span, code int) {
 	sp.Finish()
 }
 
-// OpName return a string representation of the HTTP request operation.
-func OpName(method, path string) string {
+func opName(method, path string) string {
 	return method + " " + path
 }

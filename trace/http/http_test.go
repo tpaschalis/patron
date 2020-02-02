@@ -33,7 +33,7 @@ func TestTracedClient_Do(t *testing.T) {
 	assert.NoError(t, err)
 	reqErr, err := http.NewRequest("GET", "", nil)
 	assert.NoError(t, err)
-	opName := OpName("GET", ts.URL)
+	opName := opName("GET", ts.URL)
 	opNameError := "HTTP GET"
 
 	type args struct {
