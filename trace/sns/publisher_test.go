@@ -43,7 +43,7 @@ func Test_NewPublisher(t *testing.T) {
 				assert.EqualError(t, err, tC.expectedErr.Error())
 			} else {
 				assert.Equal(t, tC.api, p.api)
-				assert.Equal(t, p.component, SNSPublisherComponent)
+				assert.Equal(t, p.component, publisherComponent)
 				assert.Equal(t, p.tag, ext.SpanKindProducer)
 			}
 		})

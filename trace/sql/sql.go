@@ -13,8 +13,8 @@ import (
 )
 
 const (
-	cmp     = "sql"
-	sqlType = "RDBMS"
+	component = "sql"
+	dbtype    = "RDBMS"
 )
 
 type connInfo struct {
@@ -23,8 +23,8 @@ type connInfo struct {
 
 func (c *connInfo) startSpan(ctx context.Context, opName, stmt string, tags ...opentracing.Tag) (opentracing.Span, context.Context) {
 	sp, ctx := opentracing.StartSpanFromContext(ctx, opName)
-	ext.Component.Set(sp, cmp)
-	ext.DBType.Set(sp, sqlType)
+	ext.Component.Set(sp, component)
+	ext.DBType.Set(sp, dbtype)
 	ext.DBInstance.Set(sp, c.instance)
 	ext.DBUser.Set(sp, c.user)
 	ext.DBStatement.Set(sp, stmt)
@@ -42,7 +42,7 @@ type Conn struct {
 }
 
 // DSNInfo contains information extracted from a valid
-// connection string. Additional parameters provided are discarded
+// connection string. Additional parameters provided are discarded.
 type DSNInfo struct {
 	Driver   string
 	DBName   string

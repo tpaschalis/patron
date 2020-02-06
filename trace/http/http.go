@@ -15,10 +15,7 @@ import (
 )
 
 const (
-	// HTTPComponent definition.
-	HTTPComponent = "http"
-	// HTTPClientComponent definition.
-	HTTPClientComponent = "http-client"
+	clientComponent = "http-client"
 )
 
 // Client interface of a HTTP client.
@@ -57,7 +54,7 @@ func (tc *TracedClient) Do(ctx context.Context, req *http.Request) (*http.Respon
 	req = req.WithContext(ctx)
 	req, ht := nethttp.TraceRequest(opentracing.GlobalTracer(), req,
 		nethttp.OperationName(opName(req.Method, req.URL.String())),
-		nethttp.ComponentName(HTTPClientComponent))
+		nethttp.ComponentName(clientComponent))
 	defer ht.Finish()
 
 	req.Header.Set(correlation.HeaderID, correlation.IDFromContext(ctx))

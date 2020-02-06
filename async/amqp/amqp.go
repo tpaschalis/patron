@@ -19,8 +19,7 @@ import (
 )
 
 const (
-	// AMQPConsumerComponent definition.
-	AMQPConsumerComponent = "amqp-consumer"
+	consumerComponent = "amqp-consumer"
 )
 
 var (
@@ -176,8 +175,8 @@ func (c *consumer) Consume(ctx context.Context) (<-chan async.Message, <-chan er
 				log.Debugf("processing message %d", d.DeliveryTag)
 				corID := getCorrelationID(d.Headers)
 
-				sp, ctxCh := trace.ConsumerSpan(ctx, trace.ComponentOpName(AMQPConsumerComponent, c.queue),
-					AMQPConsumerComponent, corID, mapHeader(d.Headers), c.traceTag)
+				sp, ctxCh := trace.ConsumerSpan(ctx, trace.ComponentOpName(consumerComponent, c.queue),
+					consumerComponent, corID, mapHeader(d.Headers), c.traceTag)
 
 				dec, err := async.DetermineDecoder(d.ContentType)
 				if err != nil {

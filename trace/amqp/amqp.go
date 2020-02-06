@@ -18,8 +18,7 @@ import (
 )
 
 const (
-	// AMQPPublisherComponent definition.
-	AMQPPublisherComponent = "amqp-publisher"
+	publisherComponent = "amqp-publisher"
 )
 
 // Message abstraction for publishing.
@@ -122,8 +121,8 @@ func NewPublisher(url, exc string, oo ...OptionFunc) (*TracedPublisher, error) {
 
 // Publish a message to a exchange.
 func (tc *TracedPublisher) Publish(ctx context.Context, msg *Message) error {
-	sp, _ := trace.ChildSpan(ctx, trace.ComponentOpName(AMQPPublisherComponent, tc.exc),
-		AMQPPublisherComponent, ext.SpanKindProducer, tc.tag)
+	sp, _ := trace.ChildSpan(ctx, trace.ComponentOpName(publisherComponent, tc.exc),
+		publisherComponent, ext.SpanKindProducer, tc.tag)
 
 	p := amqp.Publishing{
 		Headers:     amqp.Table{},

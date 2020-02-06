@@ -35,8 +35,7 @@ const (
 	nackMessageState    messageState = "NACK"
 	fetchedMessageState messageState = "FETCHED"
 
-	// SQSConsumerComponent definition.
-	SQSConsumerComponent = "sqs-consumer"
+	consumerComponent = "sqs-consumer"
 )
 
 var messageAge *prometheus.GaugeVec
@@ -241,8 +240,8 @@ func (c *consumer) Consume(ctx context.Context) (<-chan async.Message, <-chan er
 
 				corID := getCorrelationID(msg.MessageAttributes)
 
-				sp, ctxCh := trace.ConsumerSpan(sqsCtx, trace.ComponentOpName(SQSConsumerComponent, c.queueName),
-					SQSConsumerComponent, corID, mapHeader(msg.MessageAttributes))
+				sp, ctxCh := trace.ConsumerSpan(sqsCtx, trace.ComponentOpName(consumerComponent, c.queueName),
+					consumerComponent, corID, mapHeader(msg.MessageAttributes))
 
 				ctxCh = correlation.ContextWithID(ctxCh, corID)
 				logger := log.Sub(map[string]interface{}{"correlationID": corID})

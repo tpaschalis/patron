@@ -15,8 +15,7 @@ import (
 )
 
 const (
-	// SNSPublisherComponent definition.
-	SNSPublisherComponent = "sns-publisher"
+	publisherComponent = "sns-publisher"
 )
 
 // Publisher is the interface defining an SNS publisher, used to publish messages to SNS.
@@ -42,7 +41,7 @@ func NewPublisher(api snsiface.SNSAPI) (*TracedPublisher, error) {
 
 	return &TracedPublisher{
 		api:       api,
-		component: SNSPublisherComponent,
+		component: publisherComponent,
 		tag:       ext.SpanKindProducer,
 	}, nil
 }
