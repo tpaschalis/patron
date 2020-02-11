@@ -11,11 +11,58 @@ import (
 	"github.com/beatlabs/patron/trace"
 	"github.com/opentracing/opentracing-go"
 	"github.com/opentracing/opentracing-go/ext"
+	"github.com/prometheus/client_golang/prometheus"
 )
 
 const (
 	producerComponent = "kafka-async-producer"
 )
+
+var countMessagesSent *prometheus.CounterVec
+var countMessageSendErrors *prometheus.CounterVec
+var countMessageCreationErrors *prometheus.CounterVec
+
+// CountMessagesSentInc increments the countMessagesSent counter.
+func CountMessagesSentInc(topic string) {
+	countMessagesSent.WithLabelValues(topic).Inc()
+}
+
+// CountMessageSendErrorsInc increments the countMessageSendErrors counter.
+func CountMessageSendErrorsInc(topic string) {
+	countMessageSendErrors.WithLabelValues(topic).Inc()
+}
+
+// CountMessageCreationErrorsInc increments the countMessageCreationErrors counter.
+func CountMessageCreationErrorsInc(topic string) {
+	countMessageCreationErrors.WithLabelValues(topic).Inc()
+}
+
+func init() {
+	countMessagesSent = prometheus.NewCounterVec(
+		prometheus.CounterOpts{
+			Namespace: "component",
+			Subsystem: "kafka_async_producer",
+			Name:      "messages_sent",
+			Help:      "Messages sent counter, classified by topic",
+		}, []string{"topic"},
+	)
+	countMessageSendErrors = prometheus.NewCounterVec(
+		prometheus.CounterOpts{
+			Namespace: "component",
+			Subsystem: "kafka_async_producer",
+			Name:      "message_send_errors",
+			Help:      "Message send errors counter, classified by topic",
+		}, []string{"topic"},
+	)
+	countMessageCreationErrors = prometheus.NewCounterVec(
+		prometheus.CounterOpts{
+			Namespace: "component",
+			Subsystem: "kafka_async_producer",
+			Name:      "message_creation_errors",
+			Help:      "Message creation errors counter, classified by topic",
+		}, []string{"topic"},
+	)
+}
 
 // Message abstraction of a Kafka message.
 type Message struct {
