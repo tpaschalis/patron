@@ -137,6 +137,7 @@ func (m *message) Ack() error {
 	if m.sess != nil {
 		m.sess.MarkMessage(m.msg, "")
 	}
+	countAcks.Inc()
 	trace.SpanSuccess(m.span)
 	return nil
 }
@@ -148,6 +149,7 @@ func (m *message) Source() string {
 
 // Nack signals the producing side an erroring condition or inconsistency.
 func (m *message) Nack() error {
+	countNacks.Inc()
 	trace.SpanError(m.span)
 	return nil
 }
