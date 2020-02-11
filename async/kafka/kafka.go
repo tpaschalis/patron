@@ -23,10 +23,30 @@ const (
 )
 
 var topicPartitionOffsetDiff *prometheus.GaugeVec
+var countAcks prometheus.Counter
+var countNacks prometheus.Counter
+var countMessagesReceived *prometheus.CounterVec
+var countMessagesDecoded *prometheus.CounterVec
+var countMessageDecoderErrors *prometheus.CounterVec
 
 // TopicPartitionOffsetDiffGaugeSet creates a new Gauge that measures partition offsets.
 func TopicPartitionOffsetDiffGaugeSet(group, topic string, partition int32, high, offset int64) {
 	topicPartitionOffsetDiff.WithLabelValues(group, topic, strconv.FormatInt(int64(partition), 10)).Set(float64(high - offset))
+}
+
+// CountMessagesReceivedInc increments the countMessagesReceived counter.
+func CountMessagesReceivedInc(group, topic string) {
+	countMessagesReceived.WithLabelValues(group, topic).Inc()
+}
+
+// CountMessagesDecodedInc increments the countMessagesDecoded counter.
+func CountMessagesDecodedInc(group, topic string) {
+	countMessagesDecoded.WithLabelValues(group, topic).Inc()
+}
+
+// CountMessageDecoderErrorsInc increments the countMessageDecoderErrors counter.
+func CountMessageDecoderErrorsInc(group, topic string) {
+	countMessageDecoderErrors.WithLabelValues(group, topic).Inc()
 }
 
 func init() {
@@ -39,7 +59,51 @@ func init() {
 		},
 		[]string{"group", "topic", "partition"},
 	)
-	prometheus.MustRegister(topicPartitionOffsetDiff)
+	countAcks = prometheus.NewCounter(
+		prometheus.CounterOpts{
+			Namespace: "component",
+			Subsystem: "kafka_consumer",
+			Name:      "ack_count",
+			Help:      "Acknowledged messages counter",
+		})
+	countNacks = prometheus.NewCounter(
+		prometheus.CounterOpts{
+			Namespace: "component",
+			Subsystem: "kafka_consumer",
+			Name:      "nack_count",
+			Help:      "Not Acknowledged signals counter",
+		})
+	countMessagesReceived = prometheus.NewCounterVec(
+		prometheus.CounterOpts{
+			Namespace: "component",
+			Subsystem: "kafka_consumer",
+			Name:      "messages_received",
+			Help:      "Messages received counter, classified by topic and partition",
+		}, []string{"group", "topic"},
+	)
+	countMessagesDecoded = prometheus.NewCounterVec(
+		prometheus.CounterOpts{
+			Namespace: "component",
+			Subsystem: "kafka_consumer",
+			Name:      "messages_decoded",
+			Help:      "Messages decoded counter, classified by topic and partition",
+		}, []string{"group", "topic"},
+	)
+	countMessageDecoderErrors = prometheus.NewCounterVec(
+		prometheus.CounterOpts{
+			Namespace: "component",
+			Subsystem: "kafka_consumer",
+			Name:      "message_decoder_errors",
+			Help:      "Message decoder errors counter, classified by topic and partition",
+		}, []string{"group", "topic"},
+	)
+	prometheus.MustRegister(topicPartitionOffsetDiff,
+		countAcks,
+		countNacks,
+		countMessagesReceived,
+		countMessagesDecoded,
+		countMessageDecoderErrors,
+	)
 }
 
 // ConsumerConfig is the common configuration of patron kafka consumers.
