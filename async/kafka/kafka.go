@@ -97,7 +97,8 @@ func init() {
 			Help:      "Message decoder errors counter, classified by topic and partition",
 		}, []string{"group", "topic"},
 	)
-	prometheus.MustRegister(topicPartitionOffsetDiff,
+	prometheus.MustRegister(
+		topicPartitionOffsetDiff,
 		countAcks,
 		countNacks,
 		countMessagesReceived,

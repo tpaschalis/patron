@@ -62,6 +62,11 @@ func init() {
 			Help:      "Message creation errors counter, classified by topic",
 		}, []string{"topic"},
 	)
+	prometheus.MustRegister(
+		countMessagesSent,
+		countMessageSendErrors,
+		countMessageCreationErrors,
+	)
 }
 
 // Message abstraction of a Kafka message.
