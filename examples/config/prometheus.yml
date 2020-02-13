@@ -15,9 +15,7 @@ rule_files:
   # - "first_rules.yml"
   # - "second_rules.yml"
 
-# A scrape configuration containing exactly two endpoints to scrape:
-# Prometheus itself
-# And the third example's /metrics endpoint on the host machine
+# A scrape configuration for prometheus itself, second/main.go and thirs/main.go
 # Use the following command to reload the configuration
 # docker kill --signal="SIGHUP" <pod-id>
 scrape_configs:
