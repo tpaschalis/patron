@@ -31,14 +31,13 @@ func TopicPartitionOffsetDiffGaugeSet(group, topic string, partition int32, high
 	topicPartitionOffsetDiff.WithLabelValues(group, topic, strconv.FormatInt(int64(partition), 10)).Set(float64(high - offset))
 }
 
-// MessageConfirmationCountInc increments the messageConfirmation (ACK/NAK) counter.
-func messageConfirmationCountInc(status string) {
-	messageConfirmation.WithLabelValues(status).Inc()
-}
-
 // MessageStatusCountInc increments the messageStatus counter for a certain status.
 func MessageStatusCountInc(status, group, topic string) {
 	messageStatus.WithLabelValues(status, group, topic).Inc()
+}
+
+func messageConfirmationCountInc(status string) {
+	messageConfirmation.WithLabelValues(status).Inc()
 }
 
 func init() {
