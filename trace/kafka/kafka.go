@@ -23,7 +23,6 @@ const (
 
 var messageStatus *prometheus.CounterVec
 
-// MessageStatusCountInc increments the messageStatus counter for a certain status.
 func messageStatusCountInc(status, topic string) {
 	messageStatus.WithLabelValues(status, topic).Inc()
 }
