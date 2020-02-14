@@ -32,7 +32,7 @@ func TopicPartitionOffsetDiffGaugeSet(group, topic string, partition int32, high
 }
 
 // MessageConfirmationCountInc increments the messageConfirmation (ACK/NAK) counter.
-func MessageConfirmationCountInc(status string) {
+func messageConfirmationCountInc(status string) {
 	messageConfirmation.WithLabelValues(status).Inc()
 }
 
@@ -66,7 +66,7 @@ func init() {
 			Namespace: "component",
 			Subsystem: "kafka_consumer",
 			Name:      "message_confirmation",
-			Help:      "Message confirmation counter (ACK/NAK)",
+			Help:      "Message confirmation counter (ACK/NACK)",
 		}, []string{"status"},
 	)
 
@@ -108,7 +108,7 @@ func (m *message) Ack() error {
 	if m.sess != nil {
 		m.sess.MarkMessage(m.msg, "")
 	}
-	MessageConfirmationCountInc("ACK")
+	messageConfirmationCountInc("ACK")
 	trace.SpanSuccess(m.span)
 	return nil
 }
@@ -120,7 +120,7 @@ func (m *message) Source() string {
 
 // Nack signals the producing side an erroring condition or inconsistency.
 func (m *message) Nack() error {
-	MessageConfirmationCountInc("NAK")
+	messageConfirmationCountInc("NACK")
 	trace.SpanError(m.span)
 	return nil
 }
