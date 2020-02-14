@@ -18,55 +18,23 @@ const (
 	producerComponent = "kafka-async-producer"
 )
 
-var countMessagesSent *prometheus.CounterVec
-var countMessageSendErrors *prometheus.CounterVec
-var countMessageCreationErrors *prometheus.CounterVec
+var messageStatus *prometheus.CounterVec
 
-// CountMessagesSentInc increments the countMessagesSent counter.
-func CountMessagesSentInc(topic string) {
-	countMessagesSent.WithLabelValues(topic).Inc()
-}
-
-// CountMessageSendErrorsInc increments the countMessageSendErrors counter.
-func CountMessageSendErrorsInc(topic string) {
-	countMessageSendErrors.WithLabelValues(topic).Inc()
-}
-
-// CountMessageCreationErrorsInc increments the countMessageCreationErrors counter.
-func CountMessageCreationErrorsInc(topic string) {
-	countMessageCreationErrors.WithLabelValues(topic).Inc()
+// MessageStatusCountInc increments the messageStatus counter for a certain status.
+func MessageStatusCountInc(status, topic string) {
+	messageStatus.WithLabelValues(status, topic).Inc()
 }
 
 func init() {
-	countMessagesSent = prometheus.NewCounterVec(
+	messageStatus = prometheus.NewCounterVec(
 		prometheus.CounterOpts{
 			Namespace: "component",
 			Subsystem: "kafka_async_producer",
-			Name:      "messages_sent",
-			Help:      "Messages sent counter, classified by topic",
-		}, []string{"topic"},
+			Name:      "message_status",
+			Help:      "Message status counter (received, decoded, decoding-errors) classified by topic",
+		}, []string{"status", "topic"},
 	)
-	countMessageSendErrors = prometheus.NewCounterVec(
-		prometheus.CounterOpts{
-			Namespace: "component",
-			Subsystem: "kafka_async_producer",
-			Name:      "message_send_errors",
-			Help:      "Message send errors counter, classified by topic",
-		}, []string{"topic"},
-	)
-	countMessageCreationErrors = prometheus.NewCounterVec(
-		prometheus.CounterOpts{
-			Namespace: "component",
-			Subsystem: "kafka_async_producer",
-			Name:      "message_creation_errors",
-			Help:      "Message creation errors counter, classified by topic",
-		}, []string{"topic"},
-	)
-	prometheus.MustRegister(
-		countMessagesSent,
-		countMessageSendErrors,
-		countMessageCreationErrors,
-	)
+	prometheus.MustRegister(messageStatus)
 }
 
 // Message abstraction of a Kafka message.
@@ -113,11 +81,11 @@ func (ap *AsyncProducer) Send(ctx context.Context, msg *Message) error {
 		opentracing.Tag{Key: "topic", Value: msg.topic})
 	pm, err := ap.createProducerMessage(ctx, msg, sp)
 	if err != nil {
-		CountMessageCreationErrorsInc(msg.topic)
+		MessageStatusCountInc("creation-errors", msg.topic)
 		trace.SpanError(sp)
 		return err
 	}
-	CountMessagesSentInc(msg.topic)
+	MessageStatusCountInc("sent", msg.topic)
 	ap.prod.Input() <- pm
 	trace.SpanSuccess(sp)
 	return nil
@@ -139,7 +107,7 @@ func (ap *AsyncProducer) Close() error {
 
 func (ap *AsyncProducer) propagateError() {
 	for pe := range ap.prod.Errors() {
-		CountMessageSendErrorsInc(pe.Msg.Topic)
+		MessageStatusCountInc("send-errors", pe.Msg.Topic)
 		ap.chErr <- fmt.Errorf("failed to send message: %w", pe)
 	}
 }

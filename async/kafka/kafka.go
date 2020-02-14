@@ -57,7 +57,7 @@ func init() {
 			Namespace: "component",
 			Subsystem: "kafka_consumer",
 			Name:      "message_status",
-			Help:      "Message status counter, (received, decoded, decoding-errors), classified by topic and partition",
+			Help:      "Message status counter (received, decoded, decoding-errors) classified by topic and partition",
 		}, []string{"status", "group", "topic"},
 	)
 
