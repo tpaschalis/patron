@@ -120,7 +120,7 @@ func (c *consumer) Consume(ctx context.Context) (<-chan async.Message, <-chan er
 					go func(message *sarama.ConsumerMessage) {
 						msg, err := kafka.ClaimMessage(ctx, message, c.config.DecoderFunc, nil)
 						if err != nil {
-							kafka.MessageStatusCountInc("decoder-errors", "", message.Topic)
+							kafka.MessageStatusCountInc("claim-errors", "", message.Topic)
 							chErr <- err
 							return
 						}
