@@ -81,11 +81,11 @@ func (ap *AsyncProducer) Send(ctx context.Context, msg *Message) error {
 		opentracing.Tag{Key: "topic", Value: msg.topic})
 	pm, err := ap.createProducerMessage(ctx, msg, sp)
 	if err != nil {
-		MessageStatusCountInc("creation-errors", msg.topic)
+		messageStatusCountInc("creation-errors", msg.topic)
 		trace.SpanError(sp)
 		return err
 	}
-	MessageStatusCountInc("sent", msg.topic)
+	messageStatusCountInc("sent", msg.topic)
 	ap.prod.Input() <- pm
 	trace.SpanSuccess(sp)
 	return nil
@@ -107,7 +107,7 @@ func (ap *AsyncProducer) Close() error {
 
 func (ap *AsyncProducer) propagateError() {
 	for pe := range ap.prod.Errors() {
-		MessageStatusCountInc("send-errors", pe.Msg.Topic)
+		messageStatusCountInc("send-errors", pe.Msg.Topic)
 		ap.chErr <- fmt.Errorf("failed to send message: %w", pe)
 	}
 }
