@@ -20,6 +20,12 @@ import (
 
 const (
 	consumerComponent = "kafka-consumer"
+	// MessageReceived is used to label the Prometheus Message Status counter.
+	MessageReceived = "received"
+	// MessageClaimErrors is used to label the Prometheus Message Status counter.
+	MessageClaimErrors = "claim-errors"
+	// MessageDecoded is used to label the Prometheus Message Status counter.
+	MessageDecoded = "decoded"
 )
 
 var topicPartitionOffsetDiff *prometheus.GaugeVec

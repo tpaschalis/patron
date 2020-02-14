@@ -15,7 +15,10 @@ import (
 )
 
 const (
-	producerComponent = "kafka-async-producer"
+	producerComponent     = "kafka-async-producer"
+	messageCreationErrors = "creation-errors"
+	messageSendErrors     = "send-errors"
+	messageSent           = "sent"
 )
 
 var messageStatus *prometheus.CounterVec
@@ -81,11 +84,11 @@ func (ap *AsyncProducer) Send(ctx context.Context, msg *Message) error {
 		opentracing.Tag{Key: "topic", Value: msg.topic})
 	pm, err := ap.createProducerMessage(ctx, msg, sp)
 	if err != nil {
-		messageStatusCountInc("creation-errors", msg.topic)
+		messageStatusCountInc(messageCreationErrors, msg.topic)
 		trace.SpanError(sp)
 		return err
 	}
-	messageStatusCountInc("sent", msg.topic)
+	messageStatusCountInc(messageSent, msg.topic)
 	ap.prod.Input() <- pm
 	trace.SpanSuccess(sp)
 	return nil
@@ -107,7 +110,7 @@ func (ap *AsyncProducer) Close() error {
 
 func (ap *AsyncProducer) propagateError() {
 	for pe := range ap.prod.Errors() {
-		messageStatusCountInc("send-errors", pe.Msg.Topic)
+		messageStatusCountInc(messageSendErrors, pe.Msg.Topic)
 		ap.chErr <- fmt.Errorf("failed to send message: %w", pe)
 	}
 }
