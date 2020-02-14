@@ -25,6 +25,8 @@ const (
 var topicPartitionOffsetDiff *prometheus.GaugeVec
 var countAcks prometheus.Counter
 var countNacks prometheus.Counter
+var messageStatus *prometheus.CounterVec
+var messageConfirmation *prometheus.CounterVec
 var countMessagesReceived *prometheus.CounterVec
 var countMessagesDecoded *prometheus.CounterVec
 var countMessageDecoderErrors *prometheus.CounterVec
@@ -32,6 +34,16 @@ var countMessageDecoderErrors *prometheus.CounterVec
 // TopicPartitionOffsetDiffGaugeSet creates a new Gauge that measures partition offsets.
 func TopicPartitionOffsetDiffGaugeSet(group, topic string, partition int32, high, offset int64) {
 	topicPartitionOffsetDiff.WithLabelValues(group, topic, strconv.FormatInt(int64(partition), 10)).Set(float64(high - offset))
+}
+
+// MessageConfirmationCountInc increments the messageConfirmation (ACK/NAK) counter.
+func MessageConfirmationCountInc(status string) {
+	messageConfirmation.WithLabelValues(status).Inc()
+}
+
+// MessageStatusCountInc increments the messageStatus counter for a certain status.
+func MessageStatusCountInc(status, group, topic string) {
+	messageStatus.WithLabelValues(status, group, topic).Inc()
 }
 
 // CountMessagesReceivedInc increments the countMessagesReceived counter.
@@ -139,6 +151,7 @@ func (m *message) Ack() error {
 		m.sess.MarkMessage(m.msg, "")
 	}
 	countAcks.Inc()
+	MessageConfirmationCountInc("ACK")
 	trace.SpanSuccess(m.span)
 	return nil
 }
@@ -151,6 +164,7 @@ func (m *message) Source() string {
 // Nack signals the producing side an erroring condition or inconsistency.
 func (m *message) Nack() error {
 	countNacks.Inc()
+	MessageConfirmationCountInc("NAK")
 	trace.SpanError(m.span)
 	return nil
 }
