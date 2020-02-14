@@ -116,18 +116,15 @@ func (c *consumer) Consume(ctx context.Context) (<-chan async.Message, <-chan er
 				case m := <-consumer.Messages():
 					kafka.TopicPartitionOffsetDiffGaugeSet("", m.Topic, m.Partition, consumer.HighWaterMarkOffset(), m.Offset)
 					kafka.MessageStatusCountInc("received", "", m.Topic)
-					kafka.CountMessagesReceivedInc("", m.Topic)
 
 					go func(message *sarama.ConsumerMessage) {
 						msg, err := kafka.ClaimMessage(ctx, message, c.config.DecoderFunc, nil)
 						if err != nil {
-							kafka.MessageStatusCountInc("decoder-errors", "", m.Topic)
-							kafka.CountMessageDecoderErrorsInc("", message.Topic)
+							kafka.MessageStatusCountInc("decoder-errors", "", message.Topic)
 							chErr <- err
 							return
 						}
-						kafka.MessageStatusCountInc("decoded", "", m.Topic)
-						kafka.CountMessagesDecodedInc("", message.Topic)
+						kafka.MessageStatusCountInc("decoded", "", message.Topic)
 						chMsg <- msg
 					}(m)
 				}

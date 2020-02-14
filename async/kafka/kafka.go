@@ -23,13 +23,8 @@ const (
 )
 
 var topicPartitionOffsetDiff *prometheus.GaugeVec
-var countAcks prometheus.Counter
-var countNacks prometheus.Counter
 var messageStatus *prometheus.CounterVec
 var messageConfirmation *prometheus.CounterVec
-var countMessagesReceived *prometheus.CounterVec
-var countMessagesDecoded *prometheus.CounterVec
-var countMessageDecoderErrors *prometheus.CounterVec
 
 // TopicPartitionOffsetDiffGaugeSet creates a new Gauge that measures partition offsets.
 func TopicPartitionOffsetDiffGaugeSet(group, topic string, partition int32, high, offset int64) {
@@ -46,21 +41,6 @@ func MessageStatusCountInc(status, group, topic string) {
 	messageStatus.WithLabelValues(status, group, topic).Inc()
 }
 
-// CountMessagesReceivedInc increments the countMessagesReceived counter.
-func CountMessagesReceivedInc(group, topic string) {
-	countMessagesReceived.WithLabelValues(group, topic).Inc()
-}
-
-// CountMessagesDecodedInc increments the countMessagesDecoded counter.
-func CountMessagesDecodedInc(group, topic string) {
-	countMessagesDecoded.WithLabelValues(group, topic).Inc()
-}
-
-// CountMessageDecoderErrorsInc increments the countMessageDecoderErrors counter.
-func CountMessageDecoderErrorsInc(group, topic string) {
-	countMessageDecoderErrors.WithLabelValues(group, topic).Inc()
-}
-
 func init() {
 	topicPartitionOffsetDiff = prometheus.NewGaugeVec(
 		prometheus.GaugeOpts{
@@ -71,21 +51,6 @@ func init() {
 		},
 		[]string{"group", "topic", "partition"},
 	)
-
-	countAcks = prometheus.NewCounter(
-		prometheus.CounterOpts{
-			Namespace: "component",
-			Subsystem: "kafka_consumer",
-			Name:      "ack_count",
-			Help:      "Acknowledged messages counter",
-		})
-	countNacks = prometheus.NewCounter(
-		prometheus.CounterOpts{
-			Namespace: "component",
-			Subsystem: "kafka_consumer",
-			Name:      "nack_count",
-			Help:      "Not Acknowledged signals counter",
-		})
 
 	messageStatus = prometheus.NewCounterVec(
 		prometheus.CounterOpts{
@@ -105,39 +70,10 @@ func init() {
 		}, []string{"status"},
 	)
 
-	countMessagesReceived = prometheus.NewCounterVec(
-		prometheus.CounterOpts{
-			Namespace: "component",
-			Subsystem: "kafka_consumer",
-			Name:      "messages_received",
-			Help:      "Messages received counter, classified by topic and partition",
-		}, []string{"group", "topic"},
-	)
-	countMessagesDecoded = prometheus.NewCounterVec(
-		prometheus.CounterOpts{
-			Namespace: "component",
-			Subsystem: "kafka_consumer",
-			Name:      "messages_decoded",
-			Help:      "Messages decoded counter, classified by topic and partition",
-		}, []string{"group", "topic"},
-	)
-	countMessageDecoderErrors = prometheus.NewCounterVec(
-		prometheus.CounterOpts{
-			Namespace: "component",
-			Subsystem: "kafka_consumer",
-			Name:      "message_decoder_errors",
-			Help:      "Message decoder errors counter, classified by topic and partition",
-		}, []string{"group", "topic"},
-	)
 	prometheus.MustRegister(
 		topicPartitionOffsetDiff,
 		messageStatus,
 		messageConfirmation,
-		countAcks,
-		countNacks,
-		countMessagesReceived,
-		countMessagesDecoded,
-		countMessageDecoderErrors,
 	)
 }
 
@@ -172,7 +108,6 @@ func (m *message) Ack() error {
 	if m.sess != nil {
 		m.sess.MarkMessage(m.msg, "")
 	}
-	countAcks.Inc()
 	MessageConfirmationCountInc("ACK")
 	trace.SpanSuccess(m.span)
 	return nil
@@ -185,7 +120,6 @@ func (m *message) Source() string {
 
 // Nack signals the producing side an erroring condition or inconsistency.
 func (m *message) Nack() error {
-	countNacks.Inc()
 	MessageConfirmationCountInc("NAK")
 	trace.SpanError(m.span)
 	return nil
