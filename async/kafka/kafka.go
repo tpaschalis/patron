@@ -71,6 +71,7 @@ func init() {
 		},
 		[]string{"group", "topic", "partition"},
 	)
+
 	countAcks = prometheus.NewCounter(
 		prometheus.CounterOpts{
 			Namespace: "component",
@@ -85,6 +86,25 @@ func init() {
 			Name:      "nack_count",
 			Help:      "Not Acknowledged signals counter",
 		})
+
+	messageStatus = prometheus.NewCounterVec(
+		prometheus.CounterOpts{
+			Namespace: "component",
+			Subsystem: "kafka_consumer",
+			Name:      "message_status",
+			Help:      "Message status counter, (received, decoded, decoding-errors), classified by topic and partition",
+		}, []string{"status", "group", "topic"},
+	)
+
+	messageConfirmation = prometheus.NewCounterVec(
+		prometheus.CounterOpts{
+			Namespace: "component",
+			Subsystem: "kafka_consumer",
+			Name:      "message_confirmation",
+			Help:      "Message confirmation counter (ACK/NAK)",
+		}, []string{"status"},
+	)
+
 	countMessagesReceived = prometheus.NewCounterVec(
 		prometheus.CounterOpts{
 			Namespace: "component",
@@ -111,6 +131,8 @@ func init() {
 	)
 	prometheus.MustRegister(
 		topicPartitionOffsetDiff,
+		messageStatus,
+		messageConfirmation,
 		countAcks,
 		countNacks,
 		countMessagesReceived,

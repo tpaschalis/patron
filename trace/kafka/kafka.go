@@ -18,6 +18,8 @@ const (
 	producerComponent = "kafka-async-producer"
 )
 
+var messageStatus *prometheus.CounterVec
+
 var countMessagesSent *prometheus.CounterVec
 var countMessageSendErrors *prometheus.CounterVec
 var countMessageCreationErrors *prometheus.CounterVec
