@@ -191,7 +191,8 @@ func clearMetrics(testMetrics ...testMetric) {
 func assertMetric(t *testing.T, testMetrics ...testMetric) {
 	reg := prometheus.NewRegistry()
 	for _, v := range testMetrics {
-		reg.Register(v.metric)
+		err := reg.Register(v.metric)
+		assert.NoError(t, err)
 	}
 	metricFamilies, err := reg.Gather()
 	assert.NoError(t, err)
@@ -218,6 +219,7 @@ func assertMetric(t *testing.T, testMetrics ...testMetric) {
 			assert.Equal(t, v.count, uint64(*counter.Value))
 		} else {
 			assert.Nil(t, v.metric)
+			assert.Nil(t, counter)
 		}
 		counter.Reset()
 	}
