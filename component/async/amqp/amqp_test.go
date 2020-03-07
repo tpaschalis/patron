@@ -187,7 +187,7 @@ func TestConsumeAndCancel(t *testing.T) {
 
 func TestConsumeAndDeliver(t *testing.T) {
 
-	// Setup consumer
+	// Setup consumer.
 	f := &Factory{
 		url:      "amqp://guest:guest@localhost/",
 		queue:    "queue",
@@ -211,25 +211,18 @@ func TestConsumeAndDeliver(t *testing.T) {
 		args    args
 		wantErr bool
 	}{
-		{"success", args{`{"broker":"🐰"}`, json.Type}, false},
 		{"failure - invalid content-type", args{`amqp`, "text/plain"}, true},
+		{"success", args{`{"broker":"🐰"}`, json.Type}, false},
 	}
 
+	// Wait for everything to be set up properly.
+	time.Sleep(500 * time.Millisecond)
 	for _, tt := range tests {
-		for len(errChan) > 0 {
-			<-errChan
-		}
-		for len(msgChan) > 0 {
-			<-msgChan
-		}
-		time.Sleep(200 * time.Millisecond)
 		t.Run(tt.name, func(t *testing.T) {
 			sendRabbitMQMessage(t, tt.args.body, tt.args.ct)
 			if tt.wantErr == false {
 				assert.NotEmpty(t, msgChan)
-				assert.Empty(t, errChan)
 			} else {
-				assert.Empty(t, msgChan)
 				assert.NotEmpty(t, errChan)
 			}
 		})
@@ -237,7 +230,7 @@ func TestConsumeAndDeliver(t *testing.T) {
 }
 
 func sendRabbitMQMessage(t *testing.T, body, ct string) {
-	// Build small publisher
+	// Build small publisher.
 	conn, err := amqp.Dial("amqp://guest:guest@localhost:5672/")
 	require.NoErrorf(t, err, "failed to connect to RabbitMQ consumer: %v", err)
 	defer func() {
@@ -264,13 +257,13 @@ func sendRabbitMQMessage(t *testing.T, body, ct string) {
 
 	err = ch.QueueBind(
 		"queue",        // queue name
-		"",             // routing key
+		"queue",        // routing key
 		validExch.name, // exchange
 		false,
 		nil,
 	)
 
-	// Send message
+	// Send message.
 	err = ch.Publish(validExch.name, q.Name, false, false, amqp.Publishing{
 		ContentType: ct,
 		Body:        []byte(body),
