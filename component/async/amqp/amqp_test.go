@@ -3,6 +3,9 @@ package amqp
 import (
 	"context"
 	"testing"
+	"time"
+
+	"github.com/stretchr/testify/require"
 
 	"github.com/beatlabs/patron/correlation"
 	"github.com/beatlabs/patron/encoding/json"
@@ -161,4 +164,116 @@ func Test_getCorrelationID(t *testing.T) {
 			assert.NotEmpty(t, getCorrelationID(tt.args.hh))
 		})
 	}
+}
+
+func TestConsumeAndCancel(t *testing.T) {
+	f := &Factory{
+		url:      "amqp://",
+		queue:    "queue",
+		exchange: *validExch,
+		bindings: []string{},
+	}
+	c, err := f.Create()
+	require.NoError(t, err)
+	ctx := context.Background()
+	ctx, cancel := context.WithCancel(ctx)
+
+	msgChan, errChan, err := c.Consume(ctx)
+	cancel()
+	assert.Empty(t, msgChan)
+	assert.Empty(t, errChan)
+	assert.NoError(t, err)
+}
+
+func TestConsumeAndDeliver(t *testing.T) {
+
+	// Setup consumer
+	f := &Factory{
+		url:      "amqp://guest:guest@localhost/",
+		queue:    "queue",
+		exchange: *validExch,
+		bindings: []string{},
+	}
+	c, err := f.Create()
+	require.NoErrorf(t, err, "failed to create consumer: %v", err)
+	ctx := context.Background()
+	msgChan, errChan, err := c.Consume(ctx)
+	assert.NotNil(t, msgChan)
+	assert.NotNil(t, errChan)
+	assert.NoError(t, err)
+
+	type args struct {
+		body string
+		ct   string
+	}
+	tests := []struct {
+		name    string
+		args    args
+		wantErr bool
+	}{
+		{"success", args{`{"broker":"🐰"}`, json.Type}, false},
+		{"failure - invalid content-type", args{`amqp`, "text/plain"}, true},
+	}
+
+	for _, tt := range tests {
+		for len(errChan) > 0 {
+			<-errChan
+		}
+		for len(msgChan) > 0 {
+			<-msgChan
+		}
+		time.Sleep(200 * time.Millisecond)
+		t.Run(tt.name, func(t *testing.T) {
+			sendRabbitMQMessage(t, tt.args.body, tt.args.ct)
+			if tt.wantErr == false {
+				assert.NotEmpty(t, msgChan)
+				assert.Empty(t, errChan)
+			} else {
+				assert.Empty(t, msgChan)
+				assert.NotEmpty(t, errChan)
+			}
+		})
+	}
+}
+
+func sendRabbitMQMessage(t *testing.T, body, ct string) {
+	// Build small publisher
+	conn, err := amqp.Dial("amqp://guest:guest@localhost:5672/")
+	require.NoErrorf(t, err, "failed to connect to RabbitMQ consumer: %v", err)
+	defer func() {
+		err = conn.Close()
+		assert.NoError(t, err)
+	}()
+
+	ch, err := conn.Channel()
+	require.NoErrorf(t, err, "failed to open a connection channel: %v", err)
+	defer func() {
+		err = ch.Close()
+		assert.NoError(t, err)
+	}()
+
+	q, err := ch.QueueDeclare(
+		"queue", // name
+		true,    // durable
+		false,   // delete when unused
+		false,   // exclusive
+		false,   // no-wait
+		nil,     // arguments
+	)
+	require.NoErrorf(t, err, "failed to declare a queue: %v", err)
+
+	err = ch.QueueBind(
+		"queue",        // queue name
+		"",             // routing key
+		validExch.name, // exchange
+		false,
+		nil,
+	)
+
+	// Send message
+	err = ch.Publish(validExch.name, q.Name, false, false, amqp.Publishing{
+		ContentType: ct,
+		Body:        []byte(body),
+	})
+	require.NoErrorf(t, err, "failed to publish message: %v", err)
 }
