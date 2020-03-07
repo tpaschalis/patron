@@ -2,6 +2,7 @@ package amqp
 
 import (
 	"context"
+	"fmt"
 	"testing"
 	"time"
 
@@ -218,8 +219,17 @@ func TestConsumeAndDeliver(t *testing.T) {
 	// Wait for everything to be set up properly.
 	time.Sleep(500 * time.Millisecond)
 	for _, tt := range tests {
+		time.Sleep(500 * time.Millisecond)
+
 		t.Run(tt.name, func(t *testing.T) {
 			sendRabbitMQMessage(t, tt.args.body, tt.args.ct)
+			fmt.Println(tt.name, "msgChan, errChan", len(msgChan), len(errChan))
+			if len(msgChan) > 0 {
+				fmt.Println("msgChan", <-msgChan)
+			}
+			if len(errChan) > 0 {
+				fmt.Println("errChan", <-errChan)
+			}
 			if tt.wantErr == false {
 				assert.NotEmpty(t, msgChan)
 			} else {
