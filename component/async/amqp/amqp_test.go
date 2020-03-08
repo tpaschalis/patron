@@ -167,27 +167,26 @@ func Test_getCorrelationID(t *testing.T) {
 	}
 }
 
-func TestConsumeAndCancel(t *testing.T) {
-	f := &Factory{
-		url:      "amqp://",
-		queue:    "queue",
-		exchange: *validExch,
-		bindings: []string{},
-	}
-	c, err := f.Create()
-	require.NoError(t, err)
-	ctx := context.Background()
-	ctx, cancel := context.WithCancel(ctx)
+// func TestConsumeAndCancel(t *testing.T) {
+// 	f := &Factory{
+// 		url:      "amqp://",
+// 		queue:    "queue",
+// 		exchange: *validExch,
+// 		bindings: []string{},
+// 	}
+// 	c, err := f.Create()
+// 	require.NoError(t, err)
+// 	ctx := context.Background()
+// 	ctx, cancel := context.WithCancel(ctx)
 
-	msgChan, errChan, err := c.Consume(ctx)
-	cancel()
-	assert.Empty(t, msgChan)
-	assert.Empty(t, errChan)
-	assert.NoError(t, err)
-}
+// 	msgChan, errChan, err := c.Consume(ctx)
+// 	cancel()
+// 	assert.Empty(t, msgChan)
+// 	assert.Empty(t, errChan)
+// 	assert.NoError(t, err)
+// }
 
 func TestConsumeAndDeliver(t *testing.T) {
-
 	// Setup consumer.
 	f := &Factory{
 		url:      "amqp://guest:guest@localhost/",
@@ -203,6 +202,11 @@ func TestConsumeAndDeliver(t *testing.T) {
 	assert.NotNil(t, errChan)
 	assert.NoError(t, err)
 
+	ch := setupRabbitMQPublisher(t)
+
+	// Wait for everything to be set up properly.
+	time.Sleep(1000 * time.Millisecond)
+
 	type args struct {
 		body string
 		ct   string
@@ -212,50 +216,34 @@ func TestConsumeAndDeliver(t *testing.T) {
 		args    args
 		wantErr bool
 	}{
-		{"failure - invalid content-type", args{`amqp`, "text/plain"}, true},
 		{"success", args{`{"broker":"🐰"}`, json.Type}, false},
+		{"failure - invalid content-type", args{`amqp`, "text/plain"}, true},
 	}
 
-	// Wait for everything to be set up properly.
-	time.Sleep(500 * time.Millisecond)
 	for _, tt := range tests {
-		time.Sleep(500 * time.Millisecond)
-
+		time.Sleep(1000 * time.Millisecond)
 		t.Run(tt.name, func(t *testing.T) {
-			sendRabbitMQMessage(t, tt.args.body, tt.args.ct)
+			sendRabbitMQMessage(t, ch, tt.args.body, tt.args.ct)
 			fmt.Println(tt.name, "msgChan, errChan", len(msgChan), len(errChan))
-			if len(msgChan) > 0 {
-				fmt.Println("msgChan", <-msgChan)
-			}
-			if len(errChan) > 0 {
-				fmt.Println("errChan", <-errChan)
-			}
 			if tt.wantErr == false {
-				assert.NotEmpty(t, msgChan)
+				assert.Len(t, msgChan, 1)
 			} else {
-				assert.NotEmpty(t, errChan)
+				assert.Len(t, errChan, 1)
 			}
 		})
 	}
 }
 
-func sendRabbitMQMessage(t *testing.T, body, ct string) {
-	// Build small publisher.
+// Setup a small default publisher for testing purposes.
+func setupRabbitMQPublisher(t *testing.T) *amqp.Channel {
+
 	conn, err := amqp.Dial("amqp://guest:guest@localhost:5672/")
 	require.NoErrorf(t, err, "failed to connect to RabbitMQ consumer: %v", err)
-	defer func() {
-		err = conn.Close()
-		assert.NoError(t, err)
-	}()
 
 	ch, err := conn.Channel()
 	require.NoErrorf(t, err, "failed to open a connection channel: %v", err)
-	defer func() {
-		err = ch.Close()
-		assert.NoError(t, err)
-	}()
 
-	q, err := ch.QueueDeclare(
+	_, err = ch.QueueDeclare(
 		"queue", // name
 		true,    // durable
 		false,   // delete when unused
@@ -272,9 +260,13 @@ func sendRabbitMQMessage(t *testing.T, body, ct string) {
 		false,
 		nil,
 	)
+	require.NoErrorf(t, err, "failed to bind queue: %v", err)
 
-	// Send message.
-	err = ch.Publish(validExch.name, q.Name, false, false, amqp.Publishing{
+	return ch
+}
+
+func sendRabbitMQMessage(t *testing.T, ch *amqp.Channel, body, ct string) {
+	err := ch.Publish(validExch.name, "queue", false, false, amqp.Publishing{
 		ContentType: ct,
 		Body:        []byte(body),
 	})
