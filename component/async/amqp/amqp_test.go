@@ -205,7 +205,7 @@ func TestConsumeAndDeliver(t *testing.T) {
 	ch := setupRabbitMQPublisher(t)
 
 	// Wait for everything to be set up properly.
-	time.Sleep(1000 * time.Millisecond)
+	time.Sleep(5000 * time.Millisecond)
 
 	type args struct {
 		body string
@@ -221,7 +221,6 @@ func TestConsumeAndDeliver(t *testing.T) {
 	}
 
 	for _, tt := range tests {
-		time.Sleep(1000 * time.Millisecond)
 		t.Run(tt.name, func(t *testing.T) {
 			sendRabbitMQMessage(t, ch, tt.args.body, tt.args.ct)
 			fmt.Println(tt.name, "msgChan, errChan", len(msgChan), len(errChan))
@@ -271,4 +270,5 @@ func sendRabbitMQMessage(t *testing.T, ch *amqp.Channel, body, ct string) {
 		Body:        []byte(body),
 	})
 	require.NoErrorf(t, err, "failed to publish message: %v", err)
+	time.Sleep(2000 * time.Millisecond)
 }
