@@ -167,25 +167,6 @@ func Test_getCorrelationID(t *testing.T) {
 	}
 }
 
-// func TestConsumeAndCancel(t *testing.T) {
-// 	f := &Factory{
-// 		url:      "amqp://",
-// 		queue:    "queue",
-// 		exchange: *validExch,
-// 		bindings: []string{},
-// 	}
-// 	c, err := f.Create()
-// 	require.NoError(t, err)
-// 	ctx := context.Background()
-// 	ctx, cancel := context.WithCancel(ctx)
-
-// 	msgChan, errChan, err := c.Consume(ctx)
-// 	cancel()
-// 	assert.Empty(t, msgChan)
-// 	assert.Empty(t, errChan)
-// 	assert.NoError(t, err)
-// }
-
 func TestConsumeAndDeliver(t *testing.T) {
 	// Setup consumer.
 	f := &Factory{
@@ -231,6 +212,41 @@ func TestConsumeAndDeliver(t *testing.T) {
 			}
 		})
 	}
+}
+
+func TestConsumeAndCancel(t *testing.T) {
+	f := &Factory{
+		url:      "amqp://guest:guest@localhost/",
+		queue:    "queue",
+		exchange: *validExch,
+		bindings: []string{},
+	}
+	c, err := f.Create()
+	require.NoError(t, err)
+	ctx := context.Background()
+	ctx, cancel := context.WithCancel(ctx)
+
+	msgChan, errChan, err := c.Consume(ctx)
+	cancel()
+	assert.Empty(t, msgChan)
+	assert.Empty(t, errChan)
+	assert.NoError(t, err)
+}
+
+func TestConsumeAndClose(t *testing.T) {
+	f := &Factory{
+		url:      "amqp://guest:guest@localhost/",
+		queue:    "queue",
+		exchange: *validExch,
+		bindings: []string{},
+	}
+	c, err := f.Create()
+	require.NoError(t, err)
+	ctx := context.Background()
+
+	_, _, err = c.Consume(ctx)
+	err = c.Close()
+	assert.NoError(t, err)
 }
 
 // Setup a small default publisher for testing purposes.
