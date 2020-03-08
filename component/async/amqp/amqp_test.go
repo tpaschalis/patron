@@ -245,6 +245,7 @@ func TestConsumeAndClose(t *testing.T) {
 	ctx := context.Background()
 
 	_, _, err = c.Consume(ctx)
+	assert.NoError(t, err)
 	err = c.Close()
 	assert.NoError(t, err)
 }
