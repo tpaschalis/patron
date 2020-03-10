@@ -1,8 +1,9 @@
+// +build integration
+
 package amqp
 
 import (
 	"context"
-	"fmt"
 	"testing"
 	"time"
 
@@ -13,7 +14,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestConsumeAndDeliver(t *testing.T) {
+func TestConsumeAndPublish(t *testing.T) {
 	// Setup consumer.
 	f := &Factory{
 		url:      "amqp://guest:guest@localhost/",
@@ -50,12 +51,66 @@ func TestConsumeAndDeliver(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			sendRabbitMQMessage(t, ch, tt.args.body, tt.args.ct)
-			fmt.Println(tt.name, "msgChan, errChan", len(msgChan), len(errChan))
 			if tt.wantErr == false {
 				assert.Len(t, msgChan, 1)
 			} else {
 				assert.Len(t, errChan, 1)
 			}
+		})
+	}
+}
+
+func TestConsumeFailures(t *testing.T) {
+
+	type args struct {
+		url   string
+		queue string
+		ex    Exchange
+	}
+	tests := []struct {
+		name    string
+		args    args
+		wantErr string
+	}{
+		{"failure due to url",
+			args{
+				url:   "foo",
+				queue: "queue",
+				ex:    *validExch,
+			},
+			"failed initialize consumer: failed to dial @ foo: AMQP scheme must be either 'amqp://' or 'amqps://'",
+		},
+		{
+			"failure due to exchange",
+			args{
+				url:   "amqp://guest:guest@localhost/",
+				queue: "queue",
+				ex:    Exchange{"foo", "bar"},
+			},
+			"failed initialize consumer: failed to declare exchange: Exception (503) Reason: \"COMMAND_INVALID - invalid exchange type 'bar'\"",
+		},
+		{"failure due to queue newline",
+			args{
+				url:   "amqp://guest:guest@localhost/",
+				queue: "\n",
+				ex:    *validExch,
+			},
+			"failed initialize consumer: failed initialize consumer: Exception (404) Reason: \"NOT_FOUND - no queue '\\n' in vhost '/'\"",
+		},
+	}
+
+	ctx := context.Background()
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+
+			f, _ := New(tt.args.url, tt.args.queue, tt.args.ex)
+			c, _ := f.Create()
+			msgChan, errChan, err := c.Consume(ctx)
+
+			assert.Nil(t, msgChan)
+			assert.Nil(t, errChan)
+			assert.EqualError(t, err, tt.wantErr)
 		})
 	}
 }
