@@ -54,7 +54,8 @@ func TestPublishIntoClosedChannel(t *testing.T) {
 	pub, _ := NewPublisher("amqp://guest:guest@localhost:5672/", "foo")
 	msg, _ := NewJSONMessage(`"foo": "bar"`)
 
-	pub.ch.Close()
-	err := pub.Publish(ctx, msg)
+	err := pub.ch.Close()
+	assert.NoError(t, err)
+	err = pub.Publish(ctx, msg)
 	assert.EqualError(t, err, "failed to publish message: Exception (504) Reason: \"channel/connection is not open\"")
 }
