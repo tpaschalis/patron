@@ -4,8 +4,6 @@ import (
 	"context"
 	"testing"
 
-	"github.com/stretchr/testify/require"
-
 	"github.com/beatlabs/patron/correlation"
 	"github.com/beatlabs/patron/encoding/json"
 	"github.com/opentracing/opentracing-go"
@@ -163,40 +161,4 @@ func Test_getCorrelationID(t *testing.T) {
 			assert.NotEmpty(t, getCorrelationID(tt.args.hh))
 		})
 	}
-}
-
-func TestConsumeAndCancel(t *testing.T) {
-	f := &Factory{
-		url:      "amqp://guest:guest@localhost/",
-		queue:    "queue",
-		exchange: *validExch,
-		bindings: []string{},
-	}
-	c, err := f.Create()
-	require.NoError(t, err)
-	ctx := context.Background()
-	ctx, cancel := context.WithCancel(ctx)
-
-	msgChan, errChan, err := c.Consume(ctx)
-	cancel()
-	assert.Empty(t, msgChan)
-	assert.Empty(t, errChan)
-	assert.NoError(t, err)
-}
-
-func TestConsumeAndClose(t *testing.T) {
-	f := &Factory{
-		url:      "amqp://guest:guest@localhost/",
-		queue:    "queue",
-		exchange: *validExch,
-		bindings: []string{},
-	}
-	c, err := f.Create()
-	require.NoError(t, err)
-	ctx := context.Background()
-
-	_, _, err = c.Consume(ctx)
-	assert.NoError(t, err)
-	err = c.Close()
-	assert.NoError(t, err)
 }
