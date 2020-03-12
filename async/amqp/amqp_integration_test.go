@@ -45,7 +45,7 @@ func TestConsumeAndPublish(t *testing.T) {
 		wantErr bool
 	}{
 		{"success", args{`{"broker":"🐰"}`, json.Type}, false},
-		{"failure - invalid content-type", args{`amqp`, "text/plain"}, true},
+		{"failure - invalid content-type", args{`amqp rocks!`, "text/plain"}, true},
 	}
 
 	for _, tt := range tests {
