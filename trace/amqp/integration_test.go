@@ -1,5 +1,3 @@
-// !build integration
-
 package amqp
 
 import (
@@ -21,10 +19,10 @@ func TestPublisherSuccess(t *testing.T) {
 	assert.NoError(t, err)
 	expectedMsg := `"{\"status\":\"received\"}"`
 
+	msgs := setupRabbitMQConsumer(t)
 	err = pub.Publish(ctx, originalMsg)
 	assert.NoError(t, err)
 
-	msgs := setupRabbitMQConsumer(t)
 	received := <-msgs
 	assert.Equal(t, expectedMsg, string(received.Body))
 
@@ -105,12 +103,12 @@ func setupRabbitMQConsumer(t *testing.T) <-chan amqp.Delivery {
 	require.NoError(t, err)
 
 	q, err := ch.QueueDeclare(
-		"queue", // name
-		true,    // durable
-		false,   // audoDelete
-		false,   // exclusive
-		false,   // noWait
-		nil,     // args
+		"trace-amqp-queue", // name
+		true,               // durable
+		false,              // audoDelete
+		false,              // exclusive
+		false,              // noWait
+		nil,                // args
 	)
 	require.NoError(t, err)
 
