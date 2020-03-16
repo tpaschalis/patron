@@ -17,15 +17,16 @@ func TestPublisherSuccess(t *testing.T) {
 	pub, err := NewPublisher("amqp://guest:guest@localhost:5672/", "exchangeName")
 	assert.NoError(t, err)
 
-	originalMsg, err := NewJSONMessage(`{"broker":"🐰"}`)
+	originalMsg, err := NewJSONMessage(`{"status":"received"}`)
 	assert.NoError(t, err)
+	expectedMsg := `"{\"status\":\"received\"}"`
 
 	err = pub.Publish(ctx, originalMsg)
 	assert.NoError(t, err)
 
 	msgs := setupRabbitMQConsumer(t)
 	received := <-msgs
-	assert.Equal(t, originalMsg.body, received.Body)
+	assert.Equal(t, expectedMsg, string(received.Body))
 
 	err = pub.Close(ctx)
 	assert.NoError(t, err)
