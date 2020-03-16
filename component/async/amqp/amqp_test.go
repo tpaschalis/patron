@@ -119,7 +119,7 @@ func TestFactory_Create(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			f := &Factory{
 				url:      "url",
-				queue:    "queue",
+				queue:    "async-amqp-queue",
 				exchange: *validExch,
 				bindings: []string{},
 				oo:       tt.fields.oo,

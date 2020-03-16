@@ -1,5 +1,3 @@
-// +build integration
-
 package amqp
 
 import (
@@ -18,7 +16,7 @@ func TestConsumeAndPublish(t *testing.T) {
 	// Setup consumer.
 	f := &Factory{
 		url:      "amqp://guest:guest@localhost/",
-		queue:    "queue",
+		queue:    "async-amqp-queue",
 		exchange: *validExch,
 		bindings: []string{},
 	}
@@ -75,7 +73,7 @@ func TestConsumeFailures(t *testing.T) {
 		{"failure due to url",
 			args{
 				url:   "foo",
-				queue: "queue",
+				queue: "async-amqp-queue",
 				ex:    *validExch,
 			},
 			"failed initialize consumer: failed to dial @ foo: AMQP scheme must be either 'amqp://' or 'amqps://'",
@@ -84,7 +82,7 @@ func TestConsumeFailures(t *testing.T) {
 			"failure due to exchange",
 			args{
 				url:   "amqp://guest:guest@localhost/",
-				queue: "queue",
+				queue: "async-amqp-queue",
 				ex:    Exchange{"foo", "bar"},
 			},
 			"failed initialize consumer: failed to declare exchange: Exception (503) Reason: \"COMMAND_INVALID - invalid exchange type 'bar'\"",
@@ -118,7 +116,7 @@ func TestConsumeFailures(t *testing.T) {
 func TestConsumeAndCancel(t *testing.T) {
 	f := &Factory{
 		url:      "amqp://guest:guest@localhost/",
-		queue:    "queue",
+		queue:    "async-amqp-queue",
 		exchange: *validExch,
 		bindings: []string{},
 	}
@@ -137,7 +135,7 @@ func TestConsumeAndCancel(t *testing.T) {
 func TestConsumeAndClose(t *testing.T) {
 	f := &Factory{
 		url:      "amqp://guest:guest@localhost/",
-		queue:    "queue",
+		queue:    "async-amqp-queue",
 		exchange: *validExch,
 		bindings: []string{},
 	}
@@ -161,19 +159,19 @@ func setupRabbitMQPublisher(t *testing.T) *amqp.Channel {
 	require.NoErrorf(t, err, "failed to open a connection channel: %v", err)
 
 	_, err = ch.QueueDeclare(
-		"queue", // name
-		true,    // durable
-		false,   // delete when unused
-		false,   // exclusive
-		false,   // no-wait
-		nil,     // arguments
+		"async-amqp-queue", // name
+		true,               // durable
+		false,              // delete when unused
+		false,              // exclusive
+		false,              // no-wait
+		nil,                // arguments
 	)
 	require.NoErrorf(t, err, "failed to declare a queue: %v", err)
 
 	err = ch.QueueBind(
-		"queue",        // queue name
-		"queue",        // routing key
-		validExch.name, // exchange
+		"async-amqp-queue", // queue name
+		"async-amqp-queue", // routing key
+		validExch.name,     // exchange
 		false,
 		nil,
 	)
@@ -183,7 +181,7 @@ func setupRabbitMQPublisher(t *testing.T) *amqp.Channel {
 }
 
 func sendRabbitMQMessage(t *testing.T, ch *amqp.Channel, body, ct string) {
-	err := ch.Publish(validExch.name, "queue", false, false, amqp.Publishing{
+	err := ch.Publish(validExch.name, "async-amqp-queue", false, false, amqp.Publishing{
 		ContentType: ct,
 		Body:        []byte(body),
 	})
