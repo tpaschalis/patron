@@ -6,6 +6,9 @@ import (
 	"context"
 	"testing"
 
+	"github.com/streadway/amqp"
+	"github.com/stretchr/testify/require"
+
 	"github.com/stretchr/testify/assert"
 )
 
@@ -14,11 +17,15 @@ func TestPublisherSuccess(t *testing.T) {
 	pub, err := NewPublisher("amqp://guest:guest@localhost:5672/", "exchangeName")
 	assert.NoError(t, err)
 
-	msg, err := NewJSONMessage(`{"broker":"🐰"}`)
+	originalMsg, err := NewJSONMessage(`{"broker":"🐰"}`)
 	assert.NoError(t, err)
 
-	err = pub.Publish(ctx, msg)
+	err = pub.Publish(ctx, originalMsg)
 	assert.NoError(t, err)
+
+	msgs := setupRabbitMQConsumer(t)
+	received := <-msgs
+	assert.Equal(t, originalMsg.body, received.Body)
 
 	err = pub.Close(ctx)
 	assert.NoError(t, err)
@@ -67,11 +74,64 @@ func TestPublisherFailures(t *testing.T) {
 
 func TestPublishIntoClosedChannel(t *testing.T) {
 	ctx := context.Background()
-	pub, _ := NewPublisher("amqp://guest:guest@localhost:5672/", "foo")
-	msg, _ := NewJSONMessage(`"foo": "bar"`)
+	pub, err := NewPublisher("amqp://guest:guest@localhost:5672/", "foo")
+	assert.NoError(t, err)
+	msg, err := NewJSONMessage(`"foo": "bar"`)
+	assert.NoError(t, err)
 
-	err := pub.ch.Close()
+	err = pub.ch.Close()
 	assert.NoError(t, err)
 	err = pub.Publish(ctx, msg)
 	assert.EqualError(t, err, "failed to publish message: Exception (504) Reason: \"channel/connection is not open\"")
+}
+
+func setupRabbitMQConsumer(t *testing.T) <-chan amqp.Delivery {
+	conn, err := amqp.Dial("amqp://guest:guest@localhost/")
+	require.NoError(t, err)
+
+	ch, err := conn.Channel()
+	require.NoError(t, err)
+
+	err = ch.ExchangeDeclare(
+		"exchangeName",      // name
+		amqp.ExchangeFanout, // kind
+		true,                // durable
+		false,               // autoDelete
+		false,               // internal
+		false,               // noWait
+		nil,                 // args
+	)
+	require.NoError(t, err)
+
+	q, err := ch.QueueDeclare(
+		"queue", // name
+		true,    // durable
+		false,   // audoDelete
+		false,   // exclusive
+		false,   // noWait
+		nil,     // args
+	)
+	require.NoError(t, err)
+
+	err = ch.QueueBind(
+		q.Name,         // name
+		"",             // key
+		"exchangeName", // exchange
+		false,          // noWait
+		nil,            // args
+	)
+	require.NoError(t, err)
+
+	msgs, err := ch.Consume(
+		q.Name, // queue
+		"",     // consumer
+		false,  // autoAck
+		false,  // exclusive
+		false,  // noLocal
+		false,  // noWait
+		nil,    // args
+	)
+	require.NoError(t, err)
+
+	return msgs
 }
