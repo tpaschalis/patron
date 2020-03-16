@@ -37,17 +37,16 @@ func TestConsumeAndPublish(t *testing.T) {
 		body string
 		ct   string
 	}
-	tests := []struct {
-		name    string
+	tests := map[string]struct {
 		args    args
 		wantErr bool
 	}{
-		{"success", args{`{"broker":"🐰"}`, json.Type}, false},
-		{"failure - invalid content-type", args{`amqp rocks!`, "text/plain"}, true},
+		"success":                        {args{`{"broker":"🐰"}`, json.Type}, false},
+		"failure - invalid content-type": {args{`amqp rocks!`, "text/plain"}, true},
 	}
 
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
+	for name, tt := range tests {
+		t.Run(name, func(t *testing.T) {
 			sendRabbitMQMessage(t, ch, tt.args.body, tt.args.ct)
 			if tt.wantErr == false {
 				assert.Len(t, msgChan, 1)
@@ -65,12 +64,11 @@ func TestConsumeFailures(t *testing.T) {
 		queue string
 		ex    Exchange
 	}
-	tests := []struct {
-		name    string
+	tests := map[string]struct {
 		args    args
 		wantErr string
 	}{
-		{"failure due to url",
+		"failure due to url": {
 			args{
 				url:   "foo",
 				queue: "async-amqp-queue",
@@ -78,8 +76,7 @@ func TestConsumeFailures(t *testing.T) {
 			},
 			"failed initialize consumer: failed to dial @ foo: AMQP scheme must be either 'amqp://' or 'amqps://'",
 		},
-		{
-			"failure due to exchange",
+		"failure due to exchange": {
 			args{
 				url:   "amqp://guest:guest@localhost/",
 				queue: "async-amqp-queue",
@@ -87,7 +84,7 @@ func TestConsumeFailures(t *testing.T) {
 			},
 			"failed initialize consumer: failed to declare exchange: Exception (503) Reason: \"COMMAND_INVALID - invalid exchange type 'bar'\"",
 		},
-		{"failure due to queue newline",
+		"failure due to queue newline": {
 			args{
 				url:   "amqp://guest:guest@localhost/",
 				queue: "\n",
@@ -99,8 +96,8 @@ func TestConsumeFailures(t *testing.T) {
 
 	ctx := context.Background()
 
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
+	for name, tt := range tests {
+		t.Run(name, func(t *testing.T) {
 
 			f, _ := New(tt.args.url, tt.args.queue, tt.args.ex)
 			c, _ := f.Create()
