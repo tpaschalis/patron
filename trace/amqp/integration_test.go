@@ -21,7 +21,11 @@ func TestPublisherSuccess(t *testing.T) {
 	assert.NoError(t, err)
 	expectedMsg := `"{\"status\":\"received\"}"`
 
-	msgs := setupRabbitMQConsumer(t)
+	conn, msgs := setupRabbitMQConsumer(t)
+	defer func() {
+		err := conn.Close()
+		assert.NoError(t, err)
+	}()
 	err = pub.Publish(ctx, originalMsg)
 	assert.NoError(t, err)
 
@@ -81,7 +85,7 @@ func TestPublishIntoClosedChannel(t *testing.T) {
 	assert.EqualError(t, err, "failed to publish message: Exception (504) Reason: \"channel/connection is not open\"")
 }
 
-func setupRabbitMQConsumer(t *testing.T) <-chan amqp.Delivery {
+func setupRabbitMQConsumer(t *testing.T) (*amqp.Connection, <-chan amqp.Delivery) {
 	conn, err := amqp.Dial("amqp://guest:guest@localhost/")
 	require.NoError(t, err)
 
@@ -129,5 +133,5 @@ func setupRabbitMQConsumer(t *testing.T) <-chan amqp.Delivery {
 	)
 	require.NoError(t, err)
 
-	return msgs
+	return conn, msgs
 }

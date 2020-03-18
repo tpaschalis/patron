@@ -30,7 +30,11 @@ func TestConsumeAndPublish(t *testing.T) {
 	assert.NotNil(t, errChan)
 	assert.NoError(t, err)
 
-	ch := setupRabbitMQPublisher(t)
+	conn, ch := setupRabbitMQPublisher(t)
+	defer func() {
+		err := conn.Close()
+		assert.NoError(t, err)
+	}()
 
 	// Wait for everything to be set up properly.
 	time.Sleep(1000 * time.Millisecond)
@@ -149,7 +153,7 @@ func TestConsumeAndClose(t *testing.T) {
 }
 
 // Small default publisher for testing purposes.
-func setupRabbitMQPublisher(t *testing.T) *amqp.Channel {
+func setupRabbitMQPublisher(t *testing.T) (*amqp.Connection, *amqp.Channel) {
 
 	conn, err := amqp.Dial("amqp://guest:guest@localhost:5672/")
 	require.NoErrorf(t, err, "failed to connect to RabbitMQ consumer: %v", err)
@@ -176,7 +180,7 @@ func setupRabbitMQPublisher(t *testing.T) *amqp.Channel {
 	)
 	require.NoErrorf(t, err, "failed to bind queue: %v", err)
 
-	return ch
+	return conn, ch
 }
 
 func sendRabbitMQMessage(t *testing.T, ch *amqp.Channel, body, ct string) {
