@@ -71,28 +71,28 @@ func TestConsumeFailures(t *testing.T) {
 		wantErr string
 	}{
 		"failure due to url": {
-			args{
+			args: args{
 				url:   "foo",
 				queue: "async-amqp-queue",
 				ex:    *validExch,
 			},
-			"failed initialize consumer: failed to dial @ foo: AMQP scheme must be either 'amqp://' or 'amqps://'",
+			wantErr: "failed initialize consumer: failed to dial @ foo: AMQP scheme must be either 'amqp://' or 'amqps://'",
 		},
 		"failure due to exchange": {
-			args{
+			args: args{
 				url:   "amqp://guest:guest@localhost/",
 				queue: "async-amqp-queue",
 				ex:    Exchange{"foo", "bar"},
 			},
-			"failed initialize consumer: failed to declare exchange: Exception (503) Reason: \"COMMAND_INVALID - invalid exchange type 'bar'\"",
+			wantErr: "failed initialize consumer: failed to declare exchange: Exception (503) Reason: \"COMMAND_INVALID - invalid exchange type 'bar'\"",
 		},
 		"failure due to queue newline": {
-			args{
+			args: args{
 				url:   "amqp://guest:guest@localhost/",
 				queue: "\n",
 				ex:    *validExch,
 			},
-			"failed initialize consumer: failed initialize consumer: Exception (404) Reason: \"NOT_FOUND - no queue '\\n' in vhost '/'\"",
+			wantErr: "failed initialize consumer: failed initialize consumer: Exception (404) Reason: \"NOT_FOUND - no queue '\\n' in vhost '/'\"",
 		},
 	}
 

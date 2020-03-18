@@ -42,24 +42,20 @@ func TestPublisherFailures(t *testing.T) {
 		publisherErr string
 	}{
 		"missing url": {
-
-			args{"", ""},
-			"url is required",
+			args:         args{"", ""},
+			publisherErr: "url is required",
 		},
 		"missing exchange": {
-
-			args{"foo", ""},
-			"exchange is required",
+			args:         args{"foo", ""},
+			publisherErr: "exchange is required",
 		},
 		"incorrect URL": {
-
-			args{"foo", "bar"},
-			"failed to open RabbitMq connection: AMQP scheme must be either 'amqp://' or 'amqps://'",
+			args:         args{"foo", "bar"},
+			publisherErr: "failed to open RabbitMq connection: AMQP scheme must be either 'amqp://' or 'amqps://'",
 		},
 		"incorrect exchange": {
-
-			args{"amqp://guest:guest@localhost:5672/", "\n"},
-			"failed to declare exchange: Exception (403) Reason: \"ACCESS_REFUSED - operation not permitted on the default exchange\"",
+			args:         args{"amqp://guest:guest@localhost:5672/", "\n"},
+			publisherErr: "failed to declare exchange: Exception (403) Reason: \"ACCESS_REFUSED - operation not permitted on the default exchange\"",
 		},
 	}
 
