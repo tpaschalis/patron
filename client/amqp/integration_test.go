@@ -7,9 +7,8 @@ import (
 	"testing"
 
 	"github.com/streadway/amqp"
-	"github.com/stretchr/testify/require"
-
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestPublisherSuccess(t *testing.T) {
