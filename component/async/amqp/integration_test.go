@@ -35,8 +35,8 @@ func TestConsumeAndPublish(t *testing.T) {
 		assert.NoError(t, err)
 	}()
 
-	// Wait for everything to be set up properly.
-	// time.Sleep(2000 * time.Millisecond)
+	//Wait for everything to be set up properly.
+	time.Sleep(2000 * time.Millisecond)
 
 	type args struct {
 		body string
@@ -54,9 +54,11 @@ func TestConsumeAndPublish(t *testing.T) {
 		t.Run(name, func(t *testing.T) {
 			sendRabbitMQMessage(t, ch, tt.args.body, tt.args.ct)
 			if tt.wantErr == false {
-				assert.Len(t, msgChan, 1)
+				msg := <-msgChan
+				assert.NotNil(t, msg)
 			} else {
-				assert.Len(t, errChan, 1)
+				msg := <-errChan
+				assert.NotNil(t, msg)
 			}
 		})
 	}
@@ -188,5 +190,5 @@ func sendRabbitMQMessage(t *testing.T, ch *amqp.Channel, body, ct string) {
 		Body:        []byte(body),
 	})
 	require.NoErrorf(t, err, "failed to publish message: %v", err)
-	time.Sleep(250 * time.Millisecond) // throttle messages to avoid queue saturatio
+	time.Sleep(3000 * time.Millisecond) // throttle messages to avoid queue saturation
 }
