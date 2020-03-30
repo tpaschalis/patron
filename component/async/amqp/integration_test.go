@@ -36,7 +36,7 @@ func TestConsumeAndPublish(t *testing.T) {
 	}()
 
 	// Wait for everything to be set up properly.
-	time.Sleep(2000 * time.Millisecond)
+	// time.Sleep(2000 * time.Millisecond)
 
 	type args struct {
 		body string
@@ -188,5 +188,5 @@ func sendRabbitMQMessage(t *testing.T, ch *amqp.Channel, body, ct string) {
 		Body:        []byte(body),
 	})
 	require.NoErrorf(t, err, "failed to publish message: %v", err)
-	time.Sleep(100 * time.Millisecond)
+	time.Sleep(250 * time.Millisecond) // throttle messages to avoid queue saturatio
 }
