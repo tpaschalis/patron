@@ -294,7 +294,6 @@ func Test_extractParamsRawRoute(t *testing.T) {
 
 	proc := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		fields = ExtractParams(r)
-		return
 	})
 
 	router := httprouter.New()
