@@ -174,3 +174,8 @@ func extractParams(r *http.Request) map[string]string {
 	}
 	return p
 }
+
+// ExtractParams extracts dynamic URL parameters using httprouter's functionality
+func ExtractParams(r *http.Request) map[string]string {
+	return extractParams(r)
+}
