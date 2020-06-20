@@ -293,7 +293,7 @@ func Test_extractParamsRawRoute(t *testing.T) {
 	var fields map[string]string
 
 	proc := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		fields = extractParams(r)
+		fields = ExtractParams(r)
 		return
 	})
 
