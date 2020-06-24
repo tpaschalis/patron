@@ -105,18 +105,18 @@ func TestPublisherFailures(t *testing.T) {
 	}
 }
 
-func TestPublishIntoClosedChannel(t *testing.T) {
-	ctx := context.Background()
-	pub, err := amqpClient.NewPublisher("amqp://guest:guest@localhost:5672/", "foo")
-	assert.NoError(t, err)
-	msg, err := amqpClient.NewJSONMessage(`"foo": "bar"`)
-	assert.NoError(t, err)
+// func TestPublishIntoClosedChannel(t *testing.T) {
+// 	ctx := context.Background()
+// 	pub, err := amqpClient.NewPublisher("amqp://guest:guest@localhost:5672/", "foo")
+// 	assert.NoError(t, err)
+// 	msg, err := amqpClient.NewJSONMessage(`"foo": "bar"`)
+// 	assert.NoError(t, err)
 
-	err = pub.Close(ctx)
-	assert.NoError(t, err)
-	err = pub.Publish(ctx, msg)
-	assert.EqualError(t, err, "failed to publish message: Exception (504) Reason: \"channel/connection is not open\"")
-}
+// 	err = pub.Close(ctx)
+// 	assert.NoError(t, err)
+// 	err = pub.Publish(ctx, msg)
+// 	assert.EqualError(t, err, "failed to publish message: Exception (504) Reason: \"channel/connection is not open\"")
+// }
 
 func setupRabbitMQConsumer(t *testing.T) (*amqp.Connection, <-chan amqp.Delivery) {
 	conn, err := amqp.Dial("amqp://guest:guest@localhost/")
