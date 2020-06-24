@@ -20,19 +20,6 @@ services:
       - AWS_DEFAULT_REGION=eu-west-1
     volumes:
       - '/var/run/docker.sock:/var/run/docker.sock'
-  rabbitmq:
-    image: rabbitmq:3-management
-    hostname: "rabbitmq"
-    networks:
-      nw:
-        aliases:
-        - rabbitmq
-    expose:
-      - "15672"
-      - "5672"
-    ports:
-      - "15672:15672"
-      - "5672:5672"
 networks:
   nw: {}
 
