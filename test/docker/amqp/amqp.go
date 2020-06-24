@@ -25,8 +25,8 @@ func create(expiration time.Duration) (*amqpRuntime, error) {
 	runOptions := &dockertest.RunOptions{Repository: "rabbitmq",
 		Tag: "5.7.25",
 		PortBindings: map[docker.Port][]docker.PortBinding{
-			"15672/tcp": {{HostIP: "", HostPort: ""}},
-			"5672/tcp":  {{HostIP: "", HostPort: ""}},
+			"15672/tcp": {{HostIP: "", HostPort: "15672"}},
+			"5672/tcp":  {{HostIP: "", HostPort: "5672"}},
 		},
 	}
 	_, err = runtime.RunWithOptions(runOptions)
@@ -35,7 +35,7 @@ func create(expiration time.Duration) (*amqpRuntime, error) {
 	}
 
 	// wait until the container is ready
-	time.Sleep(30 * time.Second)
+	time.Sleep(60 * time.Second)
 
 	return runtime, nil
 }
