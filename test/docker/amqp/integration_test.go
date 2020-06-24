@@ -28,7 +28,7 @@ func TestMain(m *testing.M) {
 	var err error
 	runtime, err = create(60 * time.Second)
 	if err != nil {
-		fmt.Printf("could not create mysql runtime: %v\n", err)
+		fmt.Printf("could not create rabbitmq runtime: %v\n", err)
 		os.Exit(1)
 	}
 	defer func() {
