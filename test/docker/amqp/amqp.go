@@ -23,7 +23,7 @@ func create(expiration time.Duration) (*amqpRuntime, error) {
 	runtime := &amqpRuntime{Runtime: *br}
 
 	runOptions := &dockertest.RunOptions{Repository: "rabbitmq",
-		Tag: "5.7.25",
+		Tag: "3-management",
 		PortBindings: map[docker.Port][]docker.PortBinding{
 			"15672/tcp": {{HostIP: "", HostPort: "15672"}},
 			"5672/tcp":  {{HostIP: "", HostPort: "5672"}},
