@@ -28,6 +28,7 @@ func create(expiration time.Duration) (*amqpRuntime, error) {
 			"15672/tcp": {{HostIP: "", HostPort: "15672"}},
 			"5672/tcp":  {{HostIP: "", HostPort: "5672"}},
 		},
+		ExposedPorts: []string{"15672/tcp", "5672/tcp"},
 	}
 	_, err = runtime.RunWithOptions(runOptions)
 	if err != nil {
