@@ -17,10 +17,10 @@ import (
 )
 
 var (
-	runtime        *amqpRuntime
-	validExch, _   = amqpConsumer.NewExchange("e", amqp.ExchangeDirect)
-	validExchName  = "e"
-	invalidExch, _ = amqpConsumer.NewExchange("foo", "bar")
+	runtime       *amqpRuntime
+	validExch, _  = amqpConsumer.NewExchange("e", amqp.ExchangeDirect)
+	validExchName = "e"
+	// invalidExch, _ = amqpConsumer.NewExchange("foo", "bar")
 )
 
 func TestMain(m *testing.M) {
@@ -240,14 +240,14 @@ func TestConsumeFailures(t *testing.T) {
 			},
 			wantErr: "failed initialize consumer: failed to dial @ foo: AMQP scheme must be either 'amqp://' or 'amqps://'",
 		},
-		"failure due to exchange": {
-			args: args{
-				url:   "amqp://guest:guest@localhost/",
-				queue: "async-amqp-queue",
-				ex:    *invalidExch,
-			},
-			wantErr: "failed initialize consumer: failed to declare exchange: Exception (503) Reason: \"COMMAND_INVALID - invalid exchange type 'bar'\"",
-		},
+		// "failure due to exchange": {
+		// 	args: args{
+		// 		url:   "amqp://guest:guest@localhost/",
+		// 		queue: "async-amqp-queue",
+		// 		ex:    *invalidExch,
+		// 	},
+		// 	wantErr: "failed initialize consumer: failed to declare exchange: Exception (503) Reason: \"COMMAND_INVALID - invalid exchange type 'bar'\"",
+		// },
 		"failure due to queue newline": {
 			args: args{
 				url:   "amqp://guest:guest@localhost/",
