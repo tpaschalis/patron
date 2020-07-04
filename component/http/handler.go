@@ -13,11 +13,11 @@ import (
 	"github.com/julienschmidt/httprouter"
 )
 
-func handler(hnd ProcessorFunc) http.HandlerFunc {
+func handler(hnd ProcessorFunc, ce ...encoding.CustomEncodingScheme) http.HandlerFunc {
 
 	return func(w http.ResponseWriter, r *http.Request) {
 
-		ct, dec, enc, err := determineEncoding(r)
+		ct, dec, enc, err := determineEncoding(r, ce...)
 		if err != nil {
 			http.Error(w, http.StatusText(http.StatusUnsupportedMediaType), http.StatusUnsupportedMediaType)
 			return
@@ -50,18 +50,20 @@ func handler(hnd ProcessorFunc) http.HandlerFunc {
 	}
 }
 
-func determineEncoding(r *http.Request) (string, encoding.DecodeFunc, encoding.EncodeFunc, error) {
+func determineEncoding(r *http.Request, ce ...encoding.CustomEncodingScheme) (string, encoding.DecodeFunc, encoding.EncodeFunc, error) {
 	cth, cok := r.Header[encoding.ContentTypeHeader]
 	ach, aok := r.Header[encoding.AcceptHeader]
+	pch, pok := r.Header[encoding.CustomEncodingHeader]
 
 	// No headers default to JSON
-	if !cok && !aok {
+	if !cok && !aok && !pok {
 		return json.TypeCharset, json.Decode, json.Encode, nil
 	}
 
 	var enc encoding.EncodeFunc
 	var dec encoding.DecodeFunc
 	var ct string
+	var err error
 
 	if cok {
 		switch cth[0] {
@@ -94,6 +96,13 @@ func determineEncoding(r *http.Request) (string, encoding.DecodeFunc, encoding.E
 			ct = protobuf.Type
 		default:
 			return "", nil, nil, errors.New("accept header not supported")
+		}
+	}
+
+	if pok {
+		ct, dec, enc, err = getCustomEncDec(pch, ce...)
+		if err != nil {
+			return "", nil, nil, errors.New("failed to setup custom enc/dec scheme")
 		}
 	}
 
@@ -174,4 +183,17 @@ func ExtractParams(r *http.Request) map[string]string {
 		p[v.Key] = v.Value
 	}
 	return p
+}
+
+func getCustomEncDec(pth string, ce ...encoding.CustomEncodingScheme) (string, encoding.DecodeFunc, encoding.EncodeFunc, error) {
+	// first match wins
+	for _, p := range pth {
+		for _, s := range ce {
+			if pth == s.Header {
+				return s.Header, s.Dec, s.Enc, nil
+			}
+		}
+	}
+
+	return "", nil, nil, errors.New("the specific custom header was not specified")
 }

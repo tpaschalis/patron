@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	"github.com/beatlabs/patron/component/http/auth"
+	"github.com/beatlabs/patron/encoding"
 	errs "github.com/beatlabs/patron/errors"
 )
 
@@ -171,7 +172,7 @@ func NewRawRouteBuilder(path string, handler http.HandlerFunc) *RouteBuilder {
 }
 
 // NewRouteBuilder constructor.
-func NewRouteBuilder(path string, processor ProcessorFunc) *RouteBuilder {
+func NewRouteBuilder(path string, processor ProcessorFunc, ce ...encoding.CustomEncodingScheme) *RouteBuilder {
 
 	var err error
 
@@ -179,7 +180,7 @@ func NewRouteBuilder(path string, processor ProcessorFunc) *RouteBuilder {
 		err = errors.New("processor is nil")
 	}
 
-	rb := NewRawRouteBuilder(path, handler(processor))
+	rb := NewRawRouteBuilder(path, handler(processor, ce...))
 	if err != nil {
 		rb.errors = append(rb.errors, err)
 	}

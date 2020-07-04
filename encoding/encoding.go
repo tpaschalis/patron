@@ -10,6 +10,8 @@ const (
 	AcceptHeader string = "Accept"
 	// ContentTypeHeader for defining content type headers.
 	ContentTypeHeader string = "Content-Type"
+	// CustomEncodingHeader for defining user-provided enc/dec schemes.
+	CustomEncodingHeader string = "Patron-Custom-Encoding"
 )
 
 // DecodeFunc function definition of a JSON decoding function.
@@ -20,3 +22,10 @@ type DecodeRawFunc func(data []byte, v interface{}) error
 
 // EncodeFunc function definition of a JSON encoding function.
 type EncodeFunc func(v interface{}) ([]byte, error)
+
+// CustomEncodingScheme for defining user-provided enc/dec schemes.
+type CustomEncodingScheme struct {
+	Header string
+	Enc    EncodeFunc
+	Dec    DecodeFunc
+}

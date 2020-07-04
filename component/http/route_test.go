@@ -1,14 +1,18 @@
 package http
 
 import (
+	"bytes"
 	"context"
 	"encoding/json"
+	"io"
 	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
+	"reflect"
 	"testing"
 
 	"github.com/beatlabs/patron/component/http/auth"
+	"github.com/beatlabs/patron/encoding"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -325,8 +329,68 @@ func TestRoute_Getters(t *testing.T) {
 	assert.Equal(t, expectedResponse, gotResponse)
 }
 
+func TestCustomEncodingSchemes(t *testing.T) {
+	type testResponse struct {
+		Value string
+	}
+
+	customEncFunc := func(v interface{}) ([]byte, error) {
+		return []byte("⬆️"), nil
+	}
+
+	customDecFunc := func(data io.Reader, v interface{}) error {
+		rv := reflect.ValueOf(v)
+		rv.Elem().SetString("⬇️")
+		return nil
+	}
+
+	customEncHeader := "h34d3r"
+	customEncoders := []encoding.CustomEncodingScheme{
+		encoding.CustomEncodingScheme{
+			Header: customEncHeader,
+			Enc:    customEncFunc,
+			Dec:    customDecFunc,
+		},
+	}
+
+	// First, setup the route with a custom encoding scheme
+	route, err := NewRouteBuilder("/foo", testingCustomEncHandlerMock(t), customEncoders...).
+		WithTrace().
+		MethodGet().
+		Build()
+	require.NoError(t, err)
+	assert.NotNil(t, route)
+	assert.Equal(t, "/foo", route.Path())
+	assert.Equal(t, http.MethodGet, route.Method())
+	assert.Len(t, route.Middlewares(), 1)
+
+	// Then let's test it out
+	data := bytes.NewReader([]byte("foo-data"))
+	r, err := http.NewRequest(http.MethodGet, "/foo", data)
+	require.NoError(t, err)
+	r.Header.Set(encoding.CustomEncodingHeader, customEncHeader)
+
+	w := httptest.NewRecorder()
+	route.Handler().ServeHTTP(w, r)
+	br, err := ioutil.ReadAll(w.Body)
+	require.NoError(t, err)
+
+	assert.Equal(t, string(br), "⬆️")
+	ctHeader := w.Header().Values(encoding.ContentTypeHeader)
+	assert.Contains(t, ctHeader, customEncHeader)
+}
+
 func testingHandlerMock(expected interface{}) ProcessorFunc {
 	return func(_ context.Context, _ *Request) (*Response, error) {
 		return NewResponse(expected), nil
+	}
+}
+
+func testingCustomEncHandlerMock(t *testing.T) ProcessorFunc {
+	return func(_ context.Context, r *Request) (*Response, error) {
+		var s string
+		r.decode(r.Raw, &s)
+		assert.Equal(t, s, "⬇️")
+		return NewResponse(s), nil
 	}
 }
