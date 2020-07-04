@@ -382,7 +382,7 @@ func TestCustomEncodingSchemes(t *testing.T) {
 	require.NoError(t, err)
 
 	assert.Equal(t, string(br), "⬆️")
-	ctHeader := w.Header().Values(encoding.ContentTypeHeader)
+	ctHeader := w.Header().Get(encoding.ContentTypeHeader)
 	assert.Contains(t, ctHeader, customEncHeader)
 }
 
