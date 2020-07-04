@@ -352,7 +352,7 @@ func TestCustomEncodingSchemes(t *testing.T) {
 
 	customEncHeader := "h34d3r"
 	customEncoders := []encoding.CustomEncodingScheme{
-		encoding.CustomEncodingScheme{
+		{
 			Header: customEncHeader,
 			Enc:    customEncFunc,
 			Dec:    customDecFunc,
@@ -384,6 +384,37 @@ func TestCustomEncodingSchemes(t *testing.T) {
 	assert.Equal(t, string(br), "⬆️")
 	ctHeader := w.Header().Values(encoding.ContentTypeHeader)
 	assert.Contains(t, ctHeader, customEncHeader)
+}
+
+func BenchmarkDeterminEncoding(b *testing.B) {
+	stubEncFunc := func(v interface{}) ([]byte, error) { return []byte{}, nil }
+	stubDecFunc := func(data io.Reader, v interface{}) error { return nil }
+	customEncoders := []encoding.CustomEncodingScheme{
+		{
+			Header: "header_1",
+			Enc:    stubEncFunc,
+			Dec:    stubDecFunc,
+		},
+		{
+			Header: "header_1",
+			Enc:    stubEncFunc,
+			Dec:    stubDecFunc,
+		},
+		{
+			Header: "header_3",
+			Enc:    stubEncFunc,
+			Dec:    stubDecFunc,
+		},
+	}
+
+	data := bytes.NewReader([]byte("foo-data"))
+	r, _ := http.NewRequest(http.MethodGet, "/foo", data)
+	r.Header.Set(encoding.CustomEncodingHeader, "header_3")
+
+	for i := 0; i < b.N; i++ {
+		_, _, _, _ = determineEncoding(r, customEncoders...)
+	}
+
 }
 
 func testingHandlerMock(expected interface{}) ProcessorFunc {
