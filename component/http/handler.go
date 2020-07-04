@@ -185,11 +185,11 @@ func ExtractParams(r *http.Request) map[string]string {
 	return p
 }
 
-func getCustomEncDec(pth string, ce ...encoding.CustomEncodingScheme) (string, encoding.DecodeFunc, encoding.EncodeFunc, error) {
+func getCustomEncDec(pth []string, ce ...encoding.CustomEncodingScheme) (string, encoding.DecodeFunc, encoding.EncodeFunc, error) {
 	// first match wins
 	for _, p := range pth {
 		for _, s := range ce {
-			if pth == s.Header {
+			if p == s.Header {
 				return s.Header, s.Dec, s.Enc, nil
 			}
 		}

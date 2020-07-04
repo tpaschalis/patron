@@ -330,10 +330,16 @@ func TestRoute_Getters(t *testing.T) {
 }
 
 func TestCustomEncodingSchemes(t *testing.T) {
-	type testResponse struct {
-		Value string
-	}
 
+	testingCustomEncHandlerMock := func(t *testing.T) ProcessorFunc {
+		return func(_ context.Context, r *Request) (*Response, error) {
+			var s string
+			err := r.decode(r.Raw, &s)
+			assert.Nil(t, err)
+			assert.Equal(t, s, "⬇️")
+			return NewResponse(s), nil
+		}
+	}
 	customEncFunc := func(v interface{}) ([]byte, error) {
 		return []byte("⬆️"), nil
 	}
@@ -383,14 +389,5 @@ func TestCustomEncodingSchemes(t *testing.T) {
 func testingHandlerMock(expected interface{}) ProcessorFunc {
 	return func(_ context.Context, _ *Request) (*Response, error) {
 		return NewResponse(expected), nil
-	}
-}
-
-func testingCustomEncHandlerMock(t *testing.T) ProcessorFunc {
-	return func(_ context.Context, r *Request) (*Response, error) {
-		var s string
-		r.decode(r.Raw, &s)
-		assert.Equal(t, s, "⬇️")
-		return NewResponse(s), nil
 	}
 }
