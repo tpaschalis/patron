@@ -3,6 +3,8 @@
 package kafka
 
 import (
+	"context"
+	"fmt"
 	"testing"
 	"time"
 
@@ -107,4 +109,43 @@ func TestGroupConsume_ClaimMessageError(t *testing.T) {
 	case err = <-chErr:
 		require.EqualError(t, err, "kafka: tried to use a consumer group that was closed")
 	}
+}
+
+// Issue 175
+func TestLoggingMessageWhichClosesConsumer(t *testing.T) {
+
+	fmt.Println("Before goroutine")
+	go func() {
+		factory, err := group.New("test1", uuid.New().String(), []string{groupTopic2}, Brokers(),
+			kafka.Version(sarama.V2_1_0_0.String()), kafka.StartFromNewest())
+		assert.NoError(t, err)
+
+		consumer, err := factory.Create()
+		assert.NoError(t, err)
+
+		ctx, cnl := context.WithCancel(context.Background())
+		defer cnl()
+
+		ch, chErr, err := consumer.Consume(ctx)
+		_, _ = ch, chErr
+		assert.NoError(t, err)
+	}()
+
+	fmt.Println("After goroutine")
+	msg := &sarama.ProducerMessage{
+		Topic: groupTopic2,
+		Value: sarama.StringEncoder("foo"),
+	}
+
+	fmt.Println("Before producer")
+	prod, err := NewProducer()
+	assert.NoError(t, err)
+	fmt.Println("After producer")
+
+	fmt.Println("Before SendMessage")
+	_, _, err = prod.SendMessage(msg)
+	assert.NoError(t, err)
+	fmt.Println("After SendMessage")
+
+	t.Errorf("")
 }
