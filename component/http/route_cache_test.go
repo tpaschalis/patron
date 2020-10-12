@@ -31,8 +31,6 @@ type arg struct {
 	err bool
 }
 
-var ce chan error
-
 func TestCachingMiddleware(t *testing.T) {
 
 	getRequest, err := http.NewRequest("GET", "/test", nil)
@@ -157,7 +155,7 @@ func assertRouteBuilder(t *testing.T, arg arg, routeBuilder *RouteBuilder, cache
 }
 
 func TestRouteCacheImplementation_WithSingleRequest(t *testing.T) {
-	ce = make(chan error, 1)
+	ce := make(chan error, 1)
 
 	cc := newTestingCache()
 	cc.instant = httpcache.NowSeconds
@@ -185,7 +183,7 @@ func TestRouteCacheImplementation_WithSingleRequest(t *testing.T) {
 	ctx, cln := context.WithTimeout(context.Background(), 5*time.Second)
 
 	port := 50023
-	runRoute(ctx, t, routeBuilder, port)
+	runRoute(ctx, t, routeBuilder, ce, port)
 
 	assertResponse(ctx, t, []http.Response{
 		{
@@ -227,7 +225,7 @@ func TestRouteCacheImplementation_WithSingleRequest(t *testing.T) {
 }
 
 func TestRouteCacheAsMiddleware_WithSingleRequest(t *testing.T) {
-	ce = make(chan error, 1)
+	ce := make(chan error, 1)
 
 	cc := newTestingCache()
 	cc.instant = httpcache.NowSeconds
@@ -259,7 +257,7 @@ func TestRouteCacheAsMiddleware_WithSingleRequest(t *testing.T) {
 	ctx, cln := context.WithTimeout(context.Background(), 5*time.Second)
 
 	port := 50023
-	runRoute(ctx, t, routeBuilder, port)
+	runRoute(ctx, t, routeBuilder, ce, port)
 
 	assertResponse(ctx, t, []http.Response{
 		{
@@ -320,7 +318,7 @@ func newMiddlewareWrapper(middlewareFunc func(w http.ResponseWriter, r *http.Req
 }
 
 func TestRawRouteCacheImplementation_WithSingleRequest(t *testing.T) {
-	ce = make(chan error, 1)
+	ce := make(chan error, 1)
 
 	cc := newTestingCache()
 	cc.instant = httpcache.NowSeconds
@@ -349,7 +347,7 @@ func TestRawRouteCacheImplementation_WithSingleRequest(t *testing.T) {
 	ctx, cln := context.WithTimeout(context.Background(), 5*time.Second)
 
 	port := 50024
-	runRoute(ctx, t, routeBuilder, port)
+	runRoute(ctx, t, routeBuilder, ce, port)
 
 	assertResponse(ctx, t, []http.Response{
 		{
@@ -407,7 +405,7 @@ func (br *bodyReader) Close() error {
 	return nil
 }
 
-func runRoute(ctx context.Context, t *testing.T, routeBuilder *RouteBuilder, port int) {
+func runRoute(ctx context.Context, t *testing.T, routeBuilder *RouteBuilder, ce chan error, port int) {
 	cmp, err := NewBuilder().WithRoutesBuilder(NewRoutesBuilder().Append(routeBuilder)).WithPort(port).Create()
 
 	assert.NoError(t, err)
