@@ -244,15 +244,13 @@ func getSpanLogError(t *testing.T, span *mocktracer.MockSpan) string {
 	return ""
 }
 
-
-
 func TestNewGzipMiddleware(t *testing.T) {
 	handler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) { w.WriteHeader(202) })
 	req, err := http.NewRequest("GET", "/test", nil)
 	assert.NoError(t, err)
 
 	req.Header.Set("Accept-Encoding", "gzip")
-	gzipMiddleware := NewGzipMiddleware(GZIPConfiguration{})
+	gzipMiddleware, err := NewCompressionMiddleware().WithGZIP().Build()
 	assert.NoError(t, err)
 	assert.NotNil(t, gzipMiddleware)
 
@@ -267,7 +265,8 @@ func TestNewGzipMiddleware_Ignore(t *testing.T) {
 	var ceh, cth string // accept-encoding, content type
 
 	handler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) { w.WriteHeader(202) })
-	gzipMiddleware := NewGzipMiddleware(GZIPConfiguration{IgnoreRoutes: []string{"/metrics"}})
+	gzipMiddleware, err := NewCompressionMiddleware().WithIgnoreRoutes("/metrics").WithGZIP().Build()
+	assert.NoError(t, err)
 	assert.NotNil(t, gzipMiddleware)
 
 	// check if the route actually ignored
@@ -309,7 +308,8 @@ func TestNewGzipMiddleware_Headers(t *testing.T) {
 	var ceh, cth string // accept-encoding, content type
 
 	handler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) { w.WriteHeader(202) })
-	gzipMiddleware := NewGzipMiddleware(GZIPConfiguration{IgnoreRoutes: []string{"/metrics"}})
+	gzipMiddleware, err := NewCompressionMiddleware().WithIgnoreRoutes("/metrics").WithGZIP().Build()
+	assert.NoError(t, err)
 	assert.NotNil(t, gzipMiddleware)
 
 	// check if the route actually ignored
@@ -345,4 +345,59 @@ func TestNewGzipMiddleware_Headers(t *testing.T) {
 	cth = rc2.Header().Get("Content-Type")
 	assert.NotNil(t, cth)
 	assert.Equal(t, "application/json", cth)
+}
+
+func TestCompressionMiddlewareBuilder(t *testing.T) {
+	tests := map[string]struct {
+		cm      *CmBuilder
+		wantErr bool
+		errMsg  string
+	}{
+		"no arguments provided":                       {cm: NewCompressionMiddleware(), wantErr: false},
+		"gzip middleware":                             {cm: NewCompressionMiddleware().WithGZIP(), wantErr: false},
+		"deflate middleware":                          {cm: NewCompressionMiddleware().WithDeflate(0), wantErr: false},
+		"compress/lzw middleware":                     {cm: NewCompressionMiddleware().WithLZW(0, 8), wantErr: false},
+		"deflate with wrong levels - too low":         {cm: NewCompressionMiddleware().WithDeflate(-3), wantErr: true, errMsg: "provided deflate level value not in the [-2, 9] range\n"},
+		"deflate with wrong levels - too high":        {cm: NewCompressionMiddleware().WithDeflate(10), wantErr: true, errMsg: "provided deflate level value not in the [-2, 9] range\n"},
+		"compress/lzw with wrong order - too low":     {cm: NewCompressionMiddleware().WithLZW(-1, 8), wantErr: true, errMsg: "provided lzw order value not valid\n"},
+		"compress/lzw with wrong order - too high":    {cm: NewCompressionMiddleware().WithLZW(2, 8), wantErr: true, errMsg: "provided lzw order value not valid\n"},
+		"compress/lzw with wrong litWidth - too low":  {cm: NewCompressionMiddleware().WithLZW(1, 1), wantErr: true, errMsg: "provided lzw litWidth value not in the [2, 8] range\n"},
+		"compress/lzw with wrong litWidth - too high": {cm: NewCompressionMiddleware().WithLZW(1, 9), wantErr: true, errMsg: "provided lzw litWidth value not in the [2, 8] range\n"},
+	}
+
+	for name, tc := range tests {
+		t.Run(name, func(t *testing.T) {
+			mw, err := tc.cm.Build()
+
+			if tc.wantErr {
+				assert.Nil(t, mw)
+				assert.EqualError(t, err, tc.errMsg)
+			} else {
+				assert.NotNil(t, mw)
+				assert.Nil(t, err)
+			}
+		})
+	}
+}
+
+func TestCompressionMiddlewareWithIgnoredRoutes(t *testing.T) {
+	tests := map[string]struct {
+		input []string
+		want  []string
+	}{
+		"no routes":                             {input: []string{}, want: []string{}},
+		"no trailing slashes":                   {input: []string{"/alive", "/ready"}, want: []string{"/alive", "/ready"}},
+		"trailing slashes are removed":          {input: []string{"/alive/", "/ready/"}, want: []string{"/alive", "/ready"}},
+		"with and without trailing slashes mix": {input: []string{"/alive////", "/ready/", "/metrics"}, want: []string{"/alive", "/ready", "/metrics"}},
+		"exclude everything":                    {input: []string{"/"}, want: []string{"/"}},
+		"multiple slashes only":                 {input: []string{"///"}, want: []string{"/"}},
+		"nested paths":                          {input: []string{"/user/foo//", "/client/bar/", "/file"}, want: []string{"/user/foo", "/client/bar", "/file"}},
+	}
+
+	for name, tc := range tests {
+		t.Run(name, func(t *testing.T) {
+			cmb := NewCompressionMiddleware().WithIgnoreRoutes(tc.input...)
+			assert.Equal(t, tc.want, cmb.ignoreRoutes)
+		})
+	}
 }
