@@ -142,7 +142,7 @@ type compressionResponseWriter struct {
 	http.ResponseWriter
 }
 
-// CmBuilder holds required parameters for building a compression middleware.
+// CmBuilder holds the required parameters for building a compression middleware.
 type CmBuilder struct {
 	ignoreRoutes      []string
 	hdr               string
@@ -159,6 +159,19 @@ func (c *CmBuilder) ignore(url string) bool {
 	}
 
 	return false
+}
+
+// NewCompressionMiddleware initializes the builder for a compression middleware.
+// As per Section 3.5 of the HTTP/1.1 RFC, we support GZIP, Deflate and LZW as compression methods,
+// with GZIP chosen as the default.
+// https://tools.ietf.org/html/rfc2616#section-3.5
+func NewCompressionMiddleware() *CmBuilder {
+	return &CmBuilder{
+		hdr: "gzip",
+		compressionWriter: func(w io.Writer) io.WriteCloser {
+			return gzip.NewWriter(w)
+		},
+	}
 }
 
 // WithGZIP sets the compression method to GZIP; based on https://golang.org/pkg/compress/gzip/
@@ -203,8 +216,7 @@ func (c *CmBuilder) WithLZW(order lzw.Order, litWidth int) *CmBuilder {
 
 	c.hdr = "compress"
 	c.compressionWriter = func(w io.Writer) io.WriteCloser {
-		wr := lzw.NewWriter(w, order, litWidth)
-		return wr
+		return lzw.NewWriter(w, order, litWidth)
 	}
 
 	return c
@@ -215,20 +227,8 @@ func (w compressionResponseWriter) Write(b []byte) (int, error) {
 	return w.Writer.Write(b)
 }
 
-// NewCompressionMiddleware initializes the builder for a compression middleware.
-// As per Section 3.5 of the HTTP/1.1 RFC, we support GZIP, Deflate and LZW as compression methods,
-// with GZIP chosen as the default.
-// https://tools.ietf.org/html/rfc2616#section-3.5
-func NewCompressionMiddleware() *CmBuilder {
-	return &CmBuilder{
-		hdr: "gzip",
-		compressionWriter: func(w io.Writer) io.WriteCloser {
-			return gzip.NewWriter(w)
-		},
-	}
-}
-
-// WithIgnoreRoutes sets which routes should be excluded from compression
+// WithIgnoreRoutes specifies which routes should be excluded from compression
+// Any trailing slashes are trimmed, so we match both /metrics/ and /metrics?seconds=30
 func (c *CmBuilder) WithIgnoreRoutes(r ...string) *CmBuilder {
 	res := make([]string, 0, len(r))
 	for _, e := range r {
