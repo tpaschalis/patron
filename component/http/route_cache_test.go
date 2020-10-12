@@ -31,6 +31,8 @@ type arg struct {
 	err bool
 }
 
+var ce chan error
+
 func TestCachingMiddleware(t *testing.T) {
 
 	getRequest, err := http.NewRequest("GET", "/test", nil)
@@ -155,6 +157,7 @@ func assertRouteBuilder(t *testing.T, arg arg, routeBuilder *RouteBuilder, cache
 }
 
 func TestRouteCacheImplementation_WithSingleRequest(t *testing.T) {
+	ce = make(chan error, 1)
 
 	cc := newTestingCache()
 	cc.instant = httpcache.NowSeconds
@@ -219,11 +222,12 @@ func TestRouteCacheImplementation_WithSingleRequest(t *testing.T) {
 	assert.Equal(t, 2, postWrapper.invocations)
 
 	assert.Equal(t, executions, uint32(1))
-
 	cln()
+	assert.NoError(t, <-ce)
 }
 
 func TestRouteCacheAsMiddleware_WithSingleRequest(t *testing.T) {
+	ce = make(chan error, 1)
 
 	cc := newTestingCache()
 	cc.instant = httpcache.NowSeconds
@@ -295,7 +299,7 @@ func TestRouteCacheAsMiddleware_WithSingleRequest(t *testing.T) {
 	assert.Equal(t, executions, uint32(1))
 
 	cln()
-
+	assert.NoError(t, <-ce)
 }
 
 type middlewareWrapper struct {
@@ -316,6 +320,7 @@ func newMiddlewareWrapper(middlewareFunc func(w http.ResponseWriter, r *http.Req
 }
 
 func TestRawRouteCacheImplementation_WithSingleRequest(t *testing.T) {
+	ce = make(chan error, 1)
 
 	cc := newTestingCache()
 	cc.instant = httpcache.NowSeconds
@@ -381,7 +386,7 @@ func TestRawRouteCacheImplementation_WithSingleRequest(t *testing.T) {
 	assert.Equal(t, executions, uint32(1))
 
 	cln()
-
+	assert.NoError(t, <-ce)
 }
 
 type bodyReader struct {
@@ -409,8 +414,8 @@ func runRoute(ctx context.Context, t *testing.T, routeBuilder *RouteBuilder, por
 	assert.NotNil(t, cmp)
 
 	go func() {
-		err = cmp.Run(ctx)
-		assert.NoError(t, err)
+		ce <- cmp.Run(ctx)
+		close(ce)
 	}()
 
 	var lwg sync.WaitGroup
