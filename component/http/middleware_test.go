@@ -245,106 +245,144 @@ func getSpanLogError(t *testing.T, span *mocktracer.MockSpan) string {
 }
 
 func TestNewGzipMiddleware(t *testing.T) {
-	handler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) { w.WriteHeader(202) })
-	req, err := http.NewRequest("GET", "/test", nil)
-	assert.NoError(t, err)
+	tests := map[string]struct {
+		cm *CmBuilder
+	}{
+		"gzip":     {cm: NewCompressionMiddleware().WithGZIP()},
+		"deflate":  {cm: NewCompressionMiddleware().WithDeflate(8)},
+		"compress": {cm: NewCompressionMiddleware().WithLZW(0, 8)},
+	}
 
-	req.Header.Set("Accept-Encoding", "gzip")
-	gzipMiddleware, err := NewCompressionMiddleware().WithGZIP().Build()
-	assert.NoError(t, err)
-	assert.NotNil(t, gzipMiddleware)
+	for name, tc := range tests {
+		t.Run(name, func(t *testing.T) {
+			handler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) { w.WriteHeader(202) })
+			req, err := http.NewRequest("GET", "/test", nil)
+			assert.NoError(t, err)
 
-	rc := httptest.NewRecorder()
-	gzipMiddleware(handler).ServeHTTP(rc, req)
-	actual := rc.Header().Get("Content-Encoding")
-	assert.NotNil(t, actual)
-	assert.Equal(t, "gzip", actual)
+			req.Header.Set("Accept-Encoding", name)
+			gzipMiddleware, err := tc.cm.Build()
+			assert.NoError(t, err)
+			assert.NotNil(t, gzipMiddleware)
+
+			rc := httptest.NewRecorder()
+			gzipMiddleware(handler).ServeHTTP(rc, req)
+			actual := rc.Header().Get("Content-Encoding")
+			assert.NotNil(t, actual)
+			assert.Equal(t, name, actual)
+		})
+	}
 }
 
 func TestNewGzipMiddleware_Ignore(t *testing.T) {
 	var ceh, cth string // accept-encoding, content type
 
 	handler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) { w.WriteHeader(202) })
-	gzipMiddleware, err := NewCompressionMiddleware().WithIgnoreRoutes("/metrics").WithGZIP().Build()
-	assert.NoError(t, err)
-	assert.NotNil(t, gzipMiddleware)
 
-	// check if the route actually ignored
-	req1, err := http.NewRequest("GET", "/metrics", nil)
-	assert.NoError(t, err)
-	req1.Header.Set("Accept-Encoding", "gzip")
-	assert.NoError(t, err)
+	tests := map[string]struct {
+		cm *CmBuilder
+	}{
+		"gzip":     {cm: NewCompressionMiddleware().WithIgnoreRoutes("/metrics").WithGZIP()},
+		"deflate":  {cm: NewCompressionMiddleware().WithIgnoreRoutes("/metrics").WithDeflate(8)},
+		"compress": {cm: NewCompressionMiddleware().WithIgnoreRoutes("/metrics").WithLZW(0, 8)},
+	}
 
-	rc1 := httptest.NewRecorder()
-	gzipMiddleware(handler).ServeHTTP(rc1, req1)
+	for name, tc := range tests {
+		t.Run(name, func(t *testing.T) {
+			middleware, err := tc.cm.Build()
+			assert.NoError(t, err)
+			assert.NotNil(t, middleware)
 
-	ceh = rc1.Header().Get("Content-Encoding")
-	assert.NotNil(t, ceh)
-	assert.Equal(t, ceh, "")
+			// check if the route actually ignored
+			req1, err := http.NewRequest("GET", "/metrics", nil)
+			assert.NoError(t, err)
+			req1.Header.Set("Accept-Encoding", name)
+			assert.NoError(t, err)
 
-	cth = rc1.Header().Get("Content-Type")
-	assert.NotNil(t, cth)
-	assert.Equal(t, cth, "")
+			rc1 := httptest.NewRecorder()
+			middleware(handler).ServeHTTP(rc1, req1)
 
-	// check if other routes remains untouched
-	req2, err := http.NewRequest("GET", "/alive", nil)
-	assert.NoError(t, err)
-	req2.Header.Set("Accept-Encoding", "gzip")
-	req2.Header.Set("Content-Type", "application/json")
+			ceh = rc1.Header().Get("Content-Encoding")
+			assert.NotNil(t, ceh)
+			assert.Equal(t, ceh, "")
 
-	rc2 := httptest.NewRecorder()
-	gzipMiddleware(handler).ServeHTTP(rc2, req2)
+			cth = rc1.Header().Get("Content-Type")
+			assert.NotNil(t, cth)
+			assert.Equal(t, cth, "")
 
-	ceh = rc2.Header().Get("Content-Encoding")
-	assert.NotNil(t, ceh)
-	assert.Equal(t, "gzip", ceh)
+			// check if other routes remains untouched
+			req2, err := http.NewRequest("GET", "/alive", nil)
+			assert.NoError(t, err)
+			req2.Header.Set("Accept-Encoding", name)
+			req2.Header.Set("Content-Type", "application/json")
 
-	cth = rc2.Header().Get("Content-Type")
-	assert.NotNil(t, cth)
-	assert.Equal(t, "application/json", cth)
+			rc2 := httptest.NewRecorder()
+			middleware(handler).ServeHTTP(rc2, req2)
+
+			ceh = rc2.Header().Get("Content-Encoding")
+			assert.NotNil(t, ceh)
+			assert.Equal(t, name, ceh)
+
+			cth = rc2.Header().Get("Content-Type")
+			assert.NotNil(t, cth)
+			assert.Equal(t, "application/json", cth)
+		})
+	}
 }
 
 func TestNewGzipMiddleware_Headers(t *testing.T) {
 	var ceh, cth string // accept-encoding, content type
 
 	handler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) { w.WriteHeader(202) })
-	gzipMiddleware, err := NewCompressionMiddleware().WithIgnoreRoutes("/metrics").WithGZIP().Build()
-	assert.NoError(t, err)
-	assert.NotNil(t, gzipMiddleware)
 
-	// check if the route actually ignored
-	req1, err := http.NewRequest("GET", "/alive", nil)
-	assert.NoError(t, err)
-	req1.Header.Set("Accept-Encoding", "gzip")
-	req1.Header.Set("Content-Type", "text/plain")
+	tests := map[string]struct {
+		cm *CmBuilder
+	}{
+		"gzip":     {cm: NewCompressionMiddleware().WithIgnoreRoutes("/metrics").WithGZIP()},
+		"deflate":  {cm: NewCompressionMiddleware().WithIgnoreRoutes("/metrics").WithDeflate(8)},
+		"compress": {cm: NewCompressionMiddleware().WithIgnoreRoutes("/metrics").WithLZW(0, 8)},
+	}
 
-	rc1 := httptest.NewRecorder()
-	gzipMiddleware(handler).ServeHTTP(rc1, req1)
+	for name, tc := range tests {
+		t.Run(name, func(t *testing.T) {
+			middleware, err := tc.cm.Build()
+			assert.NoError(t, err)
+			assert.NotNil(t, middleware)
 
-	ceh = rc1.Header().Get("Content-Encoding")
-	assert.NotNil(t, ceh)
-	assert.Equal(t, "gzip", ceh)
+			// check if the route actually ignored
+			req1, err := http.NewRequest("GET", "/alive", nil)
+			assert.NoError(t, err)
+			req1.Header.Set("Accept-Encoding", name)
+			req1.Header.Set("Content-Type", "text/plain")
 
-	cth = rc1.Header().Get("Content-Type")
-	assert.NotNil(t, cth)
-	assert.Equal(t, "text/plain", cth)
+			rc1 := httptest.NewRecorder()
+			middleware(handler).ServeHTTP(rc1, req1)
 
-	// check if other routes remains untouched
-	req2, err := http.NewRequest("GET", "/alive", nil)
-	assert.NoError(t, err)
-	req2.Header.Set("Accept-Encoding", "gzip")
-	req2.Header.Set("Content-Type", "application/json")
+			ceh = rc1.Header().Get("Content-Encoding")
+			assert.NotNil(t, ceh)
+			assert.Equal(t, name, ceh)
 
-	rc2 := httptest.NewRecorder()
-	gzipMiddleware(handler).ServeHTTP(rc2, req2)
+			cth = rc1.Header().Get("Content-Type")
+			assert.NotNil(t, cth)
+			assert.Equal(t, "text/plain", cth)
 
-	ceh = rc2.Header().Get("Content-Encoding")
-	assert.NotNil(t, ceh)
-	assert.Equal(t, "gzip", ceh)
+			// check if other routes remains untouched
+			req2, err := http.NewRequest("GET", "/alive", nil)
+			assert.NoError(t, err)
+			req2.Header.Set("Accept-Encoding", name)
+			req2.Header.Set("Content-Type", "application/json")
 
-	cth = rc2.Header().Get("Content-Type")
-	assert.NotNil(t, cth)
-	assert.Equal(t, "application/json", cth)
+			rc2 := httptest.NewRecorder()
+			middleware(handler).ServeHTTP(rc2, req2)
+
+			ceh = rc2.Header().Get("Content-Encoding")
+			assert.NotNil(t, ceh)
+			assert.Equal(t, name, ceh)
+
+			cth = rc2.Header().Get("Content-Type")
+			assert.NotNil(t, cth)
+			assert.Equal(t, "application/json", cth)
+		})
+	}
 }
 
 func TestCompressionMiddlewareBuilder(t *testing.T) {
