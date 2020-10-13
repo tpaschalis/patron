@@ -244,7 +244,7 @@ func getSpanLogError(t *testing.T, span *mocktracer.MockSpan) string {
 	return ""
 }
 
-func TestNewGzipMiddleware(t *testing.T) {
+func TestNewCompressionMiddleware(t *testing.T) {
 	tests := map[string]struct {
 		cm *CmBuilder
 	}{
@@ -273,7 +273,7 @@ func TestNewGzipMiddleware(t *testing.T) {
 	}
 }
 
-func TestNewGzipMiddleware_Ignore(t *testing.T) {
+func TestNewCompressionMiddleware_Ignore(t *testing.T) {
 	var ceh, cth string // accept-encoding, content type
 
 	handler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) { w.WriteHeader(202) })
@@ -329,7 +329,7 @@ func TestNewGzipMiddleware_Ignore(t *testing.T) {
 	}
 }
 
-func TestNewGzipMiddleware_Headers(t *testing.T) {
+func TestNewCompressionMiddleware_Headers(t *testing.T) {
 	var ceh, cth string // accept-encoding, content type
 
 	handler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) { w.WriteHeader(202) })
@@ -418,7 +418,7 @@ func TestCompressionMiddlewareBuilder(t *testing.T) {
 	}
 }
 
-func TestCompressionMiddlewareWithIgnoredRoutes(t *testing.T) {
+func TestCompressionMiddlewareIgnoredRoutes(t *testing.T) {
 	tests := map[string]struct {
 		input []string
 		want  []string
