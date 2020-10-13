@@ -139,6 +139,13 @@ newMiddleware := func(h http.Handler) http.Handler {
 }
 ```
 
+Patron offers the following middlewares out of the box :
+- Recovery Middleware, ensuring recovery in case of a panic
+- Auth Middleware, for authorizing requests based on a header key
+- LoggingTracing Middleware, which continues and finishes a tracing span
+- Compression Middleware, with support for GZIP, Deflate and LZW as compression methods
+- Caching Middleware, which creates a cache layer for GET requests
+
 ### gRPC
 
 On the server side, the gRPC component injects a `UnaryInterceptor` which handles tracing and log propagation.
@@ -154,6 +161,8 @@ Detailed examples can be found in the [examples](/examples) folder with the foll
 - [AMQP Component, AWS SNS](/examples/fourth/main.go)
 - [AWS SQS](/examples/fifth/main.go)
 - [gRPC](/examples/sixth/main.go)
+- [Server-side caching](/examples/seventh/main.go)
+- [Compression middleware](/examples/eighth/main.go)
 
 ## Processors
 

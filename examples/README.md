@@ -86,3 +86,30 @@ and then send a sample request:
 ```
 
 After that head over to [jaeger](http://localhost:16686/search) and [prometheus](http://localhost:9090/graph).
+
+## Service 8
+The eighth example tests the compression middleware by setting up four routes
+- /foo uses GZIP for compression
+- /bar uses Deflate for compression
+- /baz uses LZW for compression
+- /qux uses no compression at all
+
+By running the following commands, one can see the compression middleware in action by providing the correct headers
+```shell
+go run examples/eighth/main.go
+# -- No Compression
+$ curl -s localhost:50000/qux | wc -c
+
+# -- GZIP compression, with and without headers
+$ curl -s localhost:50000/foo | wc -c
+$ curl -s -H "Accept-Encoding: gzip" localhost:50000/foo | wc -c
+
+#  -- Deflate compression, with and without headers
+$ curl -s localhost:50000/bar | wc -c
+$ curl -s -H "Accept-Encoding: deflate" localhost:50000/bar | wc -c
+
+# -- LZW compression, with and without headers
+$ curl -s localhost:50000/baz | wc -c
+$ curl -s -H "Accept-Encoding: compress" localhost:50000/baz | wc -c
+
+```
