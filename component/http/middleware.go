@@ -27,6 +27,9 @@ import (
 const (
 	serverComponent = "http-server"
 	fieldNameError  = "error"
+	gzipHeader = "gzip"
+	deflateHeader = "deflate"
+	lzwHeader = "compress"
 )
 
 type responseWriter struct {
@@ -167,7 +170,7 @@ func (c *CmBuilder) ignore(url string) bool {
 // https://tools.ietf.org/html/rfc2616#section-3.5
 func NewCompressionMiddleware() *CmBuilder {
 	return &CmBuilder{
-		hdr: "gzip",
+		hdr: gzipHeader,
 		compressionWriter: func(w io.Writer) io.WriteCloser {
 			return gzip.NewWriter(w)
 		},
@@ -176,7 +179,7 @@ func NewCompressionMiddleware() *CmBuilder {
 
 // WithGZIP sets the compression method to GZIP; based on https://golang.org/pkg/compress/gzip/
 func (c *CmBuilder) WithGZIP() *CmBuilder {
-	c.hdr = "gzip"
+	c.hdr = gzipHeader
 	c.compressionWriter = func(w io.Writer) io.WriteCloser {
 		return gzip.NewWriter(w)
 	}
@@ -189,7 +192,7 @@ func (c *CmBuilder) WithDeflate(level int) *CmBuilder {
 	if level < -2 || level > 9 {
 		c.errors = append(c.errors, errors.New("provided deflate level value not in the [-2, 9] range"))
 	} else {
-		c.hdr = "deflate"
+		c.hdr = deflateHeader
 		c.compressionWriter = func(w io.Writer) io.WriteCloser {
 			wr, err := flate.NewWriter(w, level)
 			if err != nil {
@@ -214,7 +217,7 @@ func (c *CmBuilder) WithLZW(order lzw.Order, litWidth int) *CmBuilder {
 		return c
 	}
 
-	c.hdr = "compress"
+	c.hdr = lzwHeader
 	c.compressionWriter = func(w io.Writer) io.WriteCloser {
 		return lzw.NewWriter(w, order, litWidth)
 	}
