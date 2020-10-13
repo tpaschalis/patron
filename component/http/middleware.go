@@ -27,9 +27,9 @@ import (
 const (
 	serverComponent = "http-server"
 	fieldNameError  = "error"
-	gzipHeader = "gzip"
-	deflateHeader = "deflate"
-	lzwHeader = "compress"
+	gzipHeader      = "gzip"
+	deflateHeader   = "deflate"
+	lzwHeader       = "compress"
 )
 
 type responseWriter struct {
