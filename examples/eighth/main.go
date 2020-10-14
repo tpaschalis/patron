@@ -94,13 +94,13 @@ func main() {
 // creates some random data to send back
 func eighth(_ context.Context, _ *patronhttp.Request) (*patronhttp.Response, error) {
 	rand.Seed(time.Now().UnixNano())
-	oneMiB := make([]byte, 1<<20)
-	_, err := rand.Read(oneMiB)
+	data := make([]byte, 1<<20)
+	_, err := rand.Read(data)
 	if err != nil {
 		return nil, err
 	}
 
-	return patronhttp.NewResponse(oneMiB), nil
+	return patronhttp.NewResponse(data), nil
 }
 
 func handle(err error) {
