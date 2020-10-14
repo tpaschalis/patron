@@ -98,6 +98,5 @@ func hello(_ context.Context, _ *patronhttp.Request) (*patronhttp.Response, erro
 func handle(err error) {
 	if err != nil {
 		log.Fatal(err)
-		os.Exit(1)
 	}
 }
