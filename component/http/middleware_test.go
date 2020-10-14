@@ -247,9 +247,9 @@ func TestNewCompressionMiddleware(t *testing.T) {
 	tests := map[string]struct {
 		cm *CompressionMiddewareBuilder
 	}{
-		"gzip":     {cm: NewCompressionMiddleware().WithGZIP()},
-		"deflate":  {cm: NewCompressionMiddleware().WithDeflate(8)},
-		"compress": {cm: NewCompressionMiddleware().WithLZW(0, 8)},
+		"gzip":     {cm: NewCompressionMiddleware()},
+		"deflate":  {cm: NewCompressionMiddleware()},
+		"compress": {cm: NewCompressionMiddleware()},
 	}
 
 	for name, tc := range tests {
@@ -280,9 +280,9 @@ func TestNewCompressionMiddleware_Ignore(t *testing.T) {
 	tests := map[string]struct {
 		cm *CompressionMiddewareBuilder
 	}{
-		"gzip":     {cm: NewCompressionMiddleware().WithIgnoreRoutes("/metrics").WithGZIP()},
-		"deflate":  {cm: NewCompressionMiddleware().WithIgnoreRoutes("/metrics").WithDeflate(8)},
-		"compress": {cm: NewCompressionMiddleware().WithIgnoreRoutes("/metrics").WithLZW(0, 8)},
+		"gzip":     {cm: NewCompressionMiddleware().WithIgnoreRoutes("/metrics")},
+		"deflate":  {cm: NewCompressionMiddleware().WithIgnoreRoutes("/metrics")},
+		"compress": {cm: NewCompressionMiddleware().WithIgnoreRoutes("/metrics")},
 	}
 
 	for name, tc := range tests {
@@ -336,9 +336,9 @@ func TestNewCompressionMiddleware_Headers(t *testing.T) {
 	tests := map[string]struct {
 		cm *CompressionMiddewareBuilder
 	}{
-		"gzip":     {cm: NewCompressionMiddleware().WithIgnoreRoutes("/metrics").WithGZIP()},
-		"deflate":  {cm: NewCompressionMiddleware().WithIgnoreRoutes("/metrics").WithDeflate(8)},
-		"compress": {cm: NewCompressionMiddleware().WithIgnoreRoutes("/metrics").WithLZW(0, 8)},
+		"gzip":     {cm: NewCompressionMiddleware().WithIgnoreRoutes("/metrics")},
+		"deflate":  {cm: NewCompressionMiddleware().WithIgnoreRoutes("/metrics")},
+		"compress": {cm: NewCompressionMiddleware().WithIgnoreRoutes("/metrics")},
 	}
 
 	for name, tc := range tests {
@@ -391,15 +391,16 @@ func TestCompressionMiddlewareBuilder(t *testing.T) {
 		errMsg  string
 	}{
 		"no arguments provided":                       {cm: NewCompressionMiddleware(), wantErr: false},
-		"gzip middleware":                             {cm: NewCompressionMiddleware().WithGZIP(), wantErr: false},
-		"deflate middleware":                          {cm: NewCompressionMiddleware().WithDeflate(0), wantErr: false},
-		"compress/lzw middleware":                     {cm: NewCompressionMiddleware().WithLZW(0, 8), wantErr: false},
-		"deflate with wrong levels - too low":         {cm: NewCompressionMiddleware().WithDeflate(-3), wantErr: true, errMsg: "provided deflate level value not in the [-2, 9] range\n"},
-		"deflate with wrong levels - too high":        {cm: NewCompressionMiddleware().WithDeflate(10), wantErr: true, errMsg: "provided deflate level value not in the [-2, 9] range\n"},
-		"compress/lzw with wrong order - too low":     {cm: NewCompressionMiddleware().WithLZW(-1, 8), wantErr: true, errMsg: "provided lzw order value not valid\n"},
-		"compress/lzw with wrong order - too high":    {cm: NewCompressionMiddleware().WithLZW(2, 8), wantErr: true, errMsg: "provided lzw order value not valid\n"},
-		"compress/lzw with wrong litWidth - too low":  {cm: NewCompressionMiddleware().WithLZW(1, 1), wantErr: true, errMsg: "provided lzw litWidth value not in the [2, 8] range\n"},
-		"compress/lzw with wrong litWidth - too high": {cm: NewCompressionMiddleware().WithLZW(1, 9), wantErr: true, errMsg: "provided lzw litWidth value not in the [2, 8] range\n"},
+		"gzip middleware":                             {cm: NewCompressionMiddleware(), wantErr: false},
+		"deflate middleware":                          {cm: NewCompressionMiddleware().SetDeflateLevel(0), wantErr: false},
+		"compress/lzw middleware":                     {cm: NewCompressionMiddleware().SetLZWParams(0, 8), wantErr: false},
+		"deflate with wrong levels - too low":         {cm: NewCompressionMiddleware().SetDeflateLevel(-3), wantErr: true, errMsg: "provided deflate level value not in the [-2, 9] range\n"},
+		"deflate with wrong levels - too high":        {cm: NewCompressionMiddleware().SetDeflateLevel(10), wantErr: true, errMsg: "provided deflate level value not in the [-2, 9] range\n"},
+		"compress/lzw with wrong order - too low":     {cm: NewCompressionMiddleware().SetLZWParams(-1, 8), wantErr: true, errMsg: "provided lzw order value not valid\n"},
+		"compress/lzw with wrong order - too high":    {cm: NewCompressionMiddleware().SetLZWParams(2, 8), wantErr: true, errMsg: "provided lzw order value not valid\n"},
+		"compress/lzw with wrong litWidth - too low":  {cm: NewCompressionMiddleware().SetLZWParams(1, 1), wantErr: true, errMsg: "provided lzw litWidth value not in the [2, 8] range\n"},
+		"compress/lzw with wrong litWidth - too high": {cm: NewCompressionMiddleware().SetLZWParams(1, 9), wantErr: true, errMsg: "provided lzw litWidth value not in the [2, 8] range\n"},
+		"compress/lzw with wrong litWidth and order":  {cm: NewCompressionMiddleware().SetLZWParams(100, 100), wantErr: true, errMsg: "provided lzw order value not valid\nprovided lzw litWidth value not in the [2, 8] range\n"},
 	}
 
 	for name, tc := range tests {
@@ -428,7 +429,7 @@ func TestCompressionMiddlewareIgnoredRoutes(t *testing.T) {
 		"with and without trailing slashes mix": {input: []string{"/alive////", "/ready/", "/metrics"}, want: []string{"/alive", "/ready", "/metrics"}},
 		"exclude everything":                    {input: []string{"/"}, want: []string{"/"}},
 		"multiple slashes only":                 {input: []string{"///"}, want: []string{"/"}},
-		"nested paths":                          {input: []string{"/user/foo//", "/client/bar/", "/file"}, want: []string{"/user/foo", "/client/bar", "/file"}},
+		"nested paths":                          {input: []string{"/user/foo//", "/client/bar////", "/file/"}, want: []string{"/user/foo", "/client/bar", "/file"}},
 	}
 
 	for name, tc := range tests {
