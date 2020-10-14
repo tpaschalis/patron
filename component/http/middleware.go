@@ -166,8 +166,7 @@ func (c *CompressionMiddewareBuilder) ignore(url string) bool {
 }
 
 // NewCompressionMiddleware initializes the builder for a compression middleware.
-// As per Section 3.5 of the HTTP/1.1 RFC, we support GZIP, Deflate and LZW as compression methods,
-// with GZIP chosen as the default.
+// As per Section 3.5 of the HTTP/1.1 RFC, we support GZIP, Deflate and LZW as compression methods
 // https://tools.ietf.org/html/rfc2616#section-3.5
 func NewCompressionMiddleware() *CompressionMiddewareBuilder {
 	return &CompressionMiddewareBuilder{
