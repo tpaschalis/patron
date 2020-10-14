@@ -3,13 +3,14 @@ package main
 import (
 	"context"
 	"fmt"
-	"github.com/beatlabs/patron"
-	patronhttp "github.com/beatlabs/patron/component/http"
-	"github.com/beatlabs/patron/log"
 	"math/rand"
 	"net/http"
 	"os"
 	"time"
+
+	"github.com/beatlabs/patron"
+	patronhttp "github.com/beatlabs/patron/component/http"
+	"github.com/beatlabs/patron/log"
 )
 
 func init() {
