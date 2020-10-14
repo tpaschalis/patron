@@ -147,10 +147,11 @@ type compressionResponseWriter struct {
 
 // CompressionMiddewareBuilder holds the required parameters for building a compression middleware.
 type CompressionMiddewareBuilder struct {
-	ignoreRoutes      []string
-	hdr               string
-	compressionWriter func(w io.Writer) io.WriteCloser
-	errors            []error
+	ignoreRoutes []string
+	deflateLevel int
+	lzwOrder     lzw.Order
+	lzwLitWidth  int
+	errors       []error
 }
 
 // ignore checks if the given url ignored from compression or not.
@@ -170,58 +171,43 @@ func (c *CompressionMiddewareBuilder) ignore(url string) bool {
 // https://tools.ietf.org/html/rfc2616#section-3.5
 func NewCompressionMiddleware() *CompressionMiddewareBuilder {
 	return &CompressionMiddewareBuilder{
-		hdr: gzipHeader,
-		compressionWriter: func(w io.Writer) io.WriteCloser {
-			return gzip.NewWriter(w)
-		},
+		deflateLevel: 8,
+		lzwOrder:     0,
+		lzwLitWidth:  8,
 	}
 }
 
-// WithGZIP sets the compression method to GZIP; based on https://golang.org/pkg/compress/gzip/
-func (c *CompressionMiddewareBuilder) WithGZIP() *CompressionMiddewareBuilder {
-	c.hdr = gzipHeader
-	c.compressionWriter = func(w io.Writer) io.WriteCloser {
-		return gzip.NewWriter(w)
-	}
-
-	return c
-}
-
-// WithDeflate sets the compression method to Deflate; based on https://golang.org/pkg/compress/flate/
-func (c *CompressionMiddewareBuilder) WithDeflate(level int) *CompressionMiddewareBuilder {
+// SetDeflateLevel sets the level of compression for Deflate; based on https://golang.org/pkg/compress/flate/
+// Levels range from 1 (BestSpeed) to 9 (BestCompression); higher levels typically run slower but compress more.
+// Level 0 (NoCompression) does not attempt any compression; it only adds the necessary DEFLATE framing.
+// Level -1 (DefaultCompression) uses the default compression level.
+// Level -2 (HuffmanOnly) will use Huffman compression only, giving a very fast compression for all types of input, but sacrificing considerable compression efficiency.
+func (c *CompressionMiddewareBuilder) SetDeflateLevel(level int) *CompressionMiddewareBuilder {
 	if level < -2 || level > 9 {
 		c.errors = append(c.errors, errors.New("provided deflate level value not in the [-2, 9] range"))
 	} else {
-		c.hdr = deflateHeader
-		c.compressionWriter = func(w io.Writer) io.WriteCloser {
-			wr, err := flate.NewWriter(w, level)
-			if err != nil {
-				return nil
-			}
-			return wr
-		}
+		c.deflateLevel = level
 	}
-
 	return c
 }
 
-// WithLZW sets the compression method to 'compress'; based on LZW and https://golang.org/pkg/compress/lzw/
-func (c *CompressionMiddewareBuilder) WithLZW(order lzw.Order, litWidth int) *CompressionMiddewareBuilder {
+// SetLZWParams sets the Order and LitWidth parameters for LZW compression; based on LZW and https://golang.org/pkg/compress/lzw/
+// Order 0 uses the Least Significant Bits first (as in GIF files),
+// while Order 1 uses the Most Significant Bits first (as in TIFF and PDF files).
+// The LitWidth defines the number of bits to use for literal codes, and must be in the [2, 8] range
+// The input size must be less than 1<<litWidth.
+func (c *CompressionMiddewareBuilder) SetLZWParams(order lzw.Order, litWidth int) *CompressionMiddewareBuilder {
 	if order != 0 && order != 1 {
 		c.errors = append(c.errors, errors.New("provided lzw order value not valid"))
-		return c
+	} else {
+		c.lzwOrder = order
 	}
 
 	if litWidth < 2 || litWidth > 8 {
 		c.errors = append(c.errors, errors.New("provided lzw litWidth value not in the [2, 8] range"))
-		return c
+	} else {
+		c.lzwLitWidth = litWidth
 	}
-
-	c.hdr = lzwHeader
-	c.compressionWriter = func(w io.Writer) io.WriteCloser {
-		return lzw.NewWriter(w, order, litWidth)
-	}
-
 	return c
 }
 
@@ -253,13 +239,15 @@ func (c *CompressionMiddewareBuilder) Build() (MiddlewareFunc, error) {
 
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			if !strings.Contains(r.Header.Get(encoding.AcceptEncodingHeader), c.hdr) || c.ignore(r.URL.String()) {
+			hdr := r.Header.Get(encoding.AcceptEncodingHeader)
+
+			if !isCompressionHeader(hdr) || c.ignore(r.URL.String()) {
 				next.ServeHTTP(w, r)
 				log.Debugf("url %s skipped from compression middleware", r.URL.String())
 				return
 			}
 			// explicitly specify encoding in header
-			w.Header().Set(encoding.ContentEncodingHeader, c.hdr)
+			w.Header().Set(encoding.ContentEncodingHeader, hdr)
 
 			// keep content type intact
 			respHeader := r.Header.Get(encoding.ContentTypeHeader)
@@ -267,16 +255,34 @@ func (c *CompressionMiddewareBuilder) Build() (MiddlewareFunc, error) {
 				w.Header().Set(encoding.ContentTypeHeader, respHeader)
 			}
 
-			cw := c.compressionWriter(w)
+			var cw io.WriteCloser
+			var err error
+			switch hdr {
+			case "gzip":
+				cw = gzip.NewWriter(w)
+			case "deflate":
+				cw, err = flate.NewWriter(w, c.deflateLevel)
+				if err != nil {
+					next.ServeHTTP(w, r)
+					return
+				}
+			case "compress":
+				cw = lzw.NewWriter(w, c.lzwOrder, c.lzwLitWidth)
+			default:
+				next.ServeHTTP(w, r)
+				return
+			}
+
 			defer func(cw io.WriteCloser) {
 				err := cw.Close()
 				if err != nil {
-					log.Errorf("error in deferred call to Close() method on %v compression middleware : %v", c.hdr, err.Error())
+					log.Errorf("error in deferred call to Close() method on %v compression middleware : %v", hdr, err.Error())
 				}
 			}(cw)
 
 			crw := compressionResponseWriter{Writer: cw, ResponseWriter: w}
 			next.ServeHTTP(crw, r)
+			log.Debugf("url %s used with %s compression method", r.URL.String(), hdr)
 		})
 	}, nil
 }
@@ -306,6 +312,10 @@ func MiddlewareChain(f http.Handler, mm ...MiddlewareFunc) http.Handler {
 		f = mm[i](f)
 	}
 	return f
+}
+
+func isCompressionHeader(h string) bool {
+	return strings.Contains(h, "gzip") || strings.Contains(h, "deflate") || strings.Contains(h, "compress")
 }
 
 func logRequestResponse(corID string, w *responseWriter, r *http.Request) {
