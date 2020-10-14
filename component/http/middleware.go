@@ -258,15 +258,15 @@ func (c *CompressionMiddewareBuilder) Build() (MiddlewareFunc, error) {
 			var cw io.WriteCloser
 			var err error
 			switch hdr {
-			case "gzip":
+			case gzipHeader:
 				cw = gzip.NewWriter(w)
-			case "deflate":
+			case deflateHeader:
 				cw, err = flate.NewWriter(w, c.deflateLevel)
 				if err != nil {
 					next.ServeHTTP(w, r)
 					return
 				}
-			case "compress":
+			case lzwHeader:
 				cw = lzw.NewWriter(w, c.lzwOrder, c.lzwLitWidth)
 			default:
 				next.ServeHTTP(w, r)
