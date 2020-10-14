@@ -145,8 +145,8 @@ type compressionResponseWriter struct {
 	http.ResponseWriter
 }
 
-// CmBuilder holds the required parameters for building a compression middleware.
-type CmBuilder struct {
+// CompressionMiddewareBuilder holds the required parameters for building a compression middleware.
+type CompressionMiddewareBuilder struct {
 	ignoreRoutes      []string
 	hdr               string
 	compressionWriter func(w io.Writer) io.WriteCloser
@@ -154,7 +154,7 @@ type CmBuilder struct {
 }
 
 // ignore checks if the given url ignored from compression or not.
-func (c *CmBuilder) ignore(url string) bool {
+func (c *CompressionMiddewareBuilder) ignore(url string) bool {
 	for _, iURL := range c.ignoreRoutes {
 		if strings.HasPrefix(url, iURL) {
 			return true
@@ -168,8 +168,8 @@ func (c *CmBuilder) ignore(url string) bool {
 // As per Section 3.5 of the HTTP/1.1 RFC, we support GZIP, Deflate and LZW as compression methods,
 // with GZIP chosen as the default.
 // https://tools.ietf.org/html/rfc2616#section-3.5
-func NewCompressionMiddleware() *CmBuilder {
-	return &CmBuilder{
+func NewCompressionMiddleware() *CompressionMiddewareBuilder {
+	return &CompressionMiddewareBuilder{
 		hdr: gzipHeader,
 		compressionWriter: func(w io.Writer) io.WriteCloser {
 			return gzip.NewWriter(w)
@@ -178,7 +178,7 @@ func NewCompressionMiddleware() *CmBuilder {
 }
 
 // WithGZIP sets the compression method to GZIP; based on https://golang.org/pkg/compress/gzip/
-func (c *CmBuilder) WithGZIP() *CmBuilder {
+func (c *CompressionMiddewareBuilder) WithGZIP() *CompressionMiddewareBuilder {
 	c.hdr = gzipHeader
 	c.compressionWriter = func(w io.Writer) io.WriteCloser {
 		return gzip.NewWriter(w)
@@ -188,7 +188,7 @@ func (c *CmBuilder) WithGZIP() *CmBuilder {
 }
 
 // WithDeflate sets the compression method to Deflate; based on https://golang.org/pkg/compress/flate/
-func (c *CmBuilder) WithDeflate(level int) *CmBuilder {
+func (c *CompressionMiddewareBuilder) WithDeflate(level int) *CompressionMiddewareBuilder {
 	if level < -2 || level > 9 {
 		c.errors = append(c.errors, errors.New("provided deflate level value not in the [-2, 9] range"))
 	} else {
@@ -206,7 +206,7 @@ func (c *CmBuilder) WithDeflate(level int) *CmBuilder {
 }
 
 // WithLZW sets the compression method to 'compress'; based on LZW and https://golang.org/pkg/compress/lzw/
-func (c *CmBuilder) WithLZW(order lzw.Order, litWidth int) *CmBuilder {
+func (c *CompressionMiddewareBuilder) WithLZW(order lzw.Order, litWidth int) *CompressionMiddewareBuilder {
 	if order != 0 && order != 1 {
 		c.errors = append(c.errors, errors.New("provided lzw order value not valid"))
 		return c
@@ -232,7 +232,7 @@ func (w compressionResponseWriter) Write(b []byte) (int, error) {
 
 // WithIgnoreRoutes specifies which routes should be excluded from compression
 // Any trailing slashes are trimmed, so we match both /metrics/ and /metrics?seconds=30
-func (c *CmBuilder) WithIgnoreRoutes(r ...string) *CmBuilder {
+func (c *CompressionMiddewareBuilder) WithIgnoreRoutes(r ...string) *CompressionMiddewareBuilder {
 	res := make([]string, 0, len(r))
 	for _, e := range r {
 		for len(e) > 1 && e[len(e)-1] == '/' {
@@ -246,7 +246,7 @@ func (c *CmBuilder) WithIgnoreRoutes(r ...string) *CmBuilder {
 }
 
 // Build initializes the MiddlewareFunc from the gathered properties.
-func (c *CmBuilder) Build() (MiddlewareFunc, error) {
+func (c *CompressionMiddewareBuilder) Build() (MiddlewareFunc, error) {
 	if len(c.errors) > 0 {
 		return nil, patronErrors.Aggregate(c.errors...)
 	}
