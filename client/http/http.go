@@ -2,8 +2,14 @@
 package http
 
 import (
+	"compress/flate"
+	"compress/gzip"
+	"compress/lzw"
 	"context"
+	"github.com/beatlabs/patron/encoding"
+	"io"
 	"net/http"
+	"strconv"
 	"time"
 
 	"github.com/beatlabs/patron/correlation"
@@ -69,6 +75,11 @@ func (tc *TracedClient) Do(ctx context.Context, req *http.Request) (*http.Respon
 
 	ext.HTTPMethod.Set(ht.Span(), req.Method)
 	ext.HTTPUrl.Set(ht.Span(), req.URL.String())
+
+	if hdr := req.Header.Get(encoding.AcceptEncodingHeader); hdr != "" {
+		rsp.Body = readCompressed(hdr, rsp)
+	}
+
 	return rsp, err
 }
 
@@ -109,4 +120,30 @@ func finishSpan(sp opentracing.Span, code int) {
 
 func opName(method, path string) string {
 	return method + " " + path
+}
+
+func readCompressed(hdr string, rsp *http.Response) io.ReadCloser {
+	var reader io.ReadCloser
+	switch hdr {
+	case "gzip":
+		reader, _ = gzip.NewReader(rsp.Body)
+	case "deflate":
+		reader = flate.NewReader(rsp.Body)
+	case "compress":
+		orderStr := rsp.Header.Get("lzwOrder")
+		order, err := strconv.Atoi(orderStr)
+		if err != nil {
+			break
+		}
+		litWidthStr := rsp.Header.Get("lzwLitWidth")
+		litWidth, err := strconv.Atoi(litWidthStr)
+		if err != nil {
+			break
+		}
+		reader = lzw.NewReader(rsp.Body, lzw.Order(order), litWidth)
+	default:
+		reader = rsp.Body
+	}
+
+	return reader
 }

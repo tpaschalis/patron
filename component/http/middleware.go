@@ -9,6 +9,7 @@ import (
 	"net/http"
 	"net/url"
 	"runtime/debug"
+	"strconv"
 	"strings"
 
 	"github.com/beatlabs/patron/component/http/auth"
@@ -267,6 +268,8 @@ func (c *CompressionMiddewareBuilder) Build() (MiddlewareFunc, error) {
 				}
 			case lzwHeader:
 				cw = lzw.NewWriter(w, c.lzwOrder, c.lzwLitWidth)
+				w.Header().Set("lzwOrder", strconv.Itoa(int(c.lzwOrder)))
+				w.Header().Set("lzwLitWidth", strconv.Itoa(c.lzwLitWidth))
 			default:
 				next.ServeHTTP(w, r)
 				return
