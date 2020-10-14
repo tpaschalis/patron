@@ -88,28 +88,19 @@ and then send a sample request:
 After that head over to [jaeger](http://localhost:16686/search) and [prometheus](http://localhost:9090/graph).
 
 ## Service 8
-The eighth example tests the compression middleware by setting up four routes
-- /foo uses GZIP for compression
-- /bar uses Deflate for compression
-- /baz uses LZW for compression
-- /qux uses no compression at all
+The eighth example tests the compression middleware by setting up a route that serves some random data
 
-By running the following commands, one can see the compression middleware in action by providing the correct headers
+By running the following commands, one can see the compression middleware in action by providing the correct headers, as well as the ability to exclude routes
 ```shell
 go run examples/eighth/main.go
-# -- No Compression
-$ curl -s localhost:50000/qux | wc -c
 
-# -- GZIP compression, with and without headers
 $ curl -s localhost:50000/foo | wc -c
-$ curl -s -H "Accept-Encoding: gzip" localhost:50000/foo | wc -c
+$ curl -s localhost:50000/foo -H "Accept-Encoding: nonexistent" | wc -c
+$ curl -s localhost:50000/foo -H "Accept-Encoding: gzip" | wc -c
+$ curl -s localhost:50000/foo -H "Accept-Encoding: deflate" | wc -c
+$ curl -s localhost:50000/foo -H "Accept-Encoding: compress" | wc -c
 
-#  -- Deflate compression, with and without headers
-$ curl -s localhost:50000/bar | wc -c
-$ curl -s -H "Accept-Encoding: deflate" localhost:50000/bar | wc -c
-
-# -- LZW compression, with and without headers
-$ curl -s localhost:50000/baz | wc -c
-$ curl -s -H "Accept-Encoding: compress" localhost:50000/baz | wc -c
-
+# For ignored routes, we don't see any compression applied, even if we specify a correct header
+$ curl -s localhost:50000/bar -H "Accept-Encoding: gzip" | wc -c
+$ curl -s localhost:50000/bar  | wc -c
 ```

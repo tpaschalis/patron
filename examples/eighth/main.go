@@ -67,7 +67,8 @@ func main() {
 	// You could either add the compression middleware per-route, like here ...
 	routesBuilder := patronhttp.NewRoutesBuilder().
 		Append(patronhttp.NewRouteBuilder("/foo", eighth).MethodGet()). //.WithMiddlewares(compressionMiddleware))
-		Append(patronhttp.NewRouteBuilder("/bar", eighth).MethodGet())
+		Append(patronhttp.NewRouteBuilder("/bar", eighth).MethodGet()).
+		Append(patronhttp.NewRouteBuilder("/hello", hello).MethodGet())
 
 	// or pass middlewares to the HTTP component globally, like we do below
 	ctx := context.Background()
@@ -88,6 +89,10 @@ func eighth(_ context.Context, _ *patronhttp.Request) (*patronhttp.Response, err
 	}
 
 	return patronhttp.NewResponse(data), nil
+}
+
+func hello(_ context.Context, _ *patronhttp.Request) (*patronhttp.Response, error) {
+	return patronhttp.NewResponse("hello!"), nil
 }
 
 func handle(err error) {
