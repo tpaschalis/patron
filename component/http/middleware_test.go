@@ -245,7 +245,7 @@ func getSpanLogError(t *testing.T, span *mocktracer.MockSpan) string {
 
 func TestNewCompressionMiddleware(t *testing.T) {
 	tests := map[string]struct {
-		cm *CmBuilder
+		cm *CompressionMiddewareBuilder
 	}{
 		"gzip":     {cm: NewCompressionMiddleware().WithGZIP()},
 		"deflate":  {cm: NewCompressionMiddleware().WithDeflate(8)},
@@ -278,7 +278,7 @@ func TestNewCompressionMiddleware_Ignore(t *testing.T) {
 	handler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) { w.WriteHeader(202) })
 
 	tests := map[string]struct {
-		cm *CmBuilder
+		cm *CompressionMiddewareBuilder
 	}{
 		"gzip":     {cm: NewCompressionMiddleware().WithIgnoreRoutes("/metrics").WithGZIP()},
 		"deflate":  {cm: NewCompressionMiddleware().WithIgnoreRoutes("/metrics").WithDeflate(8)},
@@ -334,7 +334,7 @@ func TestNewCompressionMiddleware_Headers(t *testing.T) {
 	handler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) { w.WriteHeader(202) })
 
 	tests := map[string]struct {
-		cm *CmBuilder
+		cm *CompressionMiddewareBuilder
 	}{
 		"gzip":     {cm: NewCompressionMiddleware().WithIgnoreRoutes("/metrics").WithGZIP()},
 		"deflate":  {cm: NewCompressionMiddleware().WithIgnoreRoutes("/metrics").WithDeflate(8)},
@@ -386,7 +386,7 @@ func TestNewCompressionMiddleware_Headers(t *testing.T) {
 
 func TestCompressionMiddlewareBuilder(t *testing.T) {
 	tests := map[string]struct {
-		cm      *CmBuilder
+		cm      *CompressionMiddewareBuilder
 		wantErr bool
 		errMsg  string
 	}{
