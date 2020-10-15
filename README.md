@@ -23,6 +23,7 @@ The entry point of the framework is the `Service`. The `Service` uses `Component
 
 - [Code of Conduct](docs/CodeOfConduct.md)
 - [Contribution Guidelines](docs/ContributionGuidelines.md)
+- [Acknowledgments](docs/ACKNOWLEDGMENTS.md)
 
 ## patron-cli
 
