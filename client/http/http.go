@@ -5,12 +5,12 @@ import (
 	"compress/flate"
 	"compress/gzip"
 	"context"
-	"github.com/beatlabs/patron/encoding"
 	"io"
 	"net/http"
 	"time"
 
 	"github.com/beatlabs/patron/correlation"
+	"github.com/beatlabs/patron/encoding"
 	"github.com/beatlabs/patron/log"
 	"github.com/beatlabs/patron/reliability/circuitbreaker"
 	"github.com/beatlabs/patron/trace"

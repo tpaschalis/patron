@@ -6,13 +6,13 @@ import (
 	"compress/gzip"
 	"context"
 	"fmt"
-	"github.com/beatlabs/patron/encoding"
 	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
 	"testing"
 	"time"
 
+	"github.com/beatlabs/patron/encoding"
 	"github.com/beatlabs/patron/reliability/circuitbreaker"
 	opentracing "github.com/opentracing/opentracing-go"
 	"github.com/opentracing/opentracing-go/ext"
@@ -136,25 +136,43 @@ func TestDecompress(t *testing.T) {
 
 	const msg = "hello, client!"
 	ts1 := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		fmt.Fprintf(w, msg)
+		fmt.Fprint(w, msg)
 	}))
 	defer ts1.Close()
 
 	ts2 := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		var b bytes.Buffer
 		cw := gzip.NewWriter(&b)
-		cw.Write([]byte(msg))
-		cw.Close()
-		fmt.Fprintf(w, string(b.Bytes()))
+		_, err := cw.Write([]byte(msg))
+		if err != nil {
+			return
+		}
+		err = cw.Close()
+		if err != nil {
+			return
+		}
+		_, err = fmt.Fprint(w, b.String())
+		if err != nil {
+			return
+		}
 	}))
 	defer ts2.Close()
 
 	ts3 := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		var b bytes.Buffer
 		cw, _ := flate.NewWriter(&b, 8)
-		cw.Write([]byte(msg))
-		cw.Close()
-		fmt.Fprintf(w, string(b.Bytes()))
+		_, err := cw.Write([]byte(msg))
+		if err != nil {
+			return
+		}
+		err = cw.Close()
+		if err != nil {
+			return
+		}
+		_, err = fmt.Fprint(w, b.String())
+		if err != nil {
+			return
+		}
 	}))
 	defer ts3.Close()
 
@@ -177,6 +195,7 @@ func TestDecompress(t *testing.T) {
 			assert.NoError(t, err)
 			req.Header.Add(encoding.AcceptEncodingHeader, tt.hdr)
 			rsp, err := c.Do(context.Background(), req)
+			assert.Nil(t, err)
 
 			b, err := ioutil.ReadAll(rsp.Body)
 			assert.Nil(t, err)
