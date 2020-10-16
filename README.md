@@ -35,6 +35,9 @@ The entry point of the framework is the `Service`. The `Service` uses `Component
 - Packages
   - [Reliability](docs/other/Reliability.md)
   - [Observability](docs/other/Observability.md)
+  - [Caching](docs/other/Caching.md)
+  - [Encoding](docs/other/Encoding.md)
+  - [Errors](docs/other/Errors.md)
 - [Examples](docs/Examples.md)
 - [Code of Conduct](docs/CodeOfConduct.md)
 - [Contribution Guidelines](docs/ContributionGuidelines.md)
