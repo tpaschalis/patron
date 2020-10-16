@@ -40,14 +40,12 @@ var middlewareCors = func(h http.Handler) http.Handler {
 // We call this route with and without Accept-Encoding headers so we that we test the compression methods
 // $ curl -s localhost:50000/foo | wc -c
 // 1398106
-// $ curl -s localhost:50000/foo -H "Accept-Encoding: nonexistent" | wc -c
+// $ curl -s localhost:50000/foo -H "Accept-Encoding: nonexisting" | wc -c
 // 1398106
 // $ curl -s localhost:50000/foo -H "Accept-Encoding: gzip" | wc -c
 // 1053068
 // $ curl -s localhost:50000/foo -H "Accept-Encoding: deflate" | wc -c
 // 1053045
-// $ curl -s localhost:50000/foo -H "Accept-Encoding: compress" | wc -c
-// 1458451
 //
 // For ignored routes, we don't see any compression applied, even if we specify a correct header
 // $ curl -s localhost:50000/bar -H "Accept-Encoding: gzip" | wc -c

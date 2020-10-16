@@ -3,7 +3,6 @@ package http
 import (
 	"compress/flate"
 	"compress/gzip"
-	"compress/lzw"
 	"errors"
 	"io"
 	"net/http"
@@ -29,7 +28,6 @@ const (
 	fieldNameError  = "error"
 	gzipHeader      = "gzip"
 	deflateHeader   = "deflate"
-	lzwHeader       = "compress"
 )
 
 type responseWriter struct {
@@ -149,8 +147,6 @@ type compressionResponseWriter struct {
 type CompressionMiddewareBuilder struct {
 	ignoreRoutes []string
 	deflateLevel int
-	lzwOrder     lzw.Order
-	lzwLitWidth  int
 	errors       []error
 }
 
@@ -166,14 +162,10 @@ func (c *CompressionMiddewareBuilder) ignore(url string) bool {
 }
 
 // NewCompressionMiddleware initializes the builder for a compression middleware.
-// As per Section 3.5 of the HTTP/1.1 RFC, we support GZIP, Deflate and LZW as compression methods
+// As per Section 3.5 of the HTTP/1.1 RFC, we support GZIP and Deflate as compression methods
 // https://tools.ietf.org/html/rfc2616#section-3.5
 func NewCompressionMiddleware() *CompressionMiddewareBuilder {
-	return &CompressionMiddewareBuilder{
-		deflateLevel: 8,
-		lzwOrder:     0,
-		lzwLitWidth:  8,
-	}
+	return &CompressionMiddewareBuilder{deflateLevel: 8}
 }
 
 // SetDeflateLevel sets the level of compression for Deflate; based on https://golang.org/pkg/compress/flate/
@@ -186,26 +178,6 @@ func (c *CompressionMiddewareBuilder) SetDeflateLevel(level int) *CompressionMid
 		c.errors = append(c.errors, errors.New("provided deflate level value not in the [-2, 9] range"))
 	} else {
 		c.deflateLevel = level
-	}
-	return c
-}
-
-// SetLZWParams sets the Order and LitWidth parameters for LZW compression; based on LZW and https://golang.org/pkg/compress/lzw/
-// Order 0 uses the Least Significant Bits first (as in GIF files),
-// while Order 1 uses the Most Significant Bits first (as in TIFF and PDF files).
-// The LitWidth defines the number of bits to use for literal codes, and must be in the [2, 8] range
-// The input size must be less than 1<<litWidth.
-func (c *CompressionMiddewareBuilder) SetLZWParams(order lzw.Order, litWidth int) *CompressionMiddewareBuilder {
-	if order != 0 && order != 1 {
-		c.errors = append(c.errors, errors.New("provided lzw order value not valid"))
-	} else {
-		c.lzwOrder = order
-	}
-
-	if litWidth < 2 || litWidth > 8 {
-		c.errors = append(c.errors, errors.New("provided lzw litWidth value not in the [2, 8] range"))
-	} else {
-		c.lzwLitWidth = litWidth
 	}
 	return c
 }
@@ -265,8 +237,6 @@ func (c *CompressionMiddewareBuilder) Build() (MiddlewareFunc, error) {
 					next.ServeHTTP(w, r)
 					return
 				}
-			case lzwHeader:
-				cw = lzw.NewWriter(w, c.lzwOrder, c.lzwLitWidth)
 			default:
 				next.ServeHTTP(w, r)
 				return

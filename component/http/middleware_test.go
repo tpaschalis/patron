@@ -247,9 +247,8 @@ func TestNewCompressionMiddleware(t *testing.T) {
 	tests := map[string]struct {
 		cm *CompressionMiddewareBuilder
 	}{
-		"gzip":     {cm: NewCompressionMiddleware()},
-		"deflate":  {cm: NewCompressionMiddleware()},
-		"compress": {cm: NewCompressionMiddleware()},
+		"gzip":    {cm: NewCompressionMiddleware()},
+		"deflate": {cm: NewCompressionMiddleware()},
 	}
 
 	for name, tc := range tests {
@@ -280,9 +279,8 @@ func TestNewCompressionMiddleware_Ignore(t *testing.T) {
 	tests := map[string]struct {
 		cm *CompressionMiddewareBuilder
 	}{
-		"gzip":     {cm: NewCompressionMiddleware().WithIgnoreRoutes("/metrics")},
-		"deflate":  {cm: NewCompressionMiddleware().WithIgnoreRoutes("/metrics")},
-		"compress": {cm: NewCompressionMiddleware().WithIgnoreRoutes("/metrics")},
+		"gzip":    {cm: NewCompressionMiddleware().WithIgnoreRoutes("/metrics")},
+		"deflate": {cm: NewCompressionMiddleware().WithIgnoreRoutes("/metrics")},
 	}
 
 	for name, tc := range tests {
@@ -336,9 +334,8 @@ func TestNewCompressionMiddleware_Headers(t *testing.T) {
 	tests := map[string]struct {
 		cm *CompressionMiddewareBuilder
 	}{
-		"gzip":     {cm: NewCompressionMiddleware().WithIgnoreRoutes("/metrics")},
-		"deflate":  {cm: NewCompressionMiddleware().WithIgnoreRoutes("/metrics")},
-		"compress": {cm: NewCompressionMiddleware().WithIgnoreRoutes("/metrics")},
+		"gzip":    {cm: NewCompressionMiddleware().WithIgnoreRoutes("/metrics")},
+		"deflate": {cm: NewCompressionMiddleware().WithIgnoreRoutes("/metrics")},
 	}
 
 	for name, tc := range tests {
@@ -390,17 +387,11 @@ func TestCompressionMiddlewareBuilder(t *testing.T) {
 		wantErr bool
 		errMsg  string
 	}{
-		"no arguments provided":                       {cm: NewCompressionMiddleware(), wantErr: false},
-		"gzip middleware":                             {cm: NewCompressionMiddleware(), wantErr: false},
-		"deflate middleware":                          {cm: NewCompressionMiddleware().SetDeflateLevel(0), wantErr: false},
-		"compress/lzw middleware":                     {cm: NewCompressionMiddleware().SetLZWParams(0, 8), wantErr: false},
-		"deflate with wrong levels - too low":         {cm: NewCompressionMiddleware().SetDeflateLevel(-3), wantErr: true, errMsg: "provided deflate level value not in the [-2, 9] range\n"},
-		"deflate with wrong levels - too high":        {cm: NewCompressionMiddleware().SetDeflateLevel(10), wantErr: true, errMsg: "provided deflate level value not in the [-2, 9] range\n"},
-		"compress/lzw with wrong order - too low":     {cm: NewCompressionMiddleware().SetLZWParams(-1, 8), wantErr: true, errMsg: "provided lzw order value not valid\n"},
-		"compress/lzw with wrong order - too high":    {cm: NewCompressionMiddleware().SetLZWParams(2, 8), wantErr: true, errMsg: "provided lzw order value not valid\n"},
-		"compress/lzw with wrong litWidth - too low":  {cm: NewCompressionMiddleware().SetLZWParams(1, 1), wantErr: true, errMsg: "provided lzw litWidth value not in the [2, 8] range\n"},
-		"compress/lzw with wrong litWidth - too high": {cm: NewCompressionMiddleware().SetLZWParams(1, 9), wantErr: true, errMsg: "provided lzw litWidth value not in the [2, 8] range\n"},
-		"compress/lzw with wrong litWidth and order":  {cm: NewCompressionMiddleware().SetLZWParams(100, 100), wantErr: true, errMsg: "provided lzw order value not valid\nprovided lzw litWidth value not in the [2, 8] range\n"},
+		"no arguments provided":                {cm: NewCompressionMiddleware(), wantErr: false},
+		"gzip middleware":                      {cm: NewCompressionMiddleware(), wantErr: false},
+		"deflate middleware":                   {cm: NewCompressionMiddleware().SetDeflateLevel(0), wantErr: false},
+		"deflate with wrong levels - too low":  {cm: NewCompressionMiddleware().SetDeflateLevel(-3), wantErr: true, errMsg: "provided deflate level value not in the [-2, 9] range\n"},
+		"deflate with wrong levels - too high": {cm: NewCompressionMiddleware().SetDeflateLevel(10), wantErr: true, errMsg: "provided deflate level value not in the [-2, 9] range\n"},
 	}
 
 	for name, tc := range tests {

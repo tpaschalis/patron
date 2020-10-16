@@ -1,8 +1,13 @@
 package http
 
 import (
+	"bytes"
+	"compress/flate"
+	"compress/gzip"
 	"context"
 	"fmt"
+	"github.com/beatlabs/patron/encoding"
+	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -125,4 +130,58 @@ func TestHTTPStartFinishSpan(t *testing.T) {
 		"version":          "dev",
 		"correlationID":    "corID",
 	}, rawSpan.Tags())
+}
+
+func TestDecompress(t *testing.T) {
+
+	const msg = "hello, client!"
+	ts1 := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		fmt.Fprintf(w, msg)
+	}))
+	defer ts1.Close()
+
+	ts2 := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		var b bytes.Buffer
+		cw := gzip.NewWriter(&b)
+		cw.Write([]byte(msg))
+		cw.Close()
+		fmt.Fprintf(w, string(b.Bytes()))
+	}))
+	defer ts2.Close()
+
+	ts3 := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		var b bytes.Buffer
+		cw, _ := flate.NewWriter(&b, 8)
+		cw.Write([]byte(msg))
+		cw.Close()
+		fmt.Fprintf(w, string(b.Bytes()))
+	}))
+	defer ts3.Close()
+
+	c, err := New()
+	assert.NoError(t, err)
+
+	tests := []struct {
+		name string
+		hdr  string
+		url  string
+	}{
+		{"no compression", "", ts1.URL},
+		{"gzip", "gzip", ts2.URL},
+		{"deflate", "deflate", ts3.URL},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			req, err := http.NewRequest("GET", tt.url, nil)
+			assert.NoError(t, err)
+			req.Header.Add(encoding.AcceptEncodingHeader, tt.hdr)
+			rsp, err := c.Do(context.Background(), req)
+
+			b, err := ioutil.ReadAll(rsp.Body)
+			assert.Nil(t, err)
+			body := string(b)
+			assert.Equal(t, msg, body)
+		})
+	}
 }
