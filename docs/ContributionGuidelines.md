@@ -23,3 +23,5 @@ PR's should have the following requirements:
 - High code coverage
 - Coding style (go fmt)
 - Linting we use [golangci-lint](https://github.com/golangci/golangci-lint)
+
+The Make file contains the appropriate command in order to verify all the above.
