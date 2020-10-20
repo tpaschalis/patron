@@ -208,7 +208,7 @@ If we find that many evictions happen before the time to live threshold, clients
 - https://www.w3.org/Protocols/rfc2616/rfc2616-sec13.html
 - https://www.w3.org/Protocols/rfc2616/rfc2616-sec14.html#sec14.9
 
-#### improvement considerations
+**improvement considerations**
 - we can could the storing of the cached objects and their age counter. That way we would avoid loading the whole object in memory,
 if the object is already expired. This approach might provide considerable performance (in terms of memory utilisation) 
 improvement for big response objects. 
