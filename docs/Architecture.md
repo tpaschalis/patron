@@ -2,7 +2,7 @@
 
 ## Service
 
-The `Service` has the role of glueing all of the above together, which are:
+The `Service` has the role of gluing all of the above together, which are:
 
 - setting up logging
 - setting up default HTTP component with the following endpoints configured:
@@ -230,4 +230,3 @@ type ProcessorFunc func(context.Context, *Message) error
 ```
 
 Everything else is exactly the same.
-
