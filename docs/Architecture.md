@@ -170,7 +170,7 @@ The server is responsible to cap the refresh time, BUT must respond with a `Warn
 
 expects any response that is found in the cache, otherwise returns an empty response
 
-#### metrics
+**metrics**
 
 The http cache exposes several metrics, used to 
 - assess the state of the cache
