@@ -109,7 +109,7 @@ type RouteCache struct {
 func NewRouteCache(ttlCache cache.TTLCache, age Age) *RouteCache
 ```
 
-#### server cache
+**server cache**
 - The **cache key** is based on the route path and the url request parameters.
 - The server caches only **GET requests**.
 - The server implementation must specify an **Age** parameters upon construction.
