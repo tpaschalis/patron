@@ -204,7 +204,7 @@ If the vast amount of evictions are close to the time to live setting, it would 
 If we find that many evictions happen before the time to live threshold, clients would be making use cache-control headers.
  
 
-#### cache design reference
+**cache design reference**
 - https://www.w3.org/Protocols/rfc2616/rfc2616-sec13.html
 - https://www.w3.org/Protocols/rfc2616/rfc2616-sec14.html#sec14.9
 
