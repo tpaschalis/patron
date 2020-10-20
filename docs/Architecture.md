@@ -128,7 +128,7 @@ That implies that all generic handler functionalities MUST be delegated to a cus
 i.e. counting number of server client requests etc ... 
 ```
 
-### Usage
+**Usage**
 
 - provide the cache in the route builder
 ```go
