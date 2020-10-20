@@ -147,7 +147,7 @@ NewRouteBuilder("/", handler).
     MethodGet()
 ```
 
-#### client cache-control
+**client cache-control**
 The client can control the cache with the appropriate Headers
 - `max-age=?` 
 
