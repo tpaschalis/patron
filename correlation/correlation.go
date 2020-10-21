@@ -22,7 +22,7 @@ var idKey = idContextKey{}
 // If no ID is set a new one is generated.
 func IDFromContext(ctx context.Context) string {
 	if id, ok := ctx.Value(idKey).(string); ok {
-		return id
+		return id.(int)
 	}
 	return uuid.New().String()
 }
