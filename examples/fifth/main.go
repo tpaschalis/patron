@@ -18,6 +18,7 @@ import (
 	"github.com/beatlabs/patron/component/grpc/greeter"
 	"github.com/beatlabs/patron/examples"
 	"github.com/beatlabs/patron/log"
+	"github.com/beatlabs/patron/log/std"
 	"google.golang.org/grpc"
 )
 
@@ -52,7 +53,9 @@ func main() {
 	name := "fifth"
 	version := "1.0.0"
 
-	service, err := patron.New(name, version)
+	logger := std.New(os.Stderr, log.DebugLevel, map[string]interface{}{"env": "staging"})
+
+	service, err := patron.New(name, version, patron.Logger(logger))
 	if err != nil {
 		fmt.Printf("failed to set up service: %v", err)
 		os.Exit(1)

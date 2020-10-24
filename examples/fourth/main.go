@@ -22,6 +22,7 @@ import (
 	"github.com/beatlabs/patron/encoding/json"
 	"github.com/beatlabs/patron/examples"
 	"github.com/beatlabs/patron/log"
+	"github.com/beatlabs/patron/log/std"
 	oamqp "github.com/streadway/amqp"
 )
 
@@ -68,7 +69,9 @@ func main() {
 	name := "fourth"
 	version := "1.0.0"
 
-	service, err := patron.New(name, version)
+	logger := std.New(os.Stderr, log.DebugLevel, map[string]interface{}{"env": "staging"})
+
+	service, err := patron.New(name, version, patron.Logger(logger))
 	if err != nil {
 		fmt.Printf("failed to set up service: %v", err)
 		os.Exit(1)

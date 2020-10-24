@@ -14,6 +14,7 @@ import (
 	"github.com/beatlabs/patron/component/http/auth/apikey"
 	"github.com/beatlabs/patron/examples"
 	"github.com/beatlabs/patron/log"
+	"github.com/beatlabs/patron/log/std"
 )
 
 const (
@@ -44,7 +45,9 @@ func main() {
 	name := "second"
 	version := "1.0.0"
 
-	service, err := patron.New(name, version, patron.LogFields(map[string]interface{}{"env": "staging"}))
+	logger := std.New(os.Stderr, log.DebugLevel, map[string]interface{}{"env": "staging"})
+
+	service, err := patron.New(name, version, patron.Logger(logger))
 	if err != nil {
 		fmt.Printf("failed to set up service: %v", err)
 		os.Exit(1)
