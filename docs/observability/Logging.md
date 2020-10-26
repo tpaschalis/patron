@@ -5,9 +5,7 @@ The log package is designed to be a leveled logger with field support.
 The log package defines the logger interface and a factory function type that needs to be implemented in order to set up the logging in this framework.
 
 ```go
-  // instantiate the implemented factory func type and fields (map[string]interface{})
-  err := log.Setup(factory, fields)
-  // handle error
+    func Setup(l Logger) error {
 ```
 
 `If the setup is omitted the package will not setup any logging!`
@@ -57,14 +55,6 @@ type Logger interface {
 In order to be consistent with the design, the implementation of the `Fatal(f)` has to terminate the application with an error and the `Panic(f)` needs to panic.
 The `Sub` function should return a new logger instance which is a clone of the current one, along with the additional fields applied.
 
-## Factory
-
-The factory function type defines a factory for creating a logger.
-
-```go
-type FactoryFunc func(map[string]interface{}) Logger
-```
-
 ## Context Logging
 
 Logs can be associated with some contextual data e.g. a request id. Every line logged should contain this id thus grouping the logs together. This is achieved with the usage of the context package as demonstrated below:
@@ -93,4 +83,5 @@ The ID is usually received and sent via a header with key `X-Correlation-Id`.
 
 The following implementations are provided as sub-packages
 
-- zerolog, which supports the excellent [zerolog](https://github.com/rs/zerolog) package, which provides structured logging, and is set up by default
+- zerolog, which supports the excellent [zerolog](https://github.com/rs/zerolog) package, which provides structured logging
+- std, which wraps the standard log package by implementing the `Logger` interface and provides textual logging
