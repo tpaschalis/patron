@@ -1,6 +1,6 @@
 # CLI
 
-The framework supplies a cli in order to simplify repository generation with the following features:
+The framework supplies a CLI in order to simplify repository generation with the following features:
 
 - git repository creation
 - cmd folder and main.go creation with build version support (`go build -ldflags '-X main.version=1.0.0' main.go`)
