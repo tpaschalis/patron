@@ -31,7 +31,7 @@ The entry point of the framework is the `Service`. The `Service` uses `Component
   - [HTTP](docs/components/HTTP.md)
   - [gRPC](docs/components/gRPC.md)
 - Clients
-  - [HTTP](docs/clients/HTTP.md)
+  - [HTTP](docs/clients/Clients.md)
 - Packages
   - [Reliability](docs/other/Reliability.md)
   - [Observability](docs/observability/Observability.md)
