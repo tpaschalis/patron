@@ -37,15 +37,6 @@ type ProcessorFunc func(Message) error
 
 It accepts a `Message` and returns either a nil for success or an error in order to be handled by the failure strategy.
 
-## Failure Strategy
-
-The failure strategy defines how the system will behave during the processing of a message.  
-The following strategies are available:
-
-- `NackExitStrategy` does not acknowledge the message and exits the application on error
-- `NackStrategy` does not acknowledge the message, leaving it for reprocessing, and continues
-- `AckStrategy` acknowledges message and continues
-
 ## Message
 
 The messages of the component should follow the interface:
@@ -60,3 +51,12 @@ type Message interface {
     Payload() []byte
 }
 ```
+
+## Failure Strategy
+
+The failure strategy defines how the system will behave during the processing of a message.  
+The following strategies are available:
+
+- `NackExitStrategy` does not acknowledge the message and exits the application on error
+- `NackStrategy` does not acknowledge the message, leaving it for reprocessing, and continues
+- `AckStrategy` acknowledges message and continues
