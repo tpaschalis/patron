@@ -2,7 +2,7 @@
 
 Patron has two basic concepts:
 
-- Component, which define a long-running task like a Server e.g. HTTP, gRPC, Kafka consumer, etc.
+- Component, which define a long-running task like a server e.g. HTTP, gRPC, Kafka consumer, etc.
 - Service, which is responsible to run provided components and monitor them for errors
 
 ## Component
