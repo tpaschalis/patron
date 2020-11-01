@@ -5,6 +5,7 @@ The SQS component allows users to construct SQS consumers and handle messages un
 The package collects Prometheus metrics regarding the queue usage. These metrics are about the message age, the queue size, the total number of messages, as well as how many of them were delayed or not visible (in flight).
 
 Users can configure
+
 - the maximum number of messages to [fetch at once](https://docs.aws.amazon.com/AWSSimpleQueueService/latest/APIReference/API_ReceiveMessage.html)
 - the use of [short- or long-polling](https://docs.aws.amazon.com/AWSSimpleQueueService/latest/SQSDeveloperGuide/sqs-short-and-long-polling.html)
 - the wait time for the long-polling mechanism
@@ -15,4 +16,3 @@ Users can configure
 The component utilizes the official [AWS SDK for Go](http://github.com/aws/aws-sdk-go/); to get head start you can go ahead and take a look at the [sqs example](/examples/sqs/main.go) for a hands-on demonstration of the SQS package in the context of collaborating Patron components.
 
 As with all Patron components, tracing capabilities are included out of the box.
-
