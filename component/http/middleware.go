@@ -14,7 +14,6 @@ import (
 	"github.com/beatlabs/patron/component/http/cache"
 	"github.com/beatlabs/patron/correlation"
 	"github.com/beatlabs/patron/encoding"
-	patronErrors "github.com/beatlabs/patron/errors"
 	"github.com/beatlabs/patron/log"
 	"github.com/beatlabs/patron/trace"
 	"github.com/google/uuid"
@@ -151,8 +150,8 @@ type CompressionMiddewareBuilder struct {
 }
 
 // ignore checks if the given url ignored from compression or not.
-func (c *CompressionMiddewareBuilder) ignore(url string) bool {
-	for _, iURL := range c.ignoreRoutes {
+func ignore(ignoreRoutes []string, url string) bool {
+	for _, iURL := range ignoreRoutes {
 		if strings.HasPrefix(url, iURL) {
 			return true
 		}
@@ -164,55 +163,12 @@ func (c *CompressionMiddewareBuilder) ignore(url string) bool {
 // NewCompressionMiddleware initializes the builder for a compression middleware.
 // As per Section 3.5 of the HTTP/1.1 RFC, we support GZIP and Deflate as compression methods
 // https://tools.ietf.org/html/rfc2616#section-3.5
-func NewCompressionMiddleware() *CompressionMiddewareBuilder {
-	return &CompressionMiddewareBuilder{deflateLevel: 8}
-}
-
-// SetDeflateLevel sets the level of compression for Deflate; based on https://golang.org/pkg/compress/flate/
-// Levels range from 1 (BestSpeed) to 9 (BestCompression); higher levels typically run slower but compress more.
-// Level 0 (NoCompression) does not attempt any compression; it only adds the necessary DEFLATE framing.
-// Level -1 (DefaultCompression) uses the default compression level.
-// Level -2 (HuffmanOnly) will use Huffman compression only, giving a very fast compression for all types of input, but sacrificing considerable compression efficiency.
-func (c *CompressionMiddewareBuilder) SetDeflateLevel(level int) *CompressionMiddewareBuilder {
-	if level < -2 || level > 9 {
-		c.errors = append(c.errors, errors.New("provided deflate level value not in the [-2, 9] range"))
-	} else {
-		c.deflateLevel = level
-	}
-	return c
-}
-
-// Write provides write func to the writer.
-func (w compressionResponseWriter) Write(b []byte) (int, error) {
-	return w.Writer.Write(b)
-}
-
-// WithIgnoreRoutes specifies which routes should be excluded from compression
-// Any trailing slashes are trimmed, so we match both /metrics/ and /metrics?seconds=30
-func (c *CompressionMiddewareBuilder) WithIgnoreRoutes(r ...string) *CompressionMiddewareBuilder {
-	res := make([]string, 0, len(r))
-	for _, e := range r {
-		for len(e) > 1 && e[len(e)-1] == '/' {
-			e = e[0 : len(e)-1]
-		}
-		res = append(res, e)
-	}
-	c.ignoreRoutes = res
-
-	return c
-}
-
-// Build initializes the MiddlewareFunc from the gathered properties.
-func (c *CompressionMiddewareBuilder) Build() (MiddlewareFunc, error) {
-	if len(c.errors) > 0 {
-		return nil, patronErrors.Aggregate(c.errors...)
-	}
-
+func NewCompressionMiddleware(deflateLevel int, ignoreRoutes ...string) MiddlewareFunc {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			hdr := r.Header.Get(encoding.AcceptEncodingHeader)
 
-			if !isCompressionHeader(hdr) || c.ignore(r.URL.String()) {
+			if !isCompressionHeader(hdr) || ignore(ignoreRoutes, r.URL.String()) {
 				next.ServeHTTP(w, r)
 				log.Debugf("url %s skipped from compression middleware", r.URL.String())
 				return
@@ -232,7 +188,7 @@ func (c *CompressionMiddewareBuilder) Build() (MiddlewareFunc, error) {
 			case gzipHeader:
 				cw = gzip.NewWriter(w)
 			case deflateHeader:
-				cw, err = flate.NewWriter(w, c.deflateLevel)
+				cw, err = flate.NewWriter(w, deflateLevel)
 				if err != nil {
 					next.ServeHTTP(w, r)
 					return
@@ -253,7 +209,12 @@ func (c *CompressionMiddewareBuilder) Build() (MiddlewareFunc, error) {
 			next.ServeHTTP(crw, r)
 			log.Debugf("url %s used with %s compression method", r.URL.String(), hdr)
 		})
-	}, nil
+	}
+}
+
+// Write provides write func to the writer.
+func (w compressionResponseWriter) Write(b []byte) (int, error) {
+	return w.Writer.Write(b)
 }
 
 // NewCachingMiddleware creates a cache layer as a middleware
