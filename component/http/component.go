@@ -37,7 +37,7 @@ type Component struct {
 	httpReadTimeout     time.Duration
 	httpWriteTimeout    time.Duration
 	deflateLevel        int
-	uncompressedRoutes  []string
+	uncompressedPaths   []string
 	shutdownGracePeriod time.Duration
 	sync.Mutex
 	routes      []Route
@@ -91,7 +91,7 @@ func (c *Component) createHTTPServer() *http.Server {
 	}
 	// Add first the recovery middleware to ensure that no panic occur.
 	routerAfterMiddleware := MiddlewareChain(router, NewRecoveryMiddleware())
-	c.middlewares = append(c.middlewares, NewCompressionMiddleware(c.deflateLevel, c.uncompressedRoutes...))
+	c.middlewares = append(c.middlewares, NewCompressionMiddleware(c.deflateLevel, c.uncompressedPaths...))
 	routerAfterMiddleware = MiddlewareChain(routerAfterMiddleware, c.middlewares...)
 
 	return &http.Server{
@@ -133,6 +133,7 @@ func NewBuilder() *Builder {
 		httpReadTimeout:     httpReadTimeout,
 		httpWriteTimeout:    httpWriteTimeout,
 		deflateLevel:        deflateLevel,
+		uncompressedPaths:   []string{"/metrics", "/alive", "ready"},
 		shutdownGracePeriod: shutdownGracePeriod,
 		routesBuilder:       NewRoutesBuilder(),
 		errors:              errs,
@@ -223,7 +224,7 @@ func (cb *Builder) WithUncompressedPaths(r ...string) *Builder {
 		}
 		res = append(res, e)
 	}
-	cb.uncompressedPaths = res
+	cb.uncompressedPaths = append(cb.uncompressedPaths, res...)
 
 	return cb
 }

@@ -32,8 +32,8 @@ func main() {
 	version := "1.0.0"
 	ctx := context.Background()
 
-	err := patron.SetupLogging(name, version)
-	handle(err)
+	service, err := patron.New(name, version)
+	service.Run(ctx)
 
 	cl, err := clienthttp.New(clienthttp.Timeout(1 * time.Second))
 

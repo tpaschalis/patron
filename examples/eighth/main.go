@@ -48,31 +48,24 @@ var middlewareCors = func(h http.Handler) http.Handler {
 // 1053045
 //
 // For ignored routes, we don't see any compression applied, even if we specify a correct header
-// $ curl -s localhost:50000/bar -H "Accept-Encoding: gzip" | wc -c
-// 1398106
-// $ curl -s localhost:50000/bar  | wc -c
-// 1398106
+// $ curl -s localhost:50000/alive -H "Accept-Encoding: gzip" | wc -c
+// $ curl -s localhost:50000/alive | wc -c
 func main() {
 	name := "eighth"
 	version := "1.0.0"
 
-	err := patron.SetupLogging(name, version)
-	handle(err)
-
-	compressionMiddleware, err := patronhttp.NewCompressionMiddleware().WithIgnoreRoutes("/bar", "/alive", "/ready", "/metrics").Build()
+	service, err := patron.New(name, version)
 	handle(err)
 
 	// You could either add the compression middleware per-route, like here ...
 	routesBuilder := patronhttp.NewRoutesBuilder().
-		Append(patronhttp.NewRouteBuilder("/foo", eighth).MethodGet()). //.WithMiddlewares(compressionMiddleware))
-		Append(patronhttp.NewRouteBuilder("/bar", eighth).MethodGet()).
+		Append(patronhttp.NewRouteBuilder("/foo", eighth).MethodGet()).
 		Append(patronhttp.NewRouteBuilder("/hello", hello).MethodGet())
 
 	// or pass middlewares to the HTTP component globally, like we do below
 	ctx := context.Background()
-	err = patron.New(name, version).
+	err = service.
 		WithRoutesBuilder(routesBuilder).
-		WithMiddlewares(middlewareCors, compressionMiddleware).
 		Run(ctx)
 	handle(err)
 }
