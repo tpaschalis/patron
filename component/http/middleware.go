@@ -142,13 +142,6 @@ type compressionResponseWriter struct {
 	http.ResponseWriter
 }
 
-// CompressionMiddewareBuilder holds the required parameters for building a compression middleware.
-type CompressionMiddewareBuilder struct {
-	ignoreRoutes []string
-	deflateLevel int
-	errors       []error
-}
-
 // ignore checks if the given url ignored from compression or not.
 func ignore(ignoreRoutes []string, url string) bool {
 	for _, iURL := range ignoreRoutes {
