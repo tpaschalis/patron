@@ -1,7 +1,6 @@
 # Examples
 
-The examples have been created in order to be able to start them all and see how a request travels throughout all services.
-Detailed examples can be found in the [examples](/examples) folder.
+The [examples/](/examples) folder contains a number of small services which work together to provide an overview of Patron's clients and components, as well as the built-in tracing and logging. After you start them all, you can see how a request travels through all services by triggering the `start_processing.sh` script.
 
 ## Prerequisites
 

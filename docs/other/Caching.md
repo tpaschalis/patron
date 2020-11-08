@@ -29,5 +29,5 @@ type TTLCache interface {
 
 Subpackages contain concrete implementations of the above mentioned interfaces:
 
-- `lru` which contains a LRU cache implementation of the interface `Cache`
-- `redis` which contains a Redis based cache implementation of the interface `TTLCache`
+- `lru` which contains an in-memory LRU cache implementation of the `Cache` interface
+- `redis` which contains a Redis-based cache implementation of the `TTLCache` interface

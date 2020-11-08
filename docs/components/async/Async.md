@@ -1,8 +1,8 @@
 # Async
 
-The component is responsible setting up a consumer using the consumer factory, fetching messages from the underlying system and handles the processing of the messages. In case of success the component acknowledges the message and moves to the next. When a message fails to be processed the component will execute the failure strategy setup. The component has also setup logging, capturing of metrics and distributed tracing.
+The component is responsible setting up a consumer using the consumer factory, fetching messages from the underlying system and handling the processing of the messages. In case of success the component acknowledges the message and moves to the next. When a message fails to be processed the component will execute the failure strategy setup. The component has also setup logging, capturing of metrics and distributed tracing.
 
-The component can be build using the `Builder`, which accepts a consumer factory and the processor function and provides also additional setup via methods like failure strategy, retries, etc.
+The component makes use of the `Builder` pattern, and expects a consumer factory and a processor function but also provides additional setup methods for the failure strategy, retries, etc.
 
 ## Consumer and Factory
 

@@ -2,29 +2,18 @@
 
 ## Security
 
-The necessary abstraction is available to implement authentication in the following components:
-
-- HTTP
-
-### HTTP
-
-In order to use authentication, an authenticator has to be implemented following the interface:
-
+Users can implement the `Authenticator` interface to provide authentication capabilities for HTTP components and Routes
 ```go
 type Authenticator interface {
   Authenticate(req *http.Request) (bool, error)
 }
 ```
 
-This authenticator can then be used to set up routes with authentication.
-
-The following authenticator is available:
-
-- API key authenticator, see examples
+Patron also includes a ready-to-use implementation of an *API key authenticator*. 
 
 ## HTTP lifecycle endpoints
 
-When creating a new HTTP component, Patron will automatically create a liveness and readiness route, which can be used to know the lifecycle of the application:
+When creating a new HTTP component, Patron will automatically create a liveness and readiness route, which can be used to probe the lifecycle of the application:
 
 ```
 # liveness
@@ -41,7 +30,7 @@ It is possible to customize their behaviour by injecting an `http.AliveCheck` an
 ### HTTP Middlewares
 
 A `MiddlewareFunc` preserves the default net/http middleware pattern.
-You can create new middleware functions and pass them to Service to be chained on all routes in the default Http Component.
+You can create new middleware functions and pass them to Service to be chained on all routes in the default HTTP Component.
 
 ```go
 type MiddlewareFunc func(next http.Handler) http.Handler
@@ -58,7 +47,7 @@ newMiddleware := func(h http.Handler) http.Handler {
 
 ### Synchronous
 
-The implementation of the processor is responsible to create a `Request` by providing everything that is needed (Headers, Fields, decoder, raw io.Reader) pass it to the implementation by invoking the `Process` method and handle the `Response` or the `error` returned by the processor.
+The processor is responsible for creating a `Request` by providing everything that is needed (Headers, Fields, decoder, raw io.Reader), passing it to the implementation by invoking the `Process` method and handling the `Response` or the `error` returned by the processor.
 
 The sync package contains only a function definition along with the models needed:
 
@@ -212,7 +201,7 @@ If we find that many evictions happen before the time to live threshold, clients
 - https://www.w3.org/Protocols/rfc2616/rfc2616-sec14.html#sec14.9
 
 **improvement considerations**
-- we can could the storing of the cached objects and their age counter. That way we would avoid loading the whole object in memory,
+- we can reconsider the storing of the cached objects and their age counter. That way we would avoid loading the whole object in memory,
 if the object is already expired. This approach might provide considerable performance (in terms of memory utilisation) 
 improvement for big response objects. 
 - we could extend the metrics to use the key of the object as a label as well for more fine-grained tuning.

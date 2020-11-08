@@ -10,13 +10,13 @@ The reliability package contains the following implementations:
 The circuit breaker supports a half-open state which allows to probe for successful responses in order to close the circuit again.  
 Every aspect of the circuit breaker is configurable via its settings.
 
-The action to be executed has the following signature type:
+The action to be executed has the signature type of:
 
 ```go
 type Action func() (interface{}, error)
 ```
 
-and following aspects can be configured:
+and its following aspects can be configured:
 
 - The threshold for the circuit to open
 - The timeout after which we set the state to half-open and allow retries
@@ -25,10 +25,10 @@ and following aspects can be configured:
 
 ## Retry Pattern
 
-Retry accepts a function with a specific signature:
+Retry accepts a function with the following signature:
 
 ```go
 type Action func() (interface{}, error)
 ``` 
 
-and retries the action for a configurable amount of retries with a specific fixes time interval.
+and retries the action for a configurable amount of retries with a specific fixed time interval between them.

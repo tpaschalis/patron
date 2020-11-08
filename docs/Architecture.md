@@ -2,12 +2,12 @@
 
 Patron has two basic concepts:
 
-- Component, which define a long-running task like a server e.g. HTTP, gRPC, Kafka consumer, etc.
-- Service, which is responsible to run provided components and monitor them for errors
+- The *Component*, which defines a long-running task like a server e.g. HTTP, gRPC, Kafka consumer, etc.
+- The *Service*, which is responsible for running provided components and monitoring them for errors
 
 ## Component
 
-A `Component` is an interface that exposes the following API:
+A `Component` implements the following interface:
 
 ```go
 type Component interface {
@@ -15,7 +15,7 @@ type Component interface {
 }
 ```
 
-The above API gives the `Service` the ability to start and gracefully shutdown a `component` via context cancellation.  
+This allows a `Service` to start and then gracefully shutdown a `Component` via context cancellation.  
 The framework distinguishes between two types of components:
 
 - synchronous, which are components that follow the request/response pattern and
@@ -34,11 +34,11 @@ The following component implementations are available:
 The `Service` has the role of gluing all the above together:
 
 - setting up logging, metrics and tracing
-- setting up default HTTP component with the following endpoints configured:
+- setting up a default HTTP component with the following endpoints configured:
   - profiling via pprof
   - liveness check
   - readiness check
-- setting up termination by os signal
+- setting up termination by an OS signal
 - setting up SIGHUP custom hook if provided by an option
 - starting and stopping components
 - handling component errors

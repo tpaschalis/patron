@@ -7,5 +7,5 @@ The package contains two sub-packages:
 
 Both of the packages contain the factory and consumer implementation.
 
-There is a special feature in the simple package which allows the consumer to goo back a specific amount of time in each partition.  
-This allows us to consumes the messages from an approximate time onwards.
+There is a special feature in the simple package which allows the consumer to go back a specific amount of time in each partition.  
+This allows us to consume the messages from an approximate time onwards.

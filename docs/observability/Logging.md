@@ -5,7 +5,7 @@ The log package is designed to be a leveled logger with field support.
 The log package defines the logger interface and a factory function type that needs to be implemented in order to set up the logging in this framework.
 
 ```go
-    func Setup(l Logger) error {
+    func Setup(l Logger) error
 ```
 
 `If the setup is omitted the package will not setup any logging!`

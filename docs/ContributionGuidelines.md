@@ -1,6 +1,6 @@
 # Contribution Guidelines
 
-1. **Contributor**: An issue has to be created with a problem description and possible solutions using the github template. The better the problem and solution are described, the easier for the **Curators and Others** to understand it and the faster the process. In case of a bug, steps to reproduce will help a lot.
+1. **Contributor**: Issues have to be created using the supplied GitHub template. They should include a problem descriprion as well as possible solutions. The better the problem and solution are described, the easier for the **Curators and Others** to understand it and the faster the process. In case of a bug, steps to reproduce will help a lot.
 2. **Curators and Others**: The curators will engage in a discussion about the problem and the possible solution. Others can join the discussion to bring other solutions and insights at any point.
 3. **Curators**: After the discussion mentioned above, it will be determined if the proposed solution will be implemented or not. Appropriate tags will be applied to the issue.
 4. **Contributor**: The contributor will work as follows:
