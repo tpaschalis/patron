@@ -1,15 +1,81 @@
+* [HTTP](#http)
+  * [HTTP lifecycle endpoints](#http-lifecycle-endpoints)
+  * [HTTP Middlewares](#http-middlewares)
+    * [Middleware Chain](#middleware-chain)
+    * [Helper Middlewares](#helper-middlewares)
+  * [HTTP Routes](#http-routes)
+    * [HTTP Method](#http-method)
+    * [Processor](#processor)
+    * [Raw RouteBuilder Constructor](#raw-routebuilder-constructor)
+    * [Middlewares per Route](#middlewares-per-route)
+    * [Security](#security)
+    * [Tracing](#tracing)
+    * [HTTP Caching](#http-caching)
+
 # HTTP
 
-## Security
+The HTTP component provides the functionality for creating an HTTP server exposing the relevant routes. 
+It wraps the logic and handles the boilerplate for the `net.http` go package.
 
-Users can implement the `Authenticator` interface to provide authentication capabilities for HTTP components and Routes
+The way to initialise an HTTP component is through the `patron http.Builder` struct.
 ```go
-type Authenticator interface {
-  Authenticate(req *http.Request) (bool, error)
+// NewBuilder initiates the HTTP component builder chain.
+// The builder instantiates the component using default values for
+// HTTP Port, Alive/Ready check functions and Read/Write timeouts.
+func NewBuilder() *Builder {
+	// ...
+}
+
+// WithSSL sets the filenames for the Certificate and Keyfile, in order to enable SSL.
+func (cb *Builder) WithSSL(c, k string) *Builder {
+	// ..
+}
+
+// WithRoutesBuilder adds routes builder to the HTTP component.
+func (cb *Builder) WithRoutesBuilder(rb *RoutesBuilder) *Builder {
+	// ...
+}
+
+// WithMiddlewares adds middlewares to the HTTP component.
+func (cb *Builder) WithMiddlewares(mm ...MiddlewareFunc) *Builder {
+	// ...
+}
+
+// WithReadTimeout sets the Read Timeout for the HTTP component.
+func (cb *Builder) WithReadTimeout(rt time.Duration) *Builder {
+	// ...
+}
+
+// WithWriteTimeout sets the Write Timeout for the HTTP component.
+func (cb *Builder) WithWriteTimeout(wt time.Duration) *Builder {
+	// ...
+}
+
+// WithShutdownGracePeriod sets the Shutdown Grace Period for the HTTP component.
+func (cb *Builder) WithShutdownGracePeriod(gp time.Duration) *Builder {
+	// ...
+}
+
+// WithPort sets the port used by the HTTP component.
+func (cb *Builder) WithPort(p int) *Builder {
+	// ...
+}
+
+// WithAliveCheckFunc sets the AliveCheckFunc used by the HTTP component.
+func (cb *Builder) WithAliveCheckFunc(acf AliveCheckFunc) *Builder {
+	// ...
+}
+
+// WithReadyCheckFunc sets the ReadyCheckFunc used by the HTTP component.
+func (cb *Builder) WithReadyCheckFunc(rcf ReadyCheckFunc) *Builder {
+	// ...
+}
+
+// Create constructs the HTTP component by applying the gathered properties.
+func (cb *Builder) Create() (*Component, error) {
+	// ...
 }
 ```
-
-Patron also includes a ready-to-use implementation of an *API key authenticator*. 
 
 ## HTTP lifecycle endpoints
 
@@ -27,7 +93,7 @@ Both can return either a `200 OK` or a `503 Service Unavailable` status code (de
 
 It is possible to customize their behaviour by injecting an `http.AliveCheck` and/or an `http.ReadyCheck` `OptionFunc` to the HTTP component constructor.
 
-### HTTP Middlewares
+## HTTP Middlewares
 
 A `MiddlewareFunc` preserves the default net/http middleware pattern.
 You can create new middleware functions and pass them to Service to be chained on all routes in the default HTTP Component.
@@ -45,7 +111,145 @@ newMiddleware := func(h http.Handler) http.Handler {
 }
 ```
 
-### Synchronous
+### Middleware Chain
+
+Middlewares are invoked sequentially. The object handling this is the MiddlewareChain
+
+```go
+// MiddlewareChain chains middlewares to a handler func.
+func MiddlewareChain(f http.Handler, mm ...MiddlewareFunc) http.Handler {
+	for i := len(mm) - 1; i >= 0; i-- {
+		f = mm[i](f)
+	}
+	return f
+}
+```
+
+### Helper Middlewares
+
+Patron comes with some predefined middlewares, as helper tools to inject functionality into the HTTP endpoint or individual routes.
+
+```go
+
+// NewRecoveryMiddleware creates a MiddlewareFunc that ensures recovery and no panic.
+func NewRecoveryMiddleware() MiddlewareFunc {
+    // ...
+}
+
+// NewAuthMiddleware creates a MiddlewareFunc that implements authentication using an Authenticator.
+func NewAuthMiddleware(auth auth.Authenticator) MiddlewareFunc {
+    // ...
+}
+
+// NewLoggingTracingMiddleware creates a MiddlewareFunc that continues a tracing span and finishes it.
+// It also logs the HTTP request on debug logging level
+func NewLoggingTracingMiddleware(path string) MiddlewareFunc {
+    // ...
+}
+
+// NewCachingMiddleware creates a cache layer as a middleware
+// when used as part of a middleware chain any middleware later in the chain,
+// will not be executed, but the headers it appends will be part of the cache
+func NewCachingMiddleware(rc *cache.RouteCache) MiddlewareFunc {
+    // ...
+}
+```
+
+## HTTP Routes
+
+Each HTTP component can contain several routes. These are injected through the `RoutesBuilder`
+
+```go
+// RouteBuilder for building a route.
+type RouteBuilder struct {
+	// ...
+}
+
+// NewRouteBuilder constructor.
+func NewRouteBuilder(path string, processor ProcessorFunc) *RouteBuilder {
+    // ...
+}
+
+
+// WithTrace enables route tracing.
+func (rb *RouteBuilder) WithTrace() *RouteBuilder {
+	// ...
+}
+
+// WithMiddlewares adds middlewares.
+func (rb *RouteBuilder) WithMiddlewares(mm ...MiddlewareFunc) *RouteBuilder {
+	// ...
+}
+
+// WithAuth adds authenticator.
+func (rb *RouteBuilder) WithAuth(auth auth.Authenticator) *RouteBuilder {
+	// ...
+}
+
+// WithRouteCache adds a cache to the corresponding route
+func (rb *RouteBuilder) WithRouteCache(cache cache.TTLCache, ageBounds httpcache.Age) *RouteBuilder {
+	// ...
+}
+
+// Build a route.
+func (rb *RouteBuilder) Build() (Route, error) {
+	// ...
+}
+```
+
+The main components that hold the logic for a route are the **processor** and the **middlewares**
+
+### HTTP Method 
+
+The method for each route cn be defined through the builder as well
+
+```go
+
+// MethodGet HTTP method.
+func (rb *RouteBuilder) MethodGet() *RouteBuilder {
+	// ...
+}
+
+// MethodHead HTTP method.
+func (rb *RouteBuilder) MethodHead() *RouteBuilder {
+	// ...
+}
+
+// MethodPost HTTP method.
+func (rb *RouteBuilder) MethodPost() *RouteBuilder {
+	// ...
+}
+
+// MethodPut HTTP method.
+func (rb *RouteBuilder) MethodPut() *RouteBuilder {
+	// ...
+}
+...
+```
+
+and for reducing boilerplate code one can also combine this in the constructor call for the Builder
+
+```go
+
+// NewGetRouteBuilder constructor
+func NewGetRouteBuilder(path string, processor ProcessorFunc) *RouteBuilder {
+	// ...
+}
+
+// NewHeadRouteBuilder constructor.
+func NewHeadRouteBuilder(path string, processor ProcessorFunc) *RouteBuilder {
+	// ...
+}
+
+// NewPostRouteBuilder constructor.
+func NewPostRouteBuilder(path string, processor ProcessorFunc) *RouteBuilder {
+	// ...
+}
+
+... 
+```
+
+### Processor
 
 The processor is responsible for creating a `Request` by providing everything that is needed (Headers, Fields, decoder, raw io.Reader), passing it to the implementation by invoking the `Process` method and handling the `Response` or the `error` returned by the processor.
 
@@ -72,16 +276,70 @@ The `Response` model contains the following properties (which are provided when 
 
 - Payload, which may hold a struct of type `interface{}`
 
+### Raw RouteBuilder Constructor
+
+```go
+// NewRawRouteBuilder constructor.
+func NewRawRouteBuilder(path string, handler http.HandlerFunc) *RouteBuilder {
+	// ...
+}
+```
+
+The Raw Route Builder allows for lower level processing of the request and response objects. 
+It s main difference with the Route Builder is the processing function. Which in this case is the `native` go http handler func.
+
+```go
+// The HandlerFunc type is an adapter to allow the use of
+// ordinary functions as HTTP handlers. If f is a function
+// with the appropriate signature, HandlerFunc(f) is a
+// Handler that calls f.
+type HandlerFunc func(ResponseWriter, *Request)
+```
+
+```
+The Raw Route Builder constructor should be used,
+if the default behaviour and assumptions of the wrapped Route Builder 
+do not fit into the routes requirements or use-case.
+```
+
 ### Middlewares per Route
 
 Middlewares can also run per routes using the processor as Handler.
-So using the `Route` helpers:
+So using the `Route` builder:
 
 ```go
-// A route with ...MiddlewareFunc that will run for this route only + tracing
-route := NewRoute("/index", "GET" ProcessorFunc, true, ...MiddlewareFunc)
-// A route with ...MiddlewareFunc that will run for this route only + auth + tracing
-routeWithAuth := NewAuthRoute("/index", "GET" ProcessorFunc, true, Authendicator, ...MiddlewareFunc)
+// WithMiddlewares adds middlewares.
+func (rb *RouteBuilder) WithMiddlewares(mm ...MiddlewareFunc) *RouteBuilder {
+	if len(mm) == 0 {
+		rb.errors = append(rb.errors, errors.New("middlewares are empty"))
+	}
+	rb.middlewares = mm
+	return rb
+}
+```
+
+### Security
+
+Users can implement the `Authenticator` interface to provide authentication capabilities for HTTP components and Routes
+```go
+type Authenticator interface {
+  Authenticate(req *http.Request) (bool, error)
+}
+```
+
+Patron also includes a ready-to-use implementation of an *API key authenticator*. 
+
+### Tracing
+
+One of the main features of patron is the tracing functionality for Routes. 
+Tracing can either be enabled by default from the Buidler.
+
+```go
+// WithTrace enables route tracing.
+func (rb *RouteBuilder) WithTrace() *RouteBuilder {
+	rb.trace = true
+	return rb
+}
 ```
 
 ### HTTP Caching
