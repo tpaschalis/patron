@@ -84,7 +84,7 @@ The service can be started as follows:
 go run examples/sns/main.go
 ```
 
-## [AWS SQS Service](../examples/amqp/main.go)
+## [AWS SQS Service](../examples/sqs/main.go)
 
 The service shows how to use:
 
@@ -96,6 +96,19 @@ The service can be started as follows:
 
 ```shell
 go run examples/sqs/main.go
+```
+
+## [AWS SQS Concurrent Service](../examples/sqs-simple/main.go)
+
+The service shows how to use:
+
+- AWS SQS Concurrent Consumer
+- Default structured logger
+
+The service can be started as follows:
+
+```shell
+go run examples/sqs-simple/main.go
 ```
 
 ## [gRPC Service](../examples/grpc/main.go)
