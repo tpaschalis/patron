@@ -20,8 +20,8 @@ The AMQP client allows users to connect to a RabbitMQ instance and publish JSON 
 **Third-party dependencies**  
 $(cat ../../go.mod | grep github.com/streadway/amqp | xargs)
 
-## GRPC
-The GRPC client initiates a client connection to a given target while injecting a \`UnaryInterceptor\` to integrate tracing capabilities. By default, this is a non-blocking connection and users can pass in any number of [\`grpc.DialOption\`](https://github.com/grpc/grpc-go/blob/master/dialoptions.go) arguments to configure its behavior.
+## gRPC
+The gRPC client initiates a client connection to a given target while injecting a \`UnaryInterceptor\` to integrate tracing capabilities. By default, this is a non-blocking connection and users can pass in any number of [\`grpc.DialOption\`](https://github.com/grpc/grpc-go/blob/master/dialoptions.go) arguments to configure its behavior.
 
 **Third-party dependencies**  
 $(cat ../../go.mod | grep google.golang.org/grpc | xargs)

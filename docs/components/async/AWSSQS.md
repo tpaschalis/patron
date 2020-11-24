@@ -13,6 +13,6 @@ Users can configure
 - the buffer size for consuming messages concurrently
 - the interval at which stats are collected
 
-The component utilizes the official [AWS SDK for Go](http://github.com/aws/aws-sdk-go/); to get head start you can go ahead and take a look at the [sqs example](/examples/sqs/main.go) for a hands-on demonstration of the SQS package in the context of collaborating Patron components.
+The component utilizes the official [AWS SDK for Go](http://github.com/aws/aws-sdk-go/); to get a head start you can go ahead and take a look at the [sqs example](/examples/sqs/main.go) for a hands-on demonstration of the SQS package in the context of collaborating Patron components.
 
 As with all Patron components, tracing capabilities are included out of the box.

@@ -126,9 +126,7 @@ go run examples/grpc/main.go
 
 ## All of them working together
 
-After all service have been started successfully we can send a request,  
-and see how it travels through all of our services.
-and then send a sample request:
+After all services have been started successfully we can send a request and see how it travels through all of them by running. 
 
 ```shell
 ../examples/start_processing.sh

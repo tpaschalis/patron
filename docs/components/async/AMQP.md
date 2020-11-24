@@ -8,4 +8,4 @@ Users can configure the incoming messages buffer size, the connection timeout, w
 
 The AMQP consumer component is powered by the battle-tested [`streadway/amqp`](https://www.rabbitmq.com/tutorials/amqp-concepts.html#bindings) package. In the [examples](/examples/amqp/amqp.go) folder you can see the component in action.
 
-As all Patron components, tracing capabilities are included out of the box.
+As with all Patron components, tracing capabilities are included out of the box.
