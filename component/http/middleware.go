@@ -153,8 +153,8 @@ func ignore(ignoreRoutes []string, url string) bool {
 	return false
 }
 
-// NewCompressionMiddleware initializes the builder for a compression middleware.
-// As per Section 3.5 of the HTTP/1.1 RFC, we support GZIP and Deflate as compression methods
+// NewCompressionMiddleware initializes a compression middleware.
+// As per Section 3.5 of the HTTP/1.1 RFC, we support GZIP and Deflate as compression methods.
 // https://tools.ietf.org/html/rfc2616#section-3.5
 func NewCompressionMiddleware(deflateLevel int, ignoreRoutes ...string) MiddlewareFunc {
 	return func(next http.Handler) http.Handler {
