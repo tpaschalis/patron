@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"math/rand"
-	"net/http"
 	"os"
 	"time"
 
@@ -26,16 +25,6 @@ func init() {
 	}
 }
 
-var middlewareCors = func(h http.Handler) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Add("Access-Control-Allow-Origin", "*")
-		w.Header().Add("Access-Control-Allow-Methods", "GET, POST")
-		w.Header().Add("Access-Control-Allow-Headers", "Origin, Authorization, Content-Type")
-		w.Header().Add("Access-Control-Allow-Credentials", "Allow")
-		h.ServeHTTP(w, r)
-	})
-}
-
 // In the following example, we define a route that serves some random data.
 // We call this route with and without Accept-Encoding headers so we that we test the compression methods
 // $ curl -s localhost:50000/foo | wc -c
@@ -47,11 +36,8 @@ var middlewareCors = func(h http.Handler) http.Handler {
 // $ curl -s localhost:50000/foo -H "Accept-Encoding: deflate" | wc -c
 // 1053045
 //
-// For ignored routes, we don't see any compression applied, even if we specify a correct header
-// $ curl -s localhost:50000/alive -H "Accept-Encoding: gzip" | wc -c
-// $ curl -s localhost:50000/alive | wc -c
 func main() {
-	name := "eighth"
+	name := "compression-middleware"
 	version := "1.0.0"
 
 	service, err := patron.New(name, version)
@@ -59,7 +45,7 @@ func main() {
 
 	// You could either add the compression middleware per-route, like here ...
 	routesBuilder := patronhttp.NewRoutesBuilder().
-		Append(patronhttp.NewRouteBuilder("/foo", eighth).MethodGet()).
+		Append(patronhttp.NewRouteBuilder("/foo", rnd).MethodGet()).
 		Append(patronhttp.NewRouteBuilder("/hello", hello).MethodGet())
 
 	// or pass middlewares to the HTTP component globally, like we do below
@@ -71,7 +57,7 @@ func main() {
 }
 
 // creates some random data to send back
-func eighth(_ context.Context, _ *patronhttp.Request) (*patronhttp.Response, error) {
+func rnd(_ context.Context, _ *patronhttp.Request) (*patronhttp.Response, error) {
 	rand.Seed(time.Now().UnixNano())
 	data := make([]byte, 1<<20)
 	_, err := rand.Read(data)

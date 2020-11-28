@@ -28,7 +28,7 @@ func init() {
 }
 
 func main() {
-	name := "ninth"
+	name := "client-decompression"
 	version := "1.0.0"
 	ctx := context.Background()
 
