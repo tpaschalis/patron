@@ -136,20 +136,26 @@ After that head over to [jaeger](http://localhost:16686/search) and [prometheus]
 
 
 ## [Compression Middleware](../examples/compression-middleware)
-The compression middleware example uses a /foo route that sends some random data to showcases the compression middleware.
+The compression-middleware example showcases the compression middleware with a /foo route that returns some random data.
 ```shell
-go run examples/compression-middleware/main.go 
-curl -s localhost:50000/foo | wc -c
-curl -s localhost:50000/foo -H "Accept-Encoding: nonexisting" | wc -c
-curl -s localhost:50000/foo -H "Accept-Encoding: gzip" | wc -c
-curl -s localhost:50000/foo -H "Accept-Encoding: deflate" | wc -c
+$ go run examples/compression-middleware/main.go 
+$ curl -s localhost:50000/foo | wc -c
+1398106
+$ curl -s localhost:50000/foo -H "Accept-Encoding: nonexisting" | wc -c
+1398106
+$ curl -s localhost:50000/foo -H "Accept-Encoding: gzip" | wc -c
+1053068
+$ curl -s localhost:50000/foo -H "Accept-Encoding: deflate" | wc -c
+1053045
 ```
 
 It also contains a /hello route used by the next example
 
 ## [Client Decompression](../examples/client-decompression)
 After launching the `compression-middleware` example, you can run the following to validate that Patron's HTTP client
-handles compressed requests transparently. It creates three requests (with and without an 'Accept-Encoding' header), where you can
+handles compressed requests transparently. 
+
+It creates three requests (with and without an 'Accept-Encoding' header), where you can
 see that the response from the previous example is decompressed automatically.
 
 ```shell
