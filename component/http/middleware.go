@@ -238,7 +238,7 @@ func MiddlewareChain(f http.Handler, mm ...MiddlewareFunc) http.Handler {
 }
 
 func isCompressionHeader(h string) bool {
-	return strings.Contains(h, "gzip") || strings.Contains(h, "deflate") || strings.Contains(h, "compress")
+	return strings.Contains(h, "gzip") || strings.Contains(h, "deflate")
 }
 
 func logRequestResponse(corID string, w *responseWriter, r *http.Request) {

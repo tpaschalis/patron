@@ -17,6 +17,7 @@ func tagMiddleware(tag string) MiddlewareFunc {
 	return func(h http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			_, _ = w.Write([]byte(tag))
+			//next
 			h.ServeHTTP(w, r)
 		})
 	}
